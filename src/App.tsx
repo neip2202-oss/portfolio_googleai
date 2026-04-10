@@ -352,16 +352,55 @@ const SKILLS: Skill[] = [
   { name: "C# / Blueprint", level: 75, icon: <Code2 className="w-5 h-5" />, caption: "기능 구현 및 프로토타이핑 가능" },
 ];
 
-// --- Editable Content Hook ---
+// --- Supabase Config ---
+const SUPABASE_URL = 'https://wjkgjjsdbftijusbjsie.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indqa2dqanNkYmZ0aWp1c2Jqc2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3OTU2MjQsImV4cCI6MjA5MTM3MTYyNH0.9uQVRZ-uDhjdJKD4LcaH3hQlmu6OKt-bOFkN_W0kvkU';
+
+const supabaseFetch = async (path: string, options: RequestInit = {}) => {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...options,
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': options.method === 'POST' || options.method === 'PATCH' ? 'return=representation' : '',
+      ...options.headers,
+    },
+  });
+  if (!res.ok) return null;
+  return res.json();
+};
+
+// --- Editable Content Hook (Supabase-backed) ---
 const useEditableContent = (initialData: any, key: string) => {
   const [data, setData] = useState(() => {
     const saved = localStorage.getItem(key);
     return saved ? JSON.parse(saved) : initialData;
   });
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (loaded) return;
+    supabaseFetch(`site_content?key=eq.${key}&select=value`)
+      .then((rows) => {
+        if (rows && rows.length > 0 && rows[0].value && (typeof rows[0].value === 'object' ? Object.keys(rows[0].value).length > 0 || Array.isArray(rows[0].value) && rows[0].value.length > 0 : true)) {
+          setData(rows[0].value);
+          localStorage.setItem(key, JSON.stringify(rows[0].value));
+        }
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
+  }, [key, loaded]);
 
   const updateData = (newData: any) => {
     setData(newData);
     localStorage.setItem(key, JSON.stringify(newData));
+    // Upsert to Supabase
+    supabaseFetch('site_content', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
+      body: JSON.stringify({ key, value: newData, updated_at: new Date().toISOString() }),
+    }).catch(console.error);
   };
 
   return [data, updateData];
