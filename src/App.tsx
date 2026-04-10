@@ -379,6 +379,8 @@ const safeSerialize = (data: any): any => {
   if (data?.$$typeof) return undefined; // React element
   if (Array.isArray(data)) return data.map(safeSerialize);
   if (typeof data === 'object') {
+    // Detect serialized React elements (have type+ref+props+_owner but no $$typeof)
+    if ('_owner' in data && 'ref' in data && 'props' in data) return undefined;
     const clean: any = {};
     for (const k of Object.keys(data)) {
       const v = safeSerialize(data[k]);
@@ -396,18 +398,15 @@ const hasContent = (value: any): boolean => {
   return true;
 };
 
+// Clear any old corrupt localStorage data on first load
+try {
+  ['hero_content','about_content','projects_data','portfolio_data','skills_data','history_data','resume_data'].forEach(k => localStorage.removeItem(k));
+} catch {}
+
 // --- Editable Content Hook (Supabase-backed) ---
 const useEditableContent = (initialData: any, key: string) => {
-  const [data, setData] = useState(() => {
-    try {
-      const saved = localStorage.getItem(key);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (hasContent(parsed)) return parsed;
-      }
-    } catch { /* ignore corrupt localStorage */ }
-    return initialData;
-  });
+  // Always start with initialData (safe, contains valid React elements)
+  const [data, setData] = useState(initialData);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -416,7 +415,6 @@ const useEditableContent = (initialData: any, key: string) => {
       .then((rows) => {
         if (rows && rows.length > 0 && hasContent(rows[0].value)) {
           setData(rows[0].value);
-          try { localStorage.setItem(key, JSON.stringify(rows[0].value)); } catch {}
         }
         setLoaded(true);
       })
@@ -426,7 +424,6 @@ const useEditableContent = (initialData: any, key: string) => {
   const updateData = (newData: any) => {
     setData(newData);
     const serializable = safeSerialize(newData);
-    try { localStorage.setItem(key, JSON.stringify(serializable)); } catch {}
     // Upsert to Supabase
     supabaseFetch('site_content', {
       method: 'POST',
