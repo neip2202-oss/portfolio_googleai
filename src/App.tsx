@@ -371,11 +371,42 @@ const supabaseFetch = async (path: string, options: RequestInit = {}) => {
   return res.json();
 };
 
+// --- Safe JSON serializer (strips React elements & functions) ---
+const safeSerialize = (data: any): any => {
+  if (data === null || data === undefined) return data;
+  if (typeof data === 'string' || typeof data === 'number' || typeof data === 'boolean') return data;
+  if (typeof data === 'function') return undefined;
+  if (data?.$$typeof) return undefined; // React element
+  if (Array.isArray(data)) return data.map(safeSerialize);
+  if (typeof data === 'object') {
+    const clean: any = {};
+    for (const k of Object.keys(data)) {
+      const v = safeSerialize(data[k]);
+      if (v !== undefined) clean[k] = v;
+    }
+    return clean;
+  }
+  return data;
+};
+
+const hasContent = (value: any): boolean => {
+  if (!value) return false;
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === 'object') return Object.keys(value).length > 0;
+  return true;
+};
+
 // --- Editable Content Hook (Supabase-backed) ---
 const useEditableContent = (initialData: any, key: string) => {
   const [data, setData] = useState(() => {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : initialData;
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (hasContent(parsed)) return parsed;
+      }
+    } catch { /* ignore corrupt localStorage */ }
+    return initialData;
   });
   const [loaded, setLoaded] = useState(false);
 
@@ -383,9 +414,9 @@ const useEditableContent = (initialData: any, key: string) => {
     if (loaded) return;
     supabaseFetch(`site_content?key=eq.${key}&select=value`)
       .then((rows) => {
-        if (rows && rows.length > 0 && rows[0].value && (typeof rows[0].value === 'object' ? Object.keys(rows[0].value).length > 0 || Array.isArray(rows[0].value) && rows[0].value.length > 0 : true)) {
+        if (rows && rows.length > 0 && hasContent(rows[0].value)) {
           setData(rows[0].value);
-          localStorage.setItem(key, JSON.stringify(rows[0].value));
+          try { localStorage.setItem(key, JSON.stringify(rows[0].value)); } catch {}
         }
         setLoaded(true);
       })
@@ -394,12 +425,13 @@ const useEditableContent = (initialData: any, key: string) => {
 
   const updateData = (newData: any) => {
     setData(newData);
-    localStorage.setItem(key, JSON.stringify(newData));
+    const serializable = safeSerialize(newData);
+    try { localStorage.setItem(key, JSON.stringify(serializable)); } catch {}
     // Upsert to Supabase
     supabaseFetch('site_content', {
       method: 'POST',
       headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
-      body: JSON.stringify({ key, value: newData, updated_at: new Date().toISOString() }),
+      body: JSON.stringify({ key, value: serializable, updated_at: new Date().toISOString() }),
     }).catch(console.error);
   };
 
