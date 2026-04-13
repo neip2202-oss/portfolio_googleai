@@ -122,13 +122,14 @@ const App: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Floating Theme Toggle */}
+      {/* Floating Theme Toggle - position depends on page */}
       <button 
         onClick={toggleTheme}
         style={{
           position: 'fixed',
-          top: '1.5rem',
-          right: '1.5rem',
+          ...(currentPage === 'map' || currentPage === 'intro'
+            ? { top: '1.5rem', right: '1.5rem' }
+            : { bottom: '1.5rem', left: '4.5rem' }),
           zIndex: 100,
           background: 'var(--pixel-surface)',
           border: '2px solid var(--pixel-border)',
@@ -139,7 +140,7 @@ const App: React.FC = () => {
           cursor: 'pointer'
         }}
       >
-        THEME: {theme.toUpperCase()}
+        {theme === 'default' ? '🌙' : theme === 'evening' ? '☀️' : '🎮'} {theme.toUpperCase()}
       </button>
 
       {/* Floating MAP CTA (always follows on content pages) */}
