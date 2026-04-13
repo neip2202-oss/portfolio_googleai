@@ -14,14 +14,14 @@ import AdminSystem from './components/AdminSystem';
 import AudioSystem from './components/AudioSystem';
 
 type Page = 'intro' | 'map' | 'board' | 'about' | 'projects';
-type Theme = 'default' | 'evening' | 'white';
+type Theme = 'day' | 'night' | 'white';
 
 const ADMIN_PASSWORD = '0000';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('intro');
   const [isAdmin, setIsAdmin] = useState(false);
-  const [theme, setTheme] = useState<Theme>('default');
+  const [theme, setTheme] = useState<Theme>('day');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -29,9 +29,9 @@ const App: React.FC = () => {
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => {
-      if (prev === 'default') return 'evening';
-      if (prev === 'evening') return 'white';
-      return 'default';
+      if (prev === 'day') return 'night';
+      if (prev === 'night') return 'white';
+      return 'day';
     });
   }, []);
 
@@ -140,7 +140,7 @@ const App: React.FC = () => {
           cursor: 'pointer'
         }}
       >
-        {theme === 'default' ? '🌙' : theme === 'evening' ? '☀️' : '🎮'} {theme.toUpperCase()}
+        {theme === 'day' ? '☀️ DAY' : theme === 'night' ? '🌙 NIGHT' : '⬜ WHITE'}
       </button>
 
       {/* Floating MAP CTA (always follows on content pages) */}

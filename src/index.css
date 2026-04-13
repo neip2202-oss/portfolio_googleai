@@ -6,6 +6,52 @@
 
 /* --- CSS Variables --- */
 :root {
+  /* DAY theme — warm, bright pixel art */
+  --pixel-bg: #1a1535;
+  --pixel-bg-alt: #241e45;
+  --pixel-surface: #2d2455;
+  --pixel-surface-hover: #3d3465;
+  --pixel-primary: #ff7eb3;
+  --pixel-accent: #7dd3fc;
+  --pixel-yellow: #fde047;
+  --pixel-green: #4ade80;
+  --pixel-orange: #fb923c;
+  --pixel-text: #f5f0ff;
+  --pixel-text-dim: #c4b5e5;
+  --pixel-border: #5c4a9e;
+  --pixel-glow-pink: 0 0 20px rgba(255, 126, 179, 0.5);
+  --pixel-glow-cyan: 0 0 20px rgba(125, 211, 252, 0.5);
+  --pixel-glow-gold: 0 0 20px rgba(253, 224, 71, 0.5);
+
+  --font-pixel: 'Galmuri11', 'Press Start 2P', monospace;
+  --font-retro: 'Galmuri11', 'VT323', monospace;
+  --font-body: 'NanumSquareRound', 'Noto Sans KR', sans-serif;
+
+  --pixel-border-width: 3px;
+  --pixel-border-style: solid;
+  --pixel-box-shadow: inset -3px -3px 0px 0px rgba(0,0,0,0.3), inset 3px 3px 0px 0px rgba(255,255,255,0.1), 0 0 0 1px rgba(0,0,0,0.5);
+  --pixel-image-rendering: auto;
+
+  /* Scene colors (Intro / Map) */
+  --scene-sky-top: #87CEEB;
+  --scene-sky-bot: #c8e6f8;
+  --scene-ground: #7BC86C;
+  --scene-ground-dark: #5fa84e;
+  --scene-road: #9B8B75;
+  --scene-road-line: #e8dcc8;
+  --scene-building: #D4A574;
+  --scene-roof: #c0392b;
+  --scene-tree: #2E8B57;
+  --scene-tree-trunk: #8B6914;
+  --scene-water: #5BC0EB;
+  --scene-bus: #3498db;
+  --scene-char-skin: #ffd5b4;
+  --scene-char-hair: #5D4037;
+  --scene-char-dress: var(--pixel-primary);
+}
+
+/* NIGHT theme — deep purple, neon glow */
+[data-theme="night"] {
   --pixel-bg: #0d0221;
   --pixel-bg-alt: #1a0a2e;
   --pixel-surface: #2d1b4e;
@@ -22,32 +68,24 @@
   --pixel-glow-cyan: 0 0 20px rgba(81, 226, 245, 0.5);
   --pixel-glow-gold: 0 0 20px rgba(255, 215, 0, 0.5);
 
-  /* Update fonts to user requested */
-  --font-pixel: 'Galmuri11', 'Press Start 2P', monospace;
-  --font-retro: 'Galmuri11', 'VT323', monospace;
-  --font-body: 'NanumSquareRound', 'Noto Sans KR', sans-serif;
-  
-  --pixel-border-width: 3px;
-  --pixel-border-style: solid;
-  --pixel-box-shadow: inset -3px -3px 0px 0px rgba(0,0,0,0.3), inset 3px 3px 0px 0px rgba(255,255,255,0.1), 0 0 0 1px rgba(0,0,0,0.5);
-  --pixel-image-rendering: auto;
+  --scene-sky-top: #0a0025;
+  --scene-sky-bot: #1a0a3e;
+  --scene-ground: #1a3020;
+  --scene-ground-dark: #0f2010;
+  --scene-road: #3a3535;
+  --scene-road-line: #6a6a5a;
+  --scene-building: #3d2b5e;
+  --scene-roof: #8b2252;
+  --scene-tree: #1a4530;
+  --scene-tree-trunk: #4a3520;
+  --scene-water: #1a3a5a;
+  --scene-bus: #2a5090;
+  --scene-char-skin: #ffd5b4;
+  --scene-char-hair: #2d1b4e;
+  --scene-char-dress: var(--pixel-primary);
 }
 
-/* --- Theme: Evening --- */
-[data-theme="evening"] {
-  --pixel-bg: #050110;
-  --pixel-bg-alt: #0a0418;
-  --pixel-surface: #1a0f30;
-  --pixel-surface-hover: #26164a;
-  --pixel-primary: #d53f9a;
-  --pixel-accent: #2eabbd;
-  --pixel-yellow: #d1b100;
-  --pixel-text: #e0d5f2;
-  --pixel-text-dim: #8b7d9e;
-  --pixel-border: #4d2a85;
-}
-
-/* --- Theme: Simple White --- */
+/* SIMPLE WHITE — minimal, no pixel art */
 [data-theme="white"] {
   --pixel-bg: #ffffff;
   --pixel-bg-alt: #f8fafc;
@@ -61,13 +99,27 @@
   --pixel-text: #0f172a;
   --pixel-text-dim: #475569;
   --pixel-border: #e2e8f0;
-  
   --pixel-glow-pink: 0 4px 10px rgba(225, 29, 72, 0.2);
   --pixel-glow-cyan: 0 4px 10px rgba(14, 165, 233, 0.2);
   --pixel-glow-gold: 0 4px 10px rgba(202, 138, 4, 0.2);
-  
   --pixel-border-width: 1px;
   --pixel-box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+  --scene-sky-top: #f8fafc;
+  --scene-sky-bot: #e8f0f8;
+  --scene-ground: #f0fdf4;
+  --scene-ground-dark: #dcfce7;
+  --scene-road: #d4d4d8;
+  --scene-road-line: #f4f4f5;
+  --scene-building: #f1f5f9;
+  --scene-roof: #e11d48;
+  --scene-tree: #86efac;
+  --scene-tree-trunk: #a3a3a3;
+  --scene-water: #bae6fd;
+  --scene-bus: #0ea5e9;
+  --scene-char-skin: #fecaca;
+  --scene-char-hair: #1e293b;
+  --scene-char-dress: var(--pixel-primary);
 }
 
 /* --- Reset --- */
