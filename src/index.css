@@ -32,22 +32,41 @@
   --pixel-box-shadow: inset -3px -3px 0px 0px rgba(0,0,0,0.3), inset 3px 3px 0px 0px rgba(255,255,255,0.1), 0 0 0 1px rgba(0,0,0,0.5);
   --pixel-image-rendering: auto;
 
-  /* Scene colors (Intro / Map) */
-  --scene-sky-top: #87CEEB;
-  --scene-sky-bot: #c8e6f8;
-  --scene-ground: #7BC86C;
-  --scene-ground-dark: #5fa84e;
-  --scene-road: #9B8B75;
-  --scene-road-line: #e8dcc8;
-  --scene-building: #D4A574;
-  --scene-roof: #c0392b;
-  --scene-tree: #2E8B57;
-  --scene-tree-trunk: #8B6914;
-  --scene-water: #5BC0EB;
-  --scene-bus: #3498db;
-  --scene-char-skin: #ffd5b4;
-  --scene-char-hair: #5D4037;
-  --scene-char-dress: var(--pixel-primary);
+  /* Scene colors — pastel village palette */
+  --scene-sky-top: #a8d8ea;
+  --scene-sky-mid: #d4eaf7;
+  --scene-sky-bot: #f0dde4;
+  --scene-ground: #a3d9a5;
+  --scene-ground-dark: #8ac48c;
+  --scene-ground-accent: #c5e1a5;
+  --scene-road: #d4c5a9;
+  --scene-road-edge: #b8a890;
+  --scene-road-line: #f0e8d8;
+  --scene-sidewalk: #e8ddd0;
+  --scene-building-1: #f5e6d3;
+  --scene-building-2: #ddeedd;
+  --scene-building-3: #f5ddd0;
+  --scene-building-4: #ddd5f0;
+  --scene-roof-1: #c07060;
+  --scene-roof-2: #6b8f7b;
+  --scene-roof-3: #d4836b;
+  --scene-roof-4: #8b7bbf;
+  --scene-tree: #6aaa5e;
+  --scene-tree-light: #8cc47a;
+  --scene-tree-dark: #4a8a3e;
+  --scene-tree-trunk: #9e7e5a;
+  --scene-water: #8ecae6;
+  --scene-water-deep: #5fa8d3;
+  --scene-bus: #e8a87c;
+  --scene-bus-dark: #c88a60;
+  --scene-char-skin: #ffddbf;
+  --scene-char-hair: #6d4c3d;
+  --scene-char-dress: #ff8ba7;
+  --scene-fence: #f5f0e8;
+  --scene-flower-1: #ff8ba7;
+  --scene-flower-2: #ffd166;
+  --scene-flower-3: #a8d8ea;
+  --scene-flower-4: #c8a8e8;
 }
 
 /* NIGHT theme — deep purple, neon glow */
