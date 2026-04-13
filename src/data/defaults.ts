@@ -26,6 +26,15 @@ export interface GameHistory {
   package: GamePlay[];
 }
 
+export interface CareerItem {
+  id: string;
+  company: string;
+  role: string;
+  period: string;
+  description: string;
+  details: string[];
+}
+
 export interface ResumeData {
   name: string;
   role: string;
@@ -39,6 +48,7 @@ export interface ResumeData {
   summary: string;
   selfIntroduction: { title: string; body: string }[];
   skills: { name: string; icon: string }[];
+  career: CareerItem[];
   education: { title: string; period: string; description: string; details: string[] }[];
   experience: { title: string; period: string; description: string; details: string[] }[];
   awards: { title: string; organization: string; year: string }[];
@@ -155,6 +165,24 @@ export const DEFAULT_RESUME: ResumeData = {
     { name: "Unity", icon: "🎮" },
     { name: "Unreal Engine", icon: "🚀" },
     { name: "Figma", icon: "🎨" }
+  ],
+  career: [
+    {
+      id: 'c1',
+      company: "게임 스튜디오 A",
+      role: "주니어 게임 기획자",
+      period: "2025.01 - 현재",
+      description: "모바일 RPG 시스템 기획 담당",
+      details: ["전투 시스템 밸런싱", "경제 시스템 설계", "GDD 작성 및 유지보수"],
+    },
+    {
+      id: 'c2',
+      company: "인디 개발팀 B",
+      role: "기획 인턴",
+      period: "2024.06 - 2024.12",
+      description: "인디 퍼즐 게임 기획 보조",
+      details: ["레벨 디자인 보조", "QA 테스트 진행"],
+    },
   ],
   education: [
     {

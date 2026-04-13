@@ -94,39 +94,32 @@ const BoardPage: React.FC<BoardPageProps> = ({ onBack, onNavigate, onGoIntro, is
 
       {/* Project Video/GIF Area */}
       <section style={{
-        padding: '2rem 2rem',
+        padding: '4rem 2rem',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
       }}>
-        {isAdmin && (
-          <div style={{ marginBottom: '1rem', width: '100%', maxWidth: 800 }}>
-            <span style={{ fontSize: '0.8rem', color: 'var(--pixel-primary)' }}>GIF/Image URL:</span>
-            <input 
-              type="text" 
-              value={gifUrl} 
-              onChange={(e) => setGifUrl(e.target.value)} 
-              style={{ width: '100%', padding: '8px', background: 'rgba(255,255,255,0.1)', color: '#fff' }} 
-            />
-          </div>
-        )}
-        <motion.div
-          style={{
-            width: '100%',
-            maxWidth: 800,
-            height: 400,
-            background: `url(${gifUrl}) center/cover no-repeat`,
-            backgroundColor: 'var(--pixel-surface)',
-            border: '3px solid var(--pixel-border)',
-            borderRadius: '8px',
-            boxShadow: 'var(--pixel-box-shadow)'
-          }}
-          whileHover={{ scale: 1.02 }}
-        />
+        <div style={{ width: '100%', maxWidth: 800 }}>
+          <EditableField
+            value={gifUrl}
+            onChange={(v) => setGifUrl(v)}
+            isAdmin={isAdmin}
+            mediaMode
+            editorTitle="프로젝트 영상/GIF 편집"
+            style={{
+              width: '100%',
+              height: 400,
+              objectFit: 'cover',
+              border: '3px solid var(--pixel-border)',
+              borderRadius: '8px',
+              display: 'block',
+            }}
+          />
+        </div>
       </section>
 
       {/* 3 Representative Projects */}
-      <section className="section">
+      <section className="section" style={{ paddingTop: '5rem', paddingBottom: '5rem' }}>
         <div className="section-title">REPRESENTATIVE PROJECTS</div>
         <div className="section-subtitle">대표 프로젝트</div>
         <div className="project-grid">
@@ -169,7 +162,7 @@ const BoardPage: React.FC<BoardPageProps> = ({ onBack, onNavigate, onGoIntro, is
       </section>
 
       {/* Mini Logline & Philosophy */}
-      <section className="section" style={{ display: 'flex', gap: '3rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      <section className="section" style={{ display: 'flex', gap: '3rem', flexWrap: 'wrap', alignItems: 'center', paddingTop: '5rem', paddingBottom: '5rem' }}>
         <div style={{ flex: '1 1 400px' }}>
           <div className="section-title">PHILOSOPHY</div>
           <h2 style={{
@@ -202,7 +195,7 @@ const BoardPage: React.FC<BoardPageProps> = ({ onBack, onNavigate, onGoIntro, is
       </section>
 
       {/* Game History */}
-      <section className="section">
+      <section className="section" style={{ paddingTop: '5rem', paddingBottom: '5rem' }}>
         <div className="section-title">PLAY HISTORY</div>
         <div className="section-subtitle">게임 플레이 이력</div>
         <div className="history-tabs">
@@ -264,8 +257,8 @@ const BoardPage: React.FC<BoardPageProps> = ({ onBack, onNavigate, onGoIntro, is
         padding: '2rem',
         borderTop: '1px solid var(--pixel-border)',
       }}>
-        <div style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.5rem', color: 'var(--pixel-text-dim)' }}>
-          © 2024 LEE SOLIP — GAME DESIGN PORTFOLIO
+        <div style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.55rem', color: 'var(--pixel-text-dim)' }}>
+          © 2026 LEE SOLIP — GAME DESIGN PORTFOLIO
         </div>
       </footer>
     </motion.div>

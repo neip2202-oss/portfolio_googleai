@@ -921,6 +921,89 @@ body {
 }
 
 /* ========================
+   TIMELINE (Career)
+   ======================== */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--pixel-primary), var(--pixel-accent));
+  border-radius: 2px;
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 2rem;
+  padding-bottom: 2.5rem;
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -2rem;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--pixel-primary);
+  border: 3px solid var(--pixel-bg);
+  box-shadow: 0 0 0 2px var(--pixel-primary), var(--pixel-glow-pink);
+  z-index: 1;
+}
+
+.timeline-content {
+  background: var(--pixel-surface);
+  border: 2px solid var(--pixel-border);
+  padding: 1.25rem 1.5rem;
+  transition: border-color 0.3s;
+}
+
+.timeline-content:hover {
+  border-color: var(--pixel-primary);
+}
+
+.timeline-period {
+  font-family: var(--font-pixel);
+  font-size: 0.65rem;
+  color: var(--pixel-accent);
+  letter-spacing: 1px;
+  margin-bottom: 0.4rem;
+}
+
+.timeline-company {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #fff;
+  margin-bottom: 0.2rem;
+}
+
+.timeline-role {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--pixel-primary);
+  margin-bottom: 0.5rem;
+}
+
+.timeline-desc {
+  color: var(--pixel-text);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* ========================
    PIXEL DECORATIONS (CSS-only)
    ======================== */
 .pixel-cloud {
@@ -947,7 +1030,7 @@ body {
   }
 
   .project-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   .history-tabs {
@@ -958,5 +1041,15 @@ body {
     width: 40px;
     height: 40px;
     font-size: 1rem;
+  }
+
+  .timeline {
+    padding-left: 1.5rem;
+  }
+}
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .project-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }

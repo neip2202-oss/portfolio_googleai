@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence, Reorder } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useContent } from '../hooks/useContent';
 import { EditableField } from './Editable';
+import EditorPopup from './EditorPopup';
 import { DEFAULT_PROJECTS, type Project } from '../data/defaults';
 
 interface ProjectsPageProps {
@@ -11,95 +12,40 @@ interface ProjectsPageProps {
   isAdmin: boolean;
 }
 
-/** Simple Markdown renderer: supports # headings, **bold**, *italic*, ![image](url), [link](url), \n newlines */
+/** Simple Markdown renderer */
 const renderMarkdown = (md: string): React.ReactNode[] => {
-  const lines = md.split('\n');
-  return lines.map((line, i) => {
-    // Heading
+  return md.split('\n').map((line, i) => {
     if (line.startsWith('### ')) return <h4 key={i} style={{ color: 'var(--pixel-accent)', marginTop: '1.5rem', marginBottom: '0.5rem', fontWeight: 700 }}>{line.slice(4)}</h4>;
     if (line.startsWith('## ')) return <h3 key={i} style={{ color: 'var(--pixel-primary)', marginTop: '1.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '1.2rem' }}>{line.slice(3)}</h3>;
     if (line.startsWith('# ')) return <h2 key={i} style={{ color: '#fff', marginTop: '1rem', marginBottom: '0.5rem', fontWeight: 800, fontSize: '1.4rem' }}>{line.slice(2)}</h2>;
-
-    // Image: ![alt](url)
     const imgMatch = line.match(/!\[([^\]]*)\]\(([^)]+)\)/);
-    if (imgMatch) {
-      return <img key={i} src={imgMatch[2]} alt={imgMatch[1]} style={{ maxWidth: '100%', borderRadius: '4px', margin: '1rem 0', border: '2px solid var(--pixel-border)' }} />;
-    }
-
-    // Video embed (mp4 / webm)
+    if (imgMatch) return <img key={i} src={imgMatch[2]} alt={imgMatch[1]} style={{ maxWidth: '100%', borderRadius: '4px', margin: '1rem 0', border: '2px solid var(--pixel-border)' }} />;
     const vidMatch = line.match(/\[video\]\(([^)]+)\)/i);
-    if (vidMatch) {
-      return <video key={i} src={vidMatch[1]} controls style={{ maxWidth: '100%', margin: '1rem 0', border: '2px solid var(--pixel-border)' }} />;
-    }
-
-    // GIF embed (treat as image)
+    if (vidMatch) return <video key={i} src={vidMatch[1]} controls style={{ maxWidth: '100%', margin: '1rem 0', border: '2px solid var(--pixel-border)' }} />;
     const gifMatch = line.match(/\[gif\]\(([^)]+)\)/i);
-    if (gifMatch) {
-      return <img key={i} src={gifMatch[1]} alt="GIF" style={{ maxWidth: '100%', margin: '1rem 0', border: '2px solid var(--pixel-border)' }} />;
-    }
-
-    // Bold **text** and italic *text*
-    let processed: React.ReactNode = line;
-    if (line.includes('**') || line.includes('*')) {
-      const parts: React.ReactNode[] = [];
-      let remaining = line;
-      let keyIdx = 0;
-      while (remaining.length > 0) {
-        const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
-        const italicMatch = remaining.match(/\*(.+?)\*/);
-        const match = boldMatch && (!italicMatch || (boldMatch.index! <= italicMatch.index!)) ? boldMatch : italicMatch;
-        if (!match || match.index === undefined) {
-          parts.push(remaining);
-          break;
-        }
-        if (match.index > 0) parts.push(remaining.slice(0, match.index));
-        const isBold = match[0].startsWith('**');
-        parts.push(isBold
-          ? <strong key={`b${keyIdx}`} style={{ color: '#fff' }}>{match[1]}</strong>
-          : <em key={`i${keyIdx}`}>{match[1]}</em>
-        );
-        remaining = remaining.slice(match.index + match[0].length);
-        keyIdx++;
-      }
-      processed = <>{parts}</>;
-    }
-
-    // Link: [text](url)
-    if (typeof processed === 'string' && processed.includes('[')) {
-      const linkMatch = (processed as string).match(/\[([^\]]+)\]\(([^)]+)\)/);
-      if (linkMatch) {
-        const before = (processed as string).slice(0, linkMatch.index);
-        const after = (processed as string).slice(linkMatch.index! + linkMatch[0].length);
-        processed = <>{before}<a href={linkMatch[2]} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--pixel-accent)' }}>{linkMatch[1]}</a>{after}</>;
-      }
-    }
-
+    if (gifMatch) return <img key={i} src={gifMatch[1]} alt="GIF" style={{ maxWidth: '100%', margin: '1rem 0', border: '2px solid var(--pixel-border)' }} />;
     if (line.trim() === '') return <br key={i} />;
-    return <p key={i} style={{ color: 'var(--pixel-text)', lineHeight: 1.8, marginBottom: '0.3rem' }}>{processed}</p>;
+    let processed = line.replace(/\*\*(.+?)\*\*/g, '<strong style="color:#fff">$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>');
+    return <p key={i} style={{ color: 'var(--pixel-text)', lineHeight: 1.8, marginBottom: '0.3rem' }} dangerouslySetInnerHTML={{ __html: processed }} />;
   });
 };
 
 const ProjectsPage: React.FC<ProjectsPageProps> = ({ onBack, onNavigate, onGoIntro, isAdmin }) => {
   const [projects, setProjects] = useContent<Project[]>('projects_data', DEFAULT_PROJECTS);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [editingContent, setEditingContent] = useState<string>('');
+  const [editingContent, setEditingContent] = useState(false);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
 
   const openDetail = (project: Project) => {
     setSelectedProject(project);
-    setEditingContent(project.content);
-  };
-
-  const saveContent = () => {
-    if (!selectedProject) return;
-    const updated = projects.map(p =>
-      p.id === selectedProject.id ? { ...p, content: editingContent } : p
-    );
-    setProjects(updated);
-    setSelectedProject({ ...selectedProject, content: editingContent });
   };
 
   const updateProjectField = (id: number, field: keyof Project, value: any) => {
-    setProjects(projects.map(p => p.id === id ? { ...p, [field]: value } : p));
+    const updated = projects.map(p => p.id === id ? { ...p, [field]: value } : p);
+    setProjects(updated);
+    if (selectedProject?.id === id) {
+      setSelectedProject(prev => prev ? { ...prev, [field]: value } : null);
+    }
   };
 
   const addProject = () => {
@@ -112,8 +58,52 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ onBack, onNavigate, onGoInt
       tags: ['태그1'],
       image: 'https://picsum.photos/seed/new/800/600',
       color: '#6366f1',
-      content: '# 새 프로젝트\n\n프로젝트 상세 내용을 마크다운으로 작성하세요.\n\n## 사용법\n- **볼드** 텍스트\n- *이탤릭* 텍스트\n- ![이미지](URL)\n- [gif](URL)\n- [video](URL)',
+      content: '# 새 프로젝트\n\n프로젝트 상세 내용을 마크다운으로 작성하세요.',
     }]);
+  };
+
+  const deleteProject = (id: number) => {
+    setProjects(projects.filter(p => p.id !== id));
+  };
+
+  // Drag & drop handlers (simple swap approach)
+  const handleDragStart = (idx: number) => {
+    setDragIdx(idx);
+  };
+
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    if (dragIdx === null || dragIdx === idx) return;
+    const newProjects = [...projects];
+    const [dragged] = newProjects.splice(dragIdx, 1);
+    newProjects.splice(idx, 0, dragged);
+    setProjects(newProjects);
+    setDragIdx(idx);
+  };
+
+  const handleDragEnd = () => {
+    setDragIdx(null);
+  };
+
+  // Tag editing
+  const addTag = (projectId: number) => {
+    const p = projects.find(p => p.id === projectId);
+    if (!p) return;
+    updateProjectField(projectId, 'tags', [...p.tags, '새 태그']);
+  };
+
+  const removeTag = (projectId: number, tagIdx: number) => {
+    const p = projects.find(p => p.id === projectId);
+    if (!p) return;
+    updateProjectField(projectId, 'tags', p.tags.filter((_, i) => i !== tagIdx));
+  };
+
+  const updateTag = (projectId: number, tagIdx: number, value: string) => {
+    const p = projects.find(p => p.id === projectId);
+    if (!p) return;
+    const newTags = [...p.tags];
+    newTags[tagIdx] = value;
+    updateProjectField(projectId, 'tags', newTags);
   };
 
   return (
@@ -143,89 +133,99 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ onBack, onNavigate, onGoInt
         <motion.div className="section-subtitle" style={{ marginBottom: 0 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
           게임 기획 프로젝트 모음
         </motion.div>
+        {isAdmin && (
+          <p style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.6rem', color: 'var(--pixel-accent)', marginTop: '1rem' }}>
+            🖱️ 카드를 드래그하여 순서를 변경하세요
+          </p>
+        )}
       </section>
 
-      {/* Project Grid (reorderable in admin mode) */}
+      {/* Project Grid - 3 columns */}
       <section className="section" style={{ paddingTop: '2rem' }}>
-        {isAdmin ? (
-          <>
-            <p style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.6rem', color: 'var(--pixel-primary)', marginBottom: '1rem', textAlign: 'center' }}>
-              드래그하여 카드 순서를 변경하세요
-            </p>
-            <Reorder.Group
-              axis="y"
-              values={projects}
-              onReorder={(newOrder) => setProjects(newOrder)}
-              style={{ listStyle: 'none', padding: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}
+        <div className="project-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+          {projects.map((project, i) => (
+            <motion.div
+              key={project.id}
+              className="project-card"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.08 }}
+              draggable={isAdmin}
+              onDragStart={() => handleDragStart(i)}
+              onDragOver={(e) => handleDragOver(e as any, i)}
+              onDragEnd={handleDragEnd}
+              style={{
+                opacity: dragIdx === i ? 0.5 : 1,
+                cursor: isAdmin ? 'grab' : 'pointer',
+              }}
             >
-              {projects.map((project, i) => (
-                <Reorder.Item key={project.id} value={project} style={{ cursor: 'grab' }}>
-                  <div className="project-card" onClick={() => openDetail(project)}>
-                    <div className="project-card-img" style={{ backgroundImage: `url(${project.image})`, position: 'relative' }}>
-                      {isAdmin && (
-                        <input
-                          type="text"
-                          value={project.image}
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => updateProjectField(project.id, 'image', e.target.value)}
-                          style={{
-                            position: 'absolute', bottom: 4, left: 4, right: 4,
-                            padding: '4px', background: 'rgba(0,0,0,0.7)', color: '#fff',
-                            border: '1px dashed var(--pixel-primary)', fontSize: '0.7rem', zIndex: 2,
-                          }}
-                          placeholder="Image URL"
-                        />
-                      )}
-                    </div>
-                    <div className="project-card-body">
-                      <div className="project-card-category">
-                        <EditableField value={project.category} onChange={(v) => updateProjectField(project.id, 'category', v)} isAdmin={isAdmin} />
-                      </div>
-                      <div className="project-card-title">
-                        <EditableField value={project.title} onChange={(v) => updateProjectField(project.id, 'title', v)} isAdmin={isAdmin} />
-                      </div>
-                      <div className="project-card-desc">
-                        <EditableField value={project.description} onChange={(v) => updateProjectField(project.id, 'description', v)} isAdmin={isAdmin} multiline />
-                      </div>
-                    </div>
-                  </div>
-                </Reorder.Item>
-              ))}
-            </Reorder.Group>
-            <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-              <button onClick={addProject} style={{
-                background: 'var(--pixel-primary)', color: '#fff', padding: '12px 24px',
-                border: 'none', cursor: 'pointer', fontFamily: 'var(--font-pixel)', fontSize: '0.7rem',
-              }}>
-                + 프로젝트 추가
-              </button>
-            </div>
-          </>
-        ) : (
-          <div className="project-grid">
-            {projects.map((project, i) => (
-              <motion.div
-                key={project.id}
-                className="project-card"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
+              {/* Delete button (admin) */}
+              {isAdmin && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); deleteProject(project.id); }}
+                  style={{
+                    position: 'absolute', top: 8, right: 8, zIndex: 5,
+                    background: '#ef4444', color: '#fff', border: 'none',
+                    width: 24, height: 24, cursor: 'pointer', fontSize: '0.7rem',
+                  }}
+                >✕</button>
+              )}
+
+              <div
+                className="project-card-img"
+                style={{ backgroundImage: `url(${project.image})` }}
                 onClick={() => openDetail(project)}
-              >
-                <div className="project-card-img" style={{ backgroundImage: `url(${project.image})` }} />
-                <div className="project-card-body">
-                  <div className="project-card-category">{project.category}</div>
-                  <div className="project-card-title">{project.title}</div>
-                  <div className="project-card-desc">{project.description}</div>
-                  <div className="project-card-tags">
-                    {project.tags.map((tag) => (
-                      <span key={tag} className="project-tag">{tag}</span>
-                    ))}
-                  </div>
+              />
+              <div className="project-card-body" onClick={() => openDetail(project)}>
+                <div className="project-card-category">
+                  {isAdmin ? (
+                    <input value={project.category} onChange={(e) => updateProjectField(project.id, 'category', e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ background: 'transparent', border: 'none', color: 'var(--pixel-accent)', fontFamily: 'var(--font-pixel)', fontSize: 'inherit', width: '100%' }} />
+                  ) : project.category}
                 </div>
-              </motion.div>
-            ))}
+                <div className="project-card-title">
+                  {isAdmin ? (
+                    <input value={project.title} onChange={(e) => updateProjectField(project.id, 'title', e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ background: 'transparent', border: 'none', color: '#fff', fontWeight: 800, fontSize: 'inherit', width: '100%' }} />
+                  ) : project.title}
+                </div>
+                <div className="project-card-desc">{project.description}</div>
+
+                {/* Tags */}
+                <div className="project-card-tags" onClick={(e) => e.stopPropagation()}>
+                  {project.tags.map((tag, j) => (
+                    <span key={j} className="project-tag" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      {isAdmin ? (
+                        <>
+                          <input value={tag} onChange={(e) => updateTag(project.id, j, e.target.value)}
+                            style={{ background: 'transparent', border: 'none', color: 'inherit', width: '60px', fontFamily: 'inherit', fontSize: 'inherit' }} />
+                          <button onClick={() => removeTag(project.id, j)}
+                            style={{ background: 'none', border: 'none', color: '#f44', cursor: 'pointer', fontSize: '0.7rem', padding: 0 }}>✕</button>
+                        </>
+                      ) : tag}
+                    </span>
+                  ))}
+                  {isAdmin && (
+                    <button onClick={() => addTag(project.id)}
+                      style={{ background: 'var(--pixel-accent)', color: '#000', border: 'none', padding: '2px 8px', cursor: 'pointer', fontSize: '0.75rem' }}>+</button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {isAdmin && (
+          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <button onClick={addProject} style={{
+              background: 'var(--pixel-primary)', color: '#fff', padding: '12px 24px',
+              border: 'none', cursor: 'pointer', fontFamily: 'var(--font-pixel)', fontSize: '0.7rem',
+            }}>
+              + 프로젝트 추가
+            </button>
           </div>
         )}
       </section>
@@ -238,89 +238,67 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ onBack, onNavigate, onGoInt
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setSelectedProject(null)}
+            onClick={() => { setSelectedProject(null); setEditingContent(false); }}
           >
             <motion.div
               style={{
-                background: 'var(--pixel-bg-alt)',
-                border: '3px solid var(--pixel-border)',
-                padding: '2rem',
-                maxWidth: 800,
-                width: '92%',
-                maxHeight: '85vh',
-                overflow: 'auto',
-                boxShadow: '0 0 60px rgba(108, 63, 181, 0.3)',
+                background: 'var(--pixel-bg-alt)', border: '3px solid var(--pixel-border)',
+                padding: '2rem', maxWidth: 800, width: '92%', maxHeight: '85vh',
+                overflow: 'auto', boxShadow: '0 0 60px rgba(108, 63, 181, 0.3)',
               }}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <span style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.6rem', color: 'var(--pixel-accent)', letterSpacing: '2px' }}>
                   {selectedProject.category}
                 </span>
-                <button
-                  style={{
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  {isAdmin && (
+                    <button onClick={() => setEditingContent(true)} style={{
+                      fontFamily: 'var(--font-pixel)', fontSize: '0.6rem',
+                      background: 'var(--pixel-yellow)', color: '#000', border: 'none', padding: '6px 12px', cursor: 'pointer',
+                    }}>
+                      ✏️ 편집
+                    </button>
+                  )}
+                  <button onClick={() => { setSelectedProject(null); setEditingContent(false); }} style={{
                     fontFamily: 'var(--font-pixel)', fontSize: '0.65rem',
                     background: 'none', border: 'none', color: 'var(--pixel-primary)', cursor: 'pointer',
-                  }}
-                  onClick={() => setSelectedProject(null)}
-                >
-                  ✕ CLOSE
-                </button>
+                  }}>
+                    ✕ CLOSE
+                  </button>
+                </div>
               </div>
               <h2 style={{ fontWeight: 800, fontSize: '1.6rem', color: '#fff', marginBottom: '1.5rem' }}>
                 {selectedProject.title}
               </h2>
-
-              {/* Content: Markdown Editor (admin) or Rendered (viewer) */}
-              {isAdmin ? (
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                    <span style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.55rem', color: 'var(--pixel-yellow)' }}>
-                      마크다운 에디터 — ![img](url), [gif](url), [video](url) 지원
-                    </span>
-                    <button
-                      onClick={saveContent}
-                      style={{
-                        fontFamily: 'var(--font-pixel)', fontSize: '0.6rem',
-                        background: 'var(--pixel-green)', color: '#000', border: 'none',
-                        padding: '8px 16px', cursor: 'pointer',
-                      }}
-                    >
-                      💾 저장
-                    </button>
-                  </div>
-                  <textarea
-                    value={editingContent}
-                    onChange={(e) => setEditingContent(e.target.value)}
-                    style={{
-                      width: '100%', minHeight: '300px',
-                      background: 'var(--pixel-bg)', color: 'var(--pixel-text)',
-                      border: '2px solid var(--pixel-border)', padding: '1rem',
-                      fontFamily: 'var(--font-body)', fontSize: '0.95rem',
-                      lineHeight: 1.8, resize: 'vertical',
-                    }}
-                  />
-                  <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--pixel-border)', paddingTop: '1rem' }}>
-                    <span style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.5rem', color: 'var(--pixel-text-dim)', marginBottom: '0.5rem', display: 'block' }}>미리보기</span>
-                    {renderMarkdown(editingContent)}
-                  </div>
-                </div>
-              ) : (
-                <div>{renderMarkdown(selectedProject.content)}</div>
-              )}
+              <div>{renderMarkdown(selectedProject.content)}</div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
+      {/* Editor popup for project content */}
+      {selectedProject && (
+        <EditorPopup
+          isOpen={editingContent}
+          value={selectedProject.content}
+          onSave={(v) => {
+            updateProjectField(selectedProject.id, 'content', v);
+            setEditingContent(false);
+          }}
+          onClose={() => setEditingContent(false)}
+          title={`프로젝트 편집: ${selectedProject.title}`}
+        />
+      )}
+
       {/* Footer */}
       <footer style={{ textAlign: 'center', padding: '2rem', borderTop: '1px solid var(--pixel-border)' }}>
         <div style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.55rem', color: 'var(--pixel-text-dim)' }}>
-          © 2024 LEE SOLIP — PROJECTS
+          © 2026 LEE SOLIP — PROJECTS
         </div>
       </footer>
     </motion.div>
