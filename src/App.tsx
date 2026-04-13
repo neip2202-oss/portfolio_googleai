@@ -3,7 +3,7 @@
  * Main Application Router & State Manager
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
 import IntroScreen from './components/IntroScreen';
 import MapHub from './components/MapHub';
@@ -14,12 +14,26 @@ import AdminSystem from './components/AdminSystem';
 import AudioSystem from './components/AudioSystem';
 
 type Page = 'intro' | 'map' | 'board' | 'about' | 'projects';
+type Theme = 'default' | 'evening' | 'white';
 
 const ADMIN_PASSWORD = '0000';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('intro');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [theme, setTheme] = useState<Theme>('default');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => {
+      if (prev === 'default') return 'evening';
+      if (prev === 'evening') return 'white';
+      return 'default';
+    });
+  }, []);
 
   const navigateTo = useCallback((page: Page) => {
     setCurrentPage(page);
@@ -40,6 +54,10 @@ const App: React.FC = () => {
 
   const handleBackToMap = useCallback(() => {
     navigateTo('map');
+  }, [navigateTo]);
+
+  const handleGoIntro = useCallback(() => {
+    navigateTo('intro');
   }, [navigateTo]);
 
   const handlePageNavigate = useCallback((page: string) => {
@@ -78,6 +96,7 @@ const App: React.FC = () => {
             key="board"
             onBack={handleBackToMap}
             onNavigate={handlePageNavigate}
+            onGoIntro={handleGoIntro}
             isAdmin={isAdmin}
           />
         )}
@@ -86,7 +105,9 @@ const App: React.FC = () => {
           <AboutPage
             key="about"
             onBack={handleBackToMap}
+            onGoIntro={handleGoIntro}
             onNavigate={handlePageNavigate}
+            isAdmin={isAdmin}
           />
         )}
 
@@ -94,10 +115,56 @@ const App: React.FC = () => {
           <ProjectsPage
             key="projects"
             onBack={handleBackToMap}
+            onGoIntro={handleGoIntro}
             onNavigate={handlePageNavigate}
+            isAdmin={isAdmin}
           />
         )}
       </AnimatePresence>
+
+      {/* Floating Theme Toggle */}
+      <button 
+        onClick={toggleTheme}
+        style={{
+          position: 'fixed',
+          top: '1.5rem',
+          right: '1.5rem',
+          zIndex: 100,
+          background: 'var(--pixel-surface)',
+          border: '2px solid var(--pixel-border)',
+          color: 'var(--pixel-text)',
+          padding: '8px 12px',
+          fontFamily: 'var(--font-pixel)',
+          fontSize: '0.6rem',
+          cursor: 'pointer'
+        }}
+      >
+        THEME: {theme.toUpperCase()}
+      </button>
+
+      {/* Floating MAP CTA (always follows on content pages) */}
+      {(currentPage === 'board' || currentPage === 'about' || currentPage === 'projects') && (
+        <button
+          onClick={handleBackToMap}
+          style={{
+            position: 'fixed',
+            bottom: '5rem',
+            right: '1.5rem',
+            zIndex: 90,
+            background: 'var(--pixel-accent)',
+            color: 'var(--pixel-bg)',
+            border: '2px solid var(--pixel-border)',
+            padding: '12px 24px',
+            fontFamily: 'var(--font-pixel)',
+            fontSize: '0.8rem',
+            boxShadow: 'var(--pixel-glow-cyan)',
+            cursor: 'pointer',
+            borderRadius: '24px'
+          }}
+        >
+          🗺️ MAP
+        </button>
+      )}
 
       {/* Admin system - always visible except on intro */}
       {currentPage !== 'intro' && (

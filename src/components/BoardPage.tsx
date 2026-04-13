@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { supabaseFetch, hasContent, safeSerialize } from '../utils/supabase';
+import { useContent } from '../hooks/useContent';
+import { EditableField } from './Editable';
 import {
   DEFAULT_HERO,
   DEFAULT_PROJECTS,
@@ -15,42 +16,30 @@ import {
 interface BoardPageProps {
   onBack: () => void;
   onNavigate: (page: string) => void;
+  onGoIntro: () => void;
   isAdmin: boolean;
 }
 
-/** Hook to load data from Supabase with initialData fallback */
-function useContent<T>(key: string, initial: T): [T, (v: T) => void] {
-  const [data, setData] = useState<T>(initial);
-
-  useEffect(() => {
-    supabaseFetch(`site_content?key=eq.${key}&select=value`)
-      .then((rows) => {
-        if (rows && rows.length > 0 && hasContent(rows[0].value)) {
-          setData(rows[0].value as T);
-        }
-      })
-      .catch(() => {});
-  }, [key]);
-
-  const update = (newData: T) => {
-    setData(newData);
-    const serializable = safeSerialize(newData);
-    supabaseFetch('site_content', {
-      method: 'POST',
-      headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
-      body: JSON.stringify({ key, value: serializable, updated_at: new Date().toISOString() }),
-    }).catch(console.error);
-  };
-
-  return [data, update];
-}
-
-const BoardPage: React.FC<BoardPageProps> = ({ onBack, onNavigate, isAdmin }) => {
+const BoardPage: React.FC<BoardPageProps> = ({ onBack, onNavigate, onGoIntro, isAdmin }) => {
   const [hero, setHero] = useContent<HeroContent>('hero_content', DEFAULT_HERO);
   const [projects] = useContent<Project[]>('projects_data', DEFAULT_PROJECTS);
-  const [history] = useContent<GameHistory>('history_data', DEFAULT_GAME_HISTORY);
-  const [about] = useContent<AboutContent>('about_content', DEFAULT_ABOUT);
+  const [history, setHistory] = useContent<GameHistory>('history_data', DEFAULT_GAME_HISTORY);
+  const [about, setAbout] = useContent<AboutContent>('about_content', DEFAULT_ABOUT);
+  const [gifUrl, setGifUrl] = useContent<string>('board_gif_url', 'https://picsum.photos/seed/cyberpunk/800/400');
+  
   const [historyTab, setHistoryTab] = useState<'online' | 'mobile' | 'package'>('online');
+
+  const updateHero = (key: keyof HeroContent, value: string) => {
+    setHero(prev => ({ ...prev, [key]: value }));
+  };
+
+  const updateHistory = (tab: 'online' | 'mobile' | 'package', index: number, key: string, value: string | number) => {
+    setHistory(prev => {
+      const newTab = [...prev[tab]];
+      newTab[index] = { ...newTab[index], [key]: value };
+      return { ...prev, [tab]: newTab };
+    });
+  };
 
   return (
     <motion.div
@@ -62,18 +51,16 @@ const BoardPage: React.FC<BoardPageProps> = ({ onBack, onNavigate, isAdmin }) =>
     >
       {/* Navigation */}
       <nav className="page-nav">
-        <button className="page-back-btn" onClick={onBack}>
-          ← MAP
-        </button>
-        <div className="page-nav-logo" onClick={onBack}>SOLIP'S WORLD</div>
+        <div className="page-nav-logo" onClick={onGoIntro}>SOLIP'S WORLD</div>
         <ul className="page-nav-links">
+          <li><button className="page-nav-link active">Board</button></li>
           <li><button className="page-nav-link" onClick={() => onNavigate('about')}>About</button></li>
           <li><button className="page-nav-link" onClick={() => onNavigate('projects')}>Projects</button></li>
           <li><a className="page-nav-link" href="mailto:solip.dev@email.com">Contact</a></li>
         </ul>
       </nav>
 
-      {/* Hero */}
+      {/* Hero (Logline) */}
       <section className="board-hero">
         <motion.h1
           className="board-hero-title"
@@ -81,17 +68,19 @@ const BoardPage: React.FC<BoardPageProps> = ({ onBack, onNavigate, isAdmin }) =>
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          {hero.titleLine1}
-          <span>{hero.titleLine2}</span>
+          <EditableField value={hero.titleLine1} onChange={(v) => updateHero('titleLine1', v)} isAdmin={isAdmin} />
+          <span>
+            <EditableField value={hero.titleLine2} onChange={(v) => updateHero('titleLine2', v)} isAdmin={isAdmin} />
+          </span>
         </motion.h1>
-        <motion.p
+        <motion.div
           className="board-hero-desc"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
         >
-          {hero.description}
-        </motion.p>
+          <EditableField value={hero.description} onChange={(v) => updateHero('description', v)} isAdmin={isAdmin} multiline />
+        </motion.div>
         <motion.button
           className="board-hero-cta"
           initial={{ opacity: 0, y: 20 }}
@@ -103,60 +92,45 @@ const BoardPage: React.FC<BoardPageProps> = ({ onBack, onNavigate, isAdmin }) =>
         </motion.button>
       </section>
 
-      {/* Interactive GIF area */}
+      {/* Project Video/GIF Area */}
       <section style={{
-        padding: '4rem 2rem',
+        padding: '2rem 2rem',
         display: 'flex',
-        justifyContent: 'center',
-        background: 'radial-gradient(ellipse at 50% 50%, rgba(108, 63, 181, 0.15) 0%, transparent 70%)',
+        flexDirection: 'column',
+        alignItems: 'center',
       }}>
+        {isAdmin && (
+          <div style={{ marginBottom: '1rem', width: '100%', maxWidth: 800 }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--pixel-primary)' }}>GIF/Image URL:</span>
+            <input 
+              type="text" 
+              value={gifUrl} 
+              onChange={(e) => setGifUrl(e.target.value)} 
+              style={{ width: '100%', padding: '8px', background: 'rgba(255,255,255,0.1)', color: '#fff' }} 
+            />
+          </div>
+        )}
         <motion.div
           style={{
             width: '100%',
             maxWidth: 800,
-            height: 300,
-            background: 'var(--pixel-surface)',
+            height: 400,
+            background: `url(${gifUrl}) center/cover no-repeat`,
+            backgroundColor: 'var(--pixel-surface)',
             border: '3px solid var(--pixel-border)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-            position: 'relative',
+            borderRadius: '8px',
+            boxShadow: 'var(--pixel-box-shadow)'
           }}
           whileHover={{ scale: 1.02 }}
-        >
-          {/* Animated pixel art pattern */}
-          <div style={{
-            fontFamily: 'var(--font-pixel)',
-            fontSize: '0.8rem',
-            color: 'var(--pixel-accent)',
-            textAlign: 'center',
-            lineHeight: 2,
-          }}>
-            <motion.div
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              ✧ ✦ ✧ GAME DESIGN ✧ ✦ ✧
-            </motion.div>
-            <div style={{ fontSize: '3rem', margin: '1rem 0' }}>🎮</div>
-            <motion.div
-              animate={{ opacity: [0.3, 0.8, 0.3] }}
-              transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
-              style={{ color: 'var(--pixel-primary)', fontSize: '0.6rem' }}
-            >
-              SYSTEM × LEVEL × NARRATIVE × BALANCE
-            </motion.div>
-          </div>
-        </motion.div>
+        />
       </section>
 
-      {/* Project Preview */}
+      {/* 3 Representative Projects */}
       <section className="section">
-        <div className="section-title">PROJECTS</div>
-        <div className="section-subtitle">주요 프로젝트</div>
+        <div className="section-title">REPRESENTATIVE PROJECTS</div>
+        <div className="section-subtitle">대표 프로젝트</div>
         <div className="project-grid">
-          {projects.slice(0, 4).map((project, i) => (
+          {projects.slice(0, 3).map((project, i) => (
             <motion.div
               key={project.id}
               className="project-card"
@@ -194,7 +168,7 @@ const BoardPage: React.FC<BoardPageProps> = ({ onBack, onNavigate, isAdmin }) =>
         </div>
       </section>
 
-      {/* Philosophy */}
+      {/* Mini Logline & Philosophy */}
       <section className="section" style={{ display: 'flex', gap: '3rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ flex: '1 1 400px' }}>
           <div className="section-title">PHILOSOPHY</div>
@@ -206,35 +180,25 @@ const BoardPage: React.FC<BoardPageProps> = ({ onBack, onNavigate, isAdmin }) =>
             lineHeight: 1.6,
             marginBottom: '1.5rem',
           }}>
-            기능 하나를 만들더라도, 그 의도와<br />
-            사용자 경험을 먼저 고려합니다.<br />
-            정작 지켜보는 편이자 뒤에서<br />
-            정리 이해를 돕는 편이지만 종차는다고 감사합니다.
+            <EditableField value={about.subtitle} onChange={(v) => setAbout(prev => ({...prev, subtitle: v}))} isAdmin={isAdmin} multiline />
           </h2>
           {about.paragraphs.map((p, i) => (
-            <p key={i} style={{ color: 'var(--pixel-text-dim)', marginBottom: '1rem', lineHeight: 1.8 }}>
-              {p}
-            </p>
+            <div key={i} style={{ color: 'var(--pixel-text-dim)', marginBottom: '1rem', lineHeight: 1.8 }}>
+              <EditableField value={p} onChange={(v) => {
+                const newP = [...about.paragraphs];
+                newP[i] = v;
+                setAbout(prev => ({...prev, paragraphs: newP}));
+              }} isAdmin={isAdmin} multiline />
+            </div>
           ))}
+          <button
+            className="board-hero-cta"
+            style={{ marginTop: '1rem', padding: '10px 20px', fontSize: '0.55rem' }}
+            onClick={() => onNavigate('about')}
+          >
+            About Me →
+          </button>
         </div>
-        <motion.div
-          style={{
-            flex: '0 0 200px',
-            width: 200,
-            height: 200,
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--pixel-primary), var(--pixel-accent))',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '4rem',
-            boxShadow: '0 0 60px rgba(255, 107, 203, 0.3)',
-          }}
-          animate={{ rotate: [0, 5, -5, 0] }}
-          transition={{ duration: 6, repeat: Infinity }}
-        >
-          🎯
-        </motion.div>
       </section>
 
       {/* Game History */}
@@ -259,12 +223,29 @@ const BoardPage: React.FC<BoardPageProps> = ({ onBack, onNavigate, isAdmin }) =>
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {history[historyTab].map((game) => (
+          {history[historyTab].map((game, idx) => (
             <div key={game.id} className="history-item">
-              <span className="history-name">{game.name}</span>
-              <span className="history-hours">{game.hours}h</span>
+              <span className="history-name">
+                <EditableField value={game.name} onChange={(v) => updateHistory(historyTab, idx, 'name', v)} isAdmin={isAdmin} />
+              </span>
+              <span className="history-hours" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <EditableField value={game.hours.toString()} onChange={(v) => updateHistory(historyTab, idx, 'hours', Number(v) || 0)} isAdmin={isAdmin} />h
+              </span>
             </div>
           ))}
+          {isAdmin && (
+            <button 
+              onClick={() => {
+                setHistory(prev => ({
+                  ...prev,
+                  [historyTab]: [...prev[historyTab], { id: Date.now().toString(), name: 'New Game', hours: 0 }]
+                }));
+              }}
+              style={{ background: 'var(--pixel-primary)', color: '#fff', padding: '8px', border: 'none', cursor: 'pointer' }}
+            >
+              + Add
+            </button>
+          )}
         </motion.div>
       </section>
 
@@ -281,7 +262,7 @@ const BoardPage: React.FC<BoardPageProps> = ({ onBack, onNavigate, isAdmin }) =>
       <footer style={{
         textAlign: 'center',
         padding: '2rem',
-        borderTop: '1px solid rgba(108, 63, 181, 0.2)',
+        borderTop: '1px solid var(--pixel-border)',
       }}>
         <div style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.5rem', color: 'var(--pixel-text-dim)' }}>
           © 2024 LEE SOLIP — GAME DESIGN PORTFOLIO

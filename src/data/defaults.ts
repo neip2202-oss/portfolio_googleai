@@ -32,8 +32,13 @@ export interface ResumeData {
   email: string;
   linkedin: string;
   github: string;
+  notion: string;
+  dob: string;
+  image: string;
+  oneLineIntro: string;
   summary: string;
-  selfIntroduction: string;
+  selfIntroduction: { title: string; body: string }[];
+  skills: { name: string; icon: string }[];
   education: { title: string; period: string; description: string; details: string[] }[];
   experience: { title: string; period: string; description: string; details: string[] }[];
   awards: { title: string; organization: string; year: string }[];
@@ -137,8 +142,20 @@ export const DEFAULT_RESUME: ResumeData = {
   email: "solip.dev@email.com",
   linkedin: "linkedin.com/in/solip-game",
   github: "github.com/solip-dev",
+  notion: "notion.so/solip-portfolio",
+  dob: "199X.XX.XX",
+  image: "https://picsum.photos/seed/profile/400/400",
+  oneLineIntro: "게임의 세상을 넓을 수 있다고 믿는 게임 기획자",
   summary: "\"재미\"를 수치와 논리로 증명하는 게임 기획자입니다.",
-  selfIntroduction: "# 자기소개서\n\n## 성장 과정\n어린 시절부터 게임은 단순한 오락 이상의 의미였습니다.\n\n## 핵심 역량\n데이터와 논리에 기반한 사고력이 강점입니다.\n\n## 포부\n전 세계 게이머들에게 잊지 못할 경험을 선사하고 싶습니다.",
+  selfIntroduction: [
+    { title: "성장 과정", body: "어린 시절부터 게임은 단순한 오락 이상의 의미였습니다..." },
+    { title: "핵심 역량", body: "데이터와 논리에 기반한 사고력이 강점입니다..." }
+  ],
+  skills: [
+    { name: "Unity", icon: "🎮" },
+    { name: "Unreal Engine", icon: "🚀" },
+    { name: "Figma", icon: "🎨" }
+  ],
   education: [
     {
       title: "게임 기획 전문가 부트캠프",
