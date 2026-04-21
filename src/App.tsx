@@ -1,5 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle } from 'lucide-react';
+
+const getExternalEmbedUrl = (url: string) => {
+    if (!url) return url;
+    if (url.startsWith('data:')) return url;
+
+    // YouTube
+    const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?\n]+)/);
+    if (ytMatch && ytMatch[1]) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+
+    // Google Drive
+    const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/?]+)/);
+    if (driveMatch && driveMatch[1]) return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+
+    // Google Slides
+    const docsMatch = url.match(/docs\.google\.com\/presentation\/d\/([^/?]+)/);
+    if (docsMatch && docsMatch[1]) return `https://docs.google.com/presentation/d/${docsMatch[1]}/embed?start=false&loop=false`;
+
+    return url;
+};
+
+const isNativeEmbeddedDoc = (url: string) => {
+    if (!url) return false;
+    return url.startsWith('data:application/pdf') || 
+           url.toLowerCase().endsWith('.pdf') || 
+           url.includes('drive.google.com') || 
+           url.includes('docs.google.com/presentation');
+};
 import { useContent } from './hooks/useContent';
 
 const iconsMapping: Record<string, any> = { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle };
@@ -817,10 +844,10 @@ export default function App() {
                  {activeMedia === 'gameplay' && (
                     <div className="w-full h-full bg-black flex flex-col items-center justify-center animate-in fade-in duration-300">
                        {selectedProject?.media?.video ? (
-                          selectedProject.media.video.startsWith('data:') ? (
+                          selectedProject.media.video.startsWith('data:') && selectedProject.media.video.includes('video/') ? (
                              <video src={selectedProject.media.video} controls className="w-full h-full object-contain" />
                           ) : (
-                             <iframe src={selectedProject.media.video} className="w-full h-full border-none" allowFullScreen></iframe>
+                             <iframe src={getExternalEmbedUrl(selectedProject.media.video)} className="w-full h-full border-none" allowFullScreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
                           )
                        ) : (
                           <>
@@ -845,29 +872,38 @@ export default function App() {
 
                  {activeMedia === 'document' && (
                     <div className="w-full h-full flex flex-col items-center justify-center bg-white relative animate-in fade-in duration-300">
-                       {selectedProject?.media?.slides && selectedProject.media.slides[docSlideIndex] ? (
-                          selectedProject.media.slides[docSlideIndex].startsWith('data:application/pdf') ? (
-                             <iframe src={selectedProject.media.slides[docSlideIndex]} className="w-full h-full border-none" />
-                          ) : (
-                             <img src={selectedProject.media.slides[docSlideIndex]} alt="slide" className="w-full h-full object-contain" />
-                          )
-                       ) : (
-                          <>
-                             <span className="text-2xl font-extrabold text-gray-800 mb-2">상세 기획서 Page {docSlideIndex + 1}</span>
-                             <span className="text-gray-400 font-medium">({['기획서 표지', '목차 및 시스템 개요', '핵심 룰 구조도', '밸런스 데이터 테이블', 'UI 와이어프레임'][docSlideIndex] || '추가 페이지'})</span>
-                          </>
-                       )}
-                       
-                       <div className="absolute bottom-6 bg-gray-900/80 backdrop-blur text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg z-10">
-                          {docSlideIndex + 1} / {(selectedProject?.media?.slides || [1, 2, 3, 4, 5]).length}
-                       </div>
-                       
-                       <button onClick={() => setDocSlideIndex(prev => prev === 0 ? (selectedProject?.media?.slides?.length || 5) - 1 : prev - 1)} className="absolute left-6 w-12 h-12 bg-white border border-gray-200 hover:bg-gray-50 hover:border-emerald-300 rounded-full flex items-center justify-center shadow-md hover:shadow-xl transition-all text-gray-700 hover:text-emerald-600 z-20">
-                          <ChevronLeft size={28} />
-                       </button>
-                       <button onClick={() => setDocSlideIndex(prev => (prev + 1) % (selectedProject?.media?.slides?.length || 5))} className="absolute right-6 w-12 h-12 bg-white border border-gray-200 hover:bg-gray-50 hover:border-emerald-300 rounded-full flex items-center justify-center shadow-md hover:shadow-xl transition-all text-gray-700 hover:text-emerald-600 z-20">
-                          <ChevronRight size={28} />
-                       </button>
+                        {(() => {
+                           const currentSlide = selectedProject?.media?.slides && selectedProject.media.slides[docSlideIndex];
+                           if (currentSlide) {
+                              if (isNativeEmbeddedDoc(currentSlide)) {
+                                 return <iframe src={getExternalEmbedUrl(currentSlide)} className="w-full h-full border-none" allowFullScreen />;
+                              } else {
+                                 return <img src={currentSlide} alt="slide" className="w-full h-full object-contain" />;
+                              }
+                           } else {
+                              return (
+                                 <>
+                                    <span className="text-2xl font-extrabold text-gray-800 mb-2">상세 기획서 Page {docSlideIndex + 1}</span>
+                                    <span className="text-gray-400 font-medium">({['기획서 표지', '목차 및 시스템 개요', '핵심 룰 구조도', '밸런스 데이터 테이블', 'UI 와이어프레임'][docSlideIndex] || '추가 페이지'})</span>
+                                 </>
+                              );
+                           }
+                        })()}
+                        
+                        {!isNativeEmbeddedDoc(selectedProject?.media?.slides?.[docSlideIndex] || '') && (
+                           <>
+                              <div className="absolute bottom-6 bg-gray-900/80 backdrop-blur text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg z-10">
+                                 {docSlideIndex + 1} / {(selectedProject?.media?.slides || [1, 2, 3, 4, 5]).length}
+                              </div>
+                              
+                              <button onClick={() => setDocSlideIndex((prev: number) => prev === 0 ? (selectedProject?.media?.slides?.length || 5) - 1 : prev - 1)} className="absolute left-6 w-12 h-12 bg-white border border-gray-200 hover:bg-gray-50 hover:border-emerald-300 rounded-full flex items-center justify-center shadow-md hover:shadow-xl transition-all text-gray-700 hover:text-emerald-600 z-20">
+                                 <ChevronLeft size={28} />
+                              </button>
+                              <button onClick={() => setDocSlideIndex((prev: number) => (prev + 1) % (selectedProject?.media?.slides?.length || 5))} className="absolute right-6 w-12 h-12 bg-white border border-gray-200 hover:bg-gray-50 hover:border-emerald-300 rounded-full flex items-center justify-center shadow-md hover:shadow-xl transition-all text-gray-700 hover:text-emerald-600 z-20">
+                                 <ChevronRight size={28} />
+                              </button>
+                           </>
+                        )}
 
                        {isAdmin && (
                           <div className="absolute top-4 right-4 z-30 w-full max-w-xs bg-white/90 backdrop-blur p-4 rounded-2xl shadow-xl border border-gray-200" onClick={e => e.stopPropagation()}>
