@@ -174,14 +174,19 @@ export default function App() {
     { id: 1, title: '지원 동기 및 기획자로서의 목표', content: '**"선택에 이유를 묻는 단단한 근거가 서비스 성패를 좌우한다."**\n\n단순히 재밌어 보이는 아이디어를 넘어, 논리적 구조로 엮어내고 실제 지표로 증명하는 기획자가 되고자 합니다.' },
   ]);
 
-  const [docTools, setDocTools] = useContent<any>('docTools', [
+  const [workTools, setWorkTools] = useContent<any>('workTools', [
     { id: 1, name: 'Excel', tooltip: '데이터 모델링 및 수치 밸런싱', iconName: 'Database' },
-    { id: 2, name: 'PowerPoint', tooltip: '명확한 제안서 및 플로우차트', iconName: 'LayoutTemplate' },
-    { id: 3, name: 'Notion', tooltip: '위키 문서화 및 협업', iconName: 'PenTool' },
+    { id: 2, name: 'PowerPoint', tooltip: '명확한 제안서 및 플로우차트', iconName: 'LayoutTemplate' }
+  ]);
+  const [collabTools, setCollabTools] = useContent<any>('collabTools', [
+    { id: 1, name: 'Notion', tooltip: '위키 문서화 및 협업', iconName: 'PenTool' },
+    { id: 2, name: 'Jira', tooltip: '스프린트 백로그 관리', iconName: 'LayoutTemplate' }
   ]);
   const [engineTools, setEngineTools] = useContent<any>('engineTools', [
-    { id: 1, name: 'Unity', tooltip: '엔진 내 UI/프리팹 데이터 조작', iconName: 'Box' },
-    { id: 2, name: 'Jira', tooltip: '애자일 스프린트 및 백로그 관리', iconName: 'LayoutTemplate' },
+    { id: 1, name: 'Unity', tooltip: '엔진 내 UI/프리팹 데이터 조작', iconName: 'Box' }
+  ]);
+  const [designTools, setDesignTools] = useContent<any>('designTools', [
+    { id: 1, name: 'Figma', tooltip: 'UI/UX 와이어프레임 설계', iconName: 'PenTool' }
   ]);
   const [certifications, setCertifications] = useContent<any>('certifications', [
     { id: 1, title: 'CS Leaders (관리사)', date: '2022.05' },
@@ -445,19 +450,6 @@ export default function App() {
       </section>
       
       <GlobalFooterCTA />
-
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 hidden md:flex items-center gap-1 p-2 bg-white/70 backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full z-40">
-         {[
-            { id: 'hero', label: 'Intro' },
-            { id: 'process', label: 'Process' },
-            { id: 'archive', label: 'Archive' },
-            { id: 'portfolio', label: 'Portfolio' }
-         ].map(anchor => (
-            <a key={anchor.id} href={`#${anchor.id}`} className="px-5 py-2 text-xs font-bold text-gray-500 hover:text-emerald-600 hover:bg-white rounded-full transition-all uppercase tracking-widest shadow-sm hover:shadow-md">
-               {anchor.label}
-            </a>
-         ))}
-      </div>
     </div>
   );
 
@@ -493,65 +485,53 @@ export default function App() {
               <a href="mailto:solip2202@gmail.com" className="flex items-center gap-2 text-sm text-white font-bold px-5 py-2.5 bg-gray-900 hover:bg-emerald-600 transition-all rounded-full shadow-md"><Mail size={14}/> 이메일 보내기</a>
             </div>
 
-            <div className="space-y-4 text-left border-t border-gray-100 pt-8">
-               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                  <span className="text-xs font-extrabold text-gray-400 uppercase w-48 shrink-0">Document & Collaboration</span>
-                  <div className="flex flex-wrap gap-2 items-center">
-                     {docTools.map((tool: any, idx: number) => {
-                        const IconComp = getToolIcon(tool.iconName || tool.name);
-                        return (
-                          <div key={tool.id} className="group relative inline-block">
-                             {isAdmin ? (
-                                <div className="flex flex-col bg-gray-50 border border-emerald-300 rounded p-1">
-                                   <EditableText isAdmin={isAdmin} value={tool.name} onChange={(v: string) => { const n=[...docTools]; n[idx].name=v; setDocTools(n); }} className="text-xs font-bold" />
-                                   <EditableText isAdmin={isAdmin} value={tool.tooltip} onChange={(v: string) => { const n=[...docTools]; n[idx].tooltip=v; setDocTools(n); }} className="text-[10px]" />
-                                </div>
-                             ) : (
-                                <>
-                                 <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-lg cursor-help transition-colors hover:border-emerald-400 hover:text-emerald-700 hover:shadow-sm">
-                                   <IconComp size={14} className="text-gray-400 group-hover:text-emerald-500" /> {tool.name}
-                                 </span>
-                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max max-w-xs px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg shadow-xl z-50">
-                                   {tool.tooltip}
-                                   <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                                 </div>
-                                </>
-                             )}
-                          </div>
-                        )
-                     })}
-                     {isAdmin && <button onClick={() => setDocTools([...docTools, {id: Date.now(), name: '신규 툴', tooltip: '설명', iconName: 'PenTool'}])} className="text-emerald-600 text-xs font-bold ml-2 hover:bg-emerald-50 px-2 py-1 rounded">+ 추가</button>}
-                  </div>
-               </div>
-               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                  <span className="text-xs font-extrabold text-gray-400 uppercase w-48 shrink-0">Engine & Tools</span>
-                  <div className="flex flex-wrap gap-2 items-center">
-                     {engineTools.map((tool: any, idx: number) => {
-                        const IconComp = getToolIcon(tool.iconName || tool.name);
-                        return (
-                          <div key={tool.id} className="group relative inline-block">
-                             {isAdmin ? (
-                                <div className="flex flex-col bg-gray-50 border border-emerald-300 rounded p-1">
-                                   <EditableText isAdmin={isAdmin} value={tool.name} onChange={(v: string) => { const n=[...engineTools]; n[idx].name=v; setEngineTools(n); }} className="text-xs font-bold" />
-                                   <EditableText isAdmin={isAdmin} value={tool.tooltip} onChange={(v: string) => { const n=[...engineTools]; n[idx].tooltip=v; setEngineTools(n); }} className="text-[10px]" />
-                                </div>
-                             ) : (
-                                <>
-                                 <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-lg cursor-help transition-colors hover:border-emerald-400 hover:text-emerald-700 hover:shadow-sm">
-                                   <IconComp size={14} className="text-gray-400 group-hover:text-emerald-500" /> {tool.name}
-                                 </span>
-                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max max-w-xs px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg shadow-xl z-50">
-                                   {tool.tooltip}
-                                   <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                                 </div>
-                                </>
-                             )}
-                          </div>
-                        )
-                     })}
-                     {isAdmin && <button onClick={() => setEngineTools([...engineTools, {id: Date.now(), name: '신규 툴', tooltip: '설명', iconName: 'Box'}])} className="text-emerald-600 text-xs font-bold ml-2 hover:bg-emerald-50 px-2 py-1 rounded">+ 추가</button>}
-                  </div>
-               </div>
+            <div className="space-y-6 text-left border-t border-gray-100 pt-8">
+               {[
+                 { title: 'Work', data: workTools, set: setWorkTools },
+                 { title: 'Collaboration', data: collabTools, set: setCollabTools },
+                 { title: 'Engine', data: engineTools, set: setEngineTools },
+                 { title: 'Design', data: designTools, set: setDesignTools }
+               ].map(category => (
+                 <div key={category.title} className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6">
+                    <span className="text-xs font-extrabold text-gray-400 uppercase w-32 shrink-0 md:pt-3 tracking-widest">{category.title}</span>
+                    <div className="flex flex-wrap gap-2 items-center">
+                       {category.data.map((tool: any, idx: number) => {
+                          const IconComp = getToolIcon(tool.iconName || tool.name);
+                          return (
+                            <div key={tool.id} className="group relative inline-block">
+                               {isAdmin ? (
+                                  <div className="flex flex-col bg-gray-50 border border-emerald-300 rounded-xl p-2 gap-1.5 items-center w-[120px] shadow-sm">
+                                     <label className="cursor-pointer group/icon relative flex items-center justify-center w-10 h-10 rounded-lg bg-white shadow-sm border border-gray-200 hover:border-emerald-500 overflow-hidden shrink-0 transition-colors">
+                                        {tool.customIcon ? <img src={tool.customIcon} className="w-6 h-6 object-contain" /> : <IconComp size={18} className="text-gray-400" />}
+                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover/icon:opacity-100 transition-opacity">
+                                          <span className="text-white font-bold text-[9px] tracking-wider">변경</span>
+                                        </div>
+                                        <input type="file" accept="image/*" onChange={e => handleFileUpload(e, b64 => { const n=[...category.data]; n[idx].customIcon=b64; category.set(n); })} className="hidden" />
+                                     </label>
+                                     <div className="w-full">
+                                       <EditableText isAdmin={isAdmin} value={tool.name} onChange={(v: string) => { const n=[...category.data]; n[idx].name=v; category.set(n); }} className="text-[12px] font-bold text-center w-full block bg-white" placeholder="이름" />
+                                       <EditableText isAdmin={isAdmin} value={tool.tooltip} onChange={(v: string) => { const n=[...category.data]; n[idx].tooltip=v; category.set(n); }} className="text-[10px] text-center w-full block text-gray-500 bg-white mt-1" placeholder="설명" />
+                                     </div>
+                                  </div>
+                               ) : (
+                                  <>
+                                   <span className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-xl cursor-help transition-all hover:border-emerald-400 hover:text-emerald-700 hover:shadow-md hover:-translate-y-0.5">
+                                      {tool.customIcon ? <img src={tool.customIcon} className="w-4 h-4 object-contain shrink-0" /> : <IconComp size={14} className="text-gray-400 group-hover:text-emerald-500 shrink-0 transition-colors" />}
+                                      <span>{tool.name}</span>
+                                   </span>
+                                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max max-w-xs px-3 py-2 bg-gray-900/95 backdrop-blur text-white text-xs font-medium rounded-xl shadow-xl z-50">
+                                     {tool.tooltip}
+                                     <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900/95"></div>
+                                   </div>
+                                  </>
+                               )}
+                            </div>
+                          )
+                       })}
+                       {isAdmin && <button onClick={() => category.set([...category.data, {id: Date.now(), name: '신규 툴', tooltip: '설명', iconName: 'Box'}])} className="text-emerald-600 text-xs font-bold ml-2 hover:bg-emerald-50 px-3 py-2 rounded-xl border border-dashed border-emerald-300 transition-colors"> + 추가 </button>}
+                    </div>
+                 </div>
+               ))}
             </div>
           </div>
         </div>
@@ -1015,30 +995,55 @@ export default function App() {
             {playHistoryData
               .filter((game: any) => historyPageFilter === 'All' || game.platform === historyPageFilter)
               .map((game: any, index: number) => (
-              <div key={game.id} className="p-6 rounded-[1.5rem] bg-white border border-gray-200 hover:shadow-lg transition-shadow flex flex-col group items-center text-center">
+              <div key={game.id} className="p-5 md:p-6 rounded-[1.5rem] bg-white border border-gray-200 hover:shadow-lg transition-shadow flex flex-col group relative overflow-hidden h-full">
+                 {game.image ? (
+                     <div className="w-full h-36 mb-5 bg-gray-100 rounded-xl overflow-hidden relative group/img shrink-0">
+                        <img src={game.image} className="w-full h-full object-cover" />
+                        {isAdmin && (
+                           <label className="absolute inset-0 bg-black/50 text-white flex flex-col items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity cursor-pointer">
+                              <ImageIcon size={20} className="mb-1" />
+                              <span className="text-[10px] font-bold">커버 변경</span>
+                              <input type="file" accept="image/*" onChange={e => handleFileUpload(e, (b64) => { 
+                                 const originalIdx = playHistoryData.findIndex((p:any) => p.id === game.id);
+                                 if(originalIdx > -1) { const n = [...playHistoryData]; n[originalIdx].image = b64; setPlayHistoryData(n); }
+                              })} className="hidden" />
+                           </label>
+                        )}
+                     </div>
+                 ) : (
+                     <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-500 mb-5 group-hover:bg-blue-50 group-hover:text-blue-500 group-hover:border-blue-200 transition-colors mx-auto relative group/img shrink-0">
+                        {game.platform === 'PC' ? <Monitor size={32}/> : game.platform === 'Mobile' ? <Smartphone size={32}/> : <Gamepad2 size={32}/>}
+                        {isAdmin && (
+                           <label className="absolute inset-0 bg-black/50 text-white rounded-2xl flex flex-col items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity cursor-pointer z-10 w-full h-full">
+                              <span className="text-[10px] font-bold">이미지 등록</span>
+                              <input type="file" accept="image/*" onChange={e => handleFileUpload(e, (b64) => {
+                                 const originalIdx = playHistoryData.findIndex((p:any) => p.id === game.id);
+                                 if(originalIdx > -1) { const n = [...playHistoryData]; n[originalIdx].image = b64; setPlayHistoryData(n); }
+                              })} className="hidden" />
+                           </label>
+                        )}
+                     </div>
+                 )}
                  {isAdmin ? (
-                    <div className="w-full space-y-2">
-                       <EditableText isAdmin={isAdmin} value={game.title} onChange={(v: string) => { const n = [...playHistoryData]; n[index].title = v; setPlayHistoryData(n); }} className="font-bold text-center block" />
-                       <EditableText isAdmin={isAdmin} value={game.platform} onChange={(v: string) => { const n = [...playHistoryData]; n[index].platform = v; setPlayHistoryData(n); }} className="text-xs text-center block" />
-                       <EditableText isAdmin={isAdmin} value={game.genre} onChange={(v: string) => { const n = [...playHistoryData]; n[index].genre = v; setPlayHistoryData(n); }} className="text-xs text-center block" />
-                       <EditableText isAdmin={isAdmin} value={game.hours} onChange={(v: string) => { const n = [...playHistoryData]; n[index].hours = v; setPlayHistoryData(n); }} className="text-xs text-center block" />
+                    <div className="w-full space-y-2 mt-auto flex-1 flex flex-col justify-end">
+                       <EditableText isAdmin={isAdmin} value={game.title} onChange={(v: string) => { const oIdx = playHistoryData.findIndex((p:any)=>p.id===game.id); const n = [...playHistoryData]; n[oIdx].title = v; setPlayHistoryData(n); }} className="font-bold text-center block w-full" placeholder="게임명" />
+                       <EditableText isAdmin={isAdmin} value={game.platform} onChange={(v: string) => { const oIdx = playHistoryData.findIndex((p:any)=>p.id===game.id); const n = [...playHistoryData]; n[oIdx].platform = v; setPlayHistoryData(n); }} className="text-xs text-center block w-full" placeholder="PC/Mobile/Console" />
+                       <EditableText isAdmin={isAdmin} value={game.genre} onChange={(v: string) => { const oIdx = playHistoryData.findIndex((p:any)=>p.id===game.id); const n = [...playHistoryData]; n[oIdx].genre = v; setPlayHistoryData(n); }} className="text-xs text-center block w-full" placeholder="장르" />
+                       <EditableText isAdmin={isAdmin} value={game.hours} onChange={(v: string) => { const oIdx = playHistoryData.findIndex((p:any)=>p.id===game.id); const n = [...playHistoryData]; n[oIdx].hours = v; setPlayHistoryData(n); }} className="text-xs text-center block w-full" placeholder="플레이타임" />
                     </div>
                  ) : (
-                    <>
-                       <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-500 mb-4 group-hover:bg-blue-50 group-hover:text-blue-500 group-hover:border-blue-200 transition-colors">
-                         {game.platform === 'PC' ? <Monitor size={28}/> : game.platform === 'Mobile' ? <Smartphone size={28}/> : <Gamepad2 size={28}/>}
+                    <div className="flex flex-col items-center justify-between flex-1">
+                       <h3 className="text-lg font-extrabold text-gray-900 leading-tight mb-3 text-center">{game.title}</h3>
+                       <div className="flex flex-col items-center w-full gap-3 mt-auto">
+                           <div className="flex flex-wrap justify-center items-center gap-1.5">
+                              <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded tracking-wide uppercase">{game.platform}</span>
+                              <span className="text-[10px] font-bold text-gray-500 border border-gray-200 px-2.5 py-1 rounded bg-white shadow-sm">{game.genre}</span>
+                           </div>
+                           <span className="flex items-center justify-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 w-full shadow-sm">
+                             <Clock size={12}/> 누적 {game.hours}
+                           </span>
                        </div>
-                       <h3 className="text-lg font-extrabold text-gray-900 leading-tight mb-2">{game.title}</h3>
-                       <div className="flex flex-wrap justify-center items-center gap-1 mb-4">
-                          <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{game.platform}</span>
-                          <span className="text-xs font-bold text-gray-500">{game.genre}</span>
-                       </div>
-                       <div className="mt-auto">
-                          <span className="flex items-center justify-center gap-1 text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
-                            <Clock size={12}/> 누적 {game.hours}
-                          </span>
-                       </div>
-                    </>
+                    </div>
                  )}
               </div>
             ))}
@@ -1177,15 +1182,20 @@ export default function App() {
       )}
 
       {currentTab === 'about' && (
-         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 hidden md:flex items-center gap-1 p-2 bg-white/70 backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full z-40">
+         <div className="fixed right-6 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-2 p-3 bg-white/70 backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-[2rem] z-40">
             {[
                { id: 'hero', label: 'Intro' },
                { id: 'process', label: 'Process' },
                { id: 'archive', label: 'Archive' },
                { id: 'portfolio', label: 'Portfolio' }
             ].map(anchor => (
-               <a key={anchor.id} href={`#${anchor.id}`} className="px-5 py-2 text-xs font-bold text-gray-500 hover:text-emerald-600 hover:bg-white rounded-full transition-all uppercase tracking-widest shadow-sm hover:shadow-md">
-                  {anchor.label}
+               <a key={anchor.id} href={`#${anchor.id}`} className="block relative group">
+                  <div className="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-900 text-gray-400 hover:text-white transition-colors shadow-sm cursor-pointer border border-gray-100">
+                     <div className="w-2.5 h-2.5 rounded-full bg-current transition-colors"></div>
+                  </div>
+                  <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 px-4 py-2 bg-gray-900 backdrop-blur text-xs font-bold text-white rounded-xl shadow-xl opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all uppercase tracking-widest whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:left-full before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-transparent before:border-l-gray-900">
+                     {anchor.label}
+                  </span>
                </a>
             ))}
          </div>
