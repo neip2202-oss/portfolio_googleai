@@ -32,6 +32,48 @@ const MarkdownRenderer: React.FC<any> = ({ content }) => {
   return <div className="markdown-body text-gray-600 leading-relaxed text-sm md:text-base" dangerouslySetInnerHTML={createMarkup()} />;
 };
 
+const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (base64: string) => void) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const MAX = 1920;
+        if (width > MAX || height > MAX) {
+          if (width > height) {
+            height = Math.round(height * (MAX / width));
+            width = MAX;
+          } else {
+            width = Math.round(width * (MAX / height));
+            height = MAX;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        callback(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    if (file.size > 5 * 1024 * 1024) {
+      alert('파일의 용량이 5MB를 초과하여 저장에 실패하거나 브라우저가 느려질 수 있습니다. 가급적 URL 방식이나 가벼운 파일을 권장합니다.');
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      callback(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+};
 
 export default function App() {
   // 글로벌 상태 관리
@@ -424,8 +466,19 @@ export default function App() {
       <div className="max-w-5xl mx-auto px-6">
         
         <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-gray-200 shadow-sm mb-10 flex flex-col md:flex-row gap-10 items-center md:items-center">
-          <div className="w-40 h-52 md:w-48 md:h-64 bg-gray-100 rounded-[2rem] border border-gray-200 shrink-0 relative overflow-hidden shadow-inner flex items-center justify-center">
-             <span className="text-gray-400 font-bold text-sm tracking-widest">Photo</span>
+          <div className="w-40 h-52 md:w-48 md:h-64 bg-gray-100 rounded-[2rem] border border-gray-200 shrink-0 relative overflow-hidden shadow-inner flex items-center justify-center group">
+             {aboutData.profileImage ? (
+                <img src={aboutData.profileImage} className="w-full h-full object-cover" alt="Profile" />
+             ) : (
+                <span className="text-gray-400 font-bold text-sm tracking-widest">Photo</span>
+             )}
+             {isAdmin && (
+                <label className="absolute inset-0 bg-black/50 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10">
+                   <ImageIcon size={24} className="mb-2" />
+                   <span className="font-bold text-xs">사진 업로드</span>
+                   <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (b64) => setAboutData({...aboutData, profileImage: b64}))} />
+                </label>
+             )}
           </div>
           
           <div className="flex-1 w-full text-center md:text-left">
@@ -767,9 +820,15 @@ export default function App() {
                           </>
                        )}
                        {isAdmin && (
-                          <div className="absolute top-4 right-4 z-30 w-full max-w-xs bg-white/90 backdrop-blur p-3 rounded-xl shadow-lg border border-gray-200" onClick={e => e.stopPropagation()}>
-                            <div className="text-xs font-bold text-emerald-600 mb-2">🔗 썸네일 이미지 URL 연결</div>
-                            <input type="text" placeholder="https://..." value={selectedProject?.media?.thumbnail || ''} onChange={e => updateMedia('thumbnail', e.target.value)} className="w-full bg-white border border-gray-200 rounded px-2 py-1.5 text-xs outline-none focus:border-emerald-500" />
+                          <div className="absolute top-4 right-4 z-30 w-full max-w-xs bg-white/90 backdrop-blur p-4 rounded-2xl shadow-xl border border-gray-200" onClick={e => e.stopPropagation()}>
+                            <div className="text-xs font-bold text-emerald-600 mb-2">🔗 이미지 URL 연결</div>
+                            <input type="text" placeholder="https://..." value={selectedProject?.media?.thumbnail || ''} onChange={e => updateMedia('thumbnail', e.target.value)} className="w-full bg-white border border-gray-200 rounded px-3 py-2 text-xs outline-none focus:border-emerald-500 mb-3 transition-colors" />
+                            
+                            <div className="text-xs font-bold text-emerald-600 mb-2 border-t border-emerald-100 pt-3">📁 화면 클릭 또는 로컬 파일 업로드</div>
+                            <label className="w-full py-2 bg-emerald-50 text-emerald-700 text-xs font-bold rounded flex items-center justify-center gap-1.5 cursor-pointer hover:bg-emerald-100 transition-colors border border-emerald-200">
+                               <ImageIcon size={14} /> 찾아보기...
+                               <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => updateMedia('thumbnail', b64))} className="hidden" />
+                            </label>
                           </div>
                        )}
                     </div>
@@ -778,7 +837,11 @@ export default function App() {
                  {activeMedia === 'gameplay' && (
                     <div className="w-full h-full bg-black flex flex-col items-center justify-center animate-in fade-in duration-300">
                        {selectedProject?.media?.video ? (
-                          <iframe src={selectedProject.media.video} className="w-full h-full border-none" allowFullScreen></iframe>
+                          selectedProject.media.video.startsWith('data:') ? (
+                             <video src={selectedProject.media.video} controls className="w-full h-full object-contain" />
+                          ) : (
+                             <iframe src={selectedProject.media.video} className="w-full h-full border-none" allowFullScreen></iframe>
+                          )
                        ) : (
                           <>
                              <PlayCircle size={72} className="text-emerald-500 opacity-90 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] mb-4" />
@@ -786,9 +849,15 @@ export default function App() {
                           </>
                        )}
                        {isAdmin && (
-                          <div className="absolute top-4 right-4 z-30 w-full max-w-xs bg-white/90 backdrop-blur p-3 rounded-xl shadow-lg border border-gray-200" onClick={e => e.stopPropagation()}>
-                            <div className="text-xs font-bold text-emerald-600 mb-2">🔗 플레이 영상 URL (유튜브 embed 등)</div>
-                            <input type="text" placeholder="https://..." value={selectedProject?.media?.video || ''} onChange={e => updateMedia('video', e.target.value)} className="w-full bg-white border border-gray-200 rounded px-2 py-1.5 text-xs outline-none focus:border-emerald-500" />
+                          <div className="absolute top-4 right-4 z-30 w-full max-w-xs bg-white/90 backdrop-blur p-4 rounded-2xl shadow-xl border border-gray-200" onClick={e => e.stopPropagation()}>
+                            <div className="text-xs font-bold text-emerald-600 mb-2">🔗 비디오 URL (유튜브 등)</div>
+                            <input type="text" placeholder="https://..." value={selectedProject?.media?.video || ''} onChange={e => updateMedia('video', e.target.value)} className="w-full bg-white border border-gray-200 rounded px-3 py-2 text-xs outline-none focus:border-emerald-500 mb-3 transition-colors" />
+                            
+                            <div className="text-xs font-bold text-emerald-600 mb-2 border-t border-emerald-100 pt-3">📁 화면 클릭 또는 로컬 비디오 업로드</div>
+                            <label className="w-full py-2 bg-emerald-50 text-emerald-700 text-xs font-bold rounded flex items-center justify-center gap-1.5 cursor-pointer hover:bg-emerald-100 transition-colors border border-emerald-200">
+                               <PlayCircle size={14} /> 찾아보기...
+                               <input type="file" accept="video/mp4,video/webm" onChange={(e) => handleFileUpload(e, (b64) => updateMedia('video', b64))} className="hidden" />
+                            </label>
                           </div>
                        )}
                     </div>
@@ -797,7 +866,11 @@ export default function App() {
                  {activeMedia === 'document' && (
                     <div className="w-full h-full flex flex-col items-center justify-center bg-white relative animate-in fade-in duration-300">
                        {selectedProject?.media?.slides && selectedProject.media.slides[docSlideIndex] ? (
-                          <img src={selectedProject.media.slides[docSlideIndex]} alt="slide" className="w-full h-full object-contain" />
+                          selectedProject.media.slides[docSlideIndex].startsWith('data:application/pdf') ? (
+                             <iframe src={selectedProject.media.slides[docSlideIndex]} className="w-full h-full border-none" />
+                          ) : (
+                             <img src={selectedProject.media.slides[docSlideIndex]} alt="slide" className="w-full h-full object-contain" />
+                          )
                        ) : (
                           <>
                              <span className="text-2xl font-extrabold text-gray-800 mb-2">상세 기획서 Page {docSlideIndex + 1}</span>
@@ -817,8 +890,8 @@ export default function App() {
                        </button>
 
                        {isAdmin && (
-                          <div className="absolute top-4 right-4 z-30 w-full max-w-xs bg-white/90 backdrop-blur p-3 rounded-xl shadow-lg border border-gray-200" onClick={e => e.stopPropagation()}>
-                            <div className="text-xs font-bold text-emerald-600 mb-2">🔗 현재 슬라이드 이미지 URL ({docSlideIndex + 1}페이지)</div>
+                          <div className="absolute top-4 right-4 z-30 w-full max-w-xs bg-white/90 backdrop-blur p-4 rounded-2xl shadow-xl border border-gray-200" onClick={e => e.stopPropagation()}>
+                            <div className="text-xs font-bold text-emerald-600 mb-2">🔗 현재 슬라이드 이미지/PDF URL</div>
                             <input type="text" placeholder="https://..." 
                                value={(selectedProject?.media?.slides && selectedProject.media.slides[docSlideIndex]) || ''} 
                                onChange={e => {
@@ -826,13 +899,24 @@ export default function App() {
                                   newSlides[docSlideIndex] = e.target.value;
                                   updateMedia('slides', newSlides);
                                }} 
-                               className="w-full bg-white border border-gray-200 rounded px-2 py-1.5 text-xs outline-none focus:border-emerald-500" 
+                               className="w-full bg-white border border-gray-200 rounded px-3 py-2 text-xs outline-none focus:border-emerald-500 mb-3 transition-colors" 
                             />
+                            
+                            <div className="text-xs font-bold text-emerald-600 mb-2 border-t border-emerald-100 pt-3">📁 현재 페이지 로컬 파일 업로드</div>
+                            <label className="w-full py-2 bg-emerald-50 text-emerald-700 text-xs font-bold rounded flex items-center justify-center gap-1.5 cursor-pointer hover:bg-emerald-100 transition-colors border border-emerald-200 mb-3">
+                               <FileText size={14} /> 파일 업로드 (이미지/PDF)
+                               <input type="file" accept="image/*,application/pdf" onChange={(e) => handleFileUpload(e, (b64) => {
+                                  const newSlides = [...(selectedProject.media?.slides || ['', '', '', '', ''])];
+                                  newSlides[docSlideIndex] = b64;
+                                  updateMedia('slides', newSlides);
+                               })} className="hidden" />
+                            </label>
+
                             <button onClick={() => {
                                 const newSlides = [...(selectedProject.media?.slides || ['', '', '', '', '']), ''];
                                 updateMedia('slides', newSlides);
                                 setDocSlideIndex(newSlides.length - 1);
-                            }} className="w-full mt-2 py-1 bg-emerald-50 text-emerald-600 font-bold text-xs rounded border border-emerald-200">+ 페이지 추가</button>
+                            }} className="w-full py-2 bg-gray-900 text-white font-bold text-xs rounded transition-colors hover:bg-emerald-600">+ 새 페이지로 추가</button>
                           </div>
                        )}
                     </div>
