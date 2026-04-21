@@ -27,6 +27,16 @@ const isNativeEmbeddedDoc = (url: string) => {
            url.includes('drive.google.com') || 
            url.includes('docs.google.com/presentation');
 };
+
+const TAG_COLORS = [
+  { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-100', dot: 'bg-emerald-500' },
+  { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-100', dot: 'bg-blue-500' },
+  { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-100', dot: 'bg-indigo-500' },
+  { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-100', dot: 'bg-purple-500' },
+  { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-100', dot: 'bg-orange-500' },
+  { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-100', dot: 'bg-rose-500' },
+  { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200', dot: 'bg-gray-500' },
+];
 import { useContent } from './hooks/useContent';
 
 const iconsMapping: Record<string, any> = { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle };
@@ -484,23 +494,25 @@ export default function App() {
     <div className={`pt-24 pb-24 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'} bg-[#FAFAFA] min-h-screen`}>
       <div className="max-w-5xl mx-auto px-6">
         
-        <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-gray-200 shadow-sm mb-10 flex flex-col md:flex-row gap-10 items-center md:items-center">
-          <div className="w-40 h-52 md:w-48 md:h-64 bg-gray-100 rounded-[2rem] border border-gray-200 shrink-0 relative overflow-hidden shadow-inner flex items-center justify-center group">
-             {aboutData.profileImage ? (
-                <img src={aboutData.profileImage} className="w-full h-full object-cover" alt="Profile" />
-             ) : (
-                <span className="text-gray-400 font-bold text-sm tracking-widest">Photo</span>
-             )}
-             {isAdmin && (
-                <label className="absolute inset-0 bg-black/50 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10">
-                   <ImageIcon size={24} className="mb-2" />
-                   <span className="font-bold text-xs">사진 업로드</span>
-                   <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (b64) => setAboutData({...aboutData, profileImage: b64}))} />
-                </label>
-             )}
+        <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-gray-200 shadow-sm mb-10 grid md:grid-cols-12 gap-10 items-start">
+          <div className="md:col-span-4 lg:col-span-3 flex justify-center md:justify-start">
+             <div className="w-48 h-64 md:w-full md:h-[320px] bg-gray-100 rounded-[2rem] border border-gray-200 shrink-0 relative overflow-hidden shadow-inner flex items-center justify-center group">
+               {aboutData.profileImage ? (
+                  <img src={aboutData.profileImage} className="w-full h-full object-cover" alt="Profile" />
+               ) : (
+                  <span className="text-gray-400 font-bold text-sm tracking-widest">Photo</span>
+               )}
+               {isAdmin && (
+                  <label className="absolute inset-0 bg-black/50 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10 w-full h-full">
+                     <ImageIcon size={24} className="mb-2" />
+                     <span className="font-bold text-xs">사진 업로드</span>
+                     <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (b64) => setAboutData({...aboutData, profileImage: b64}))} />
+                  </label>
+               )}
+             </div>
           </div>
           
-          <div className="flex-1 w-full text-center md:text-left">
+          <div className="md:col-span-8 lg:col-span-9 flex flex-col items-center md:items-start text-center md:text-left">
             <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">이솔잎 <span className="text-2xl text-gray-300 font-bold ml-2">LEE SOLIP</span></h1>
             <p className="text-emerald-600 font-extrabold mb-8 text-lg md:text-xl tracking-tight">"의도를 구조로 만들고, 구조를 명확히 완성하는 기획자"</p>
             
@@ -512,15 +524,15 @@ export default function App() {
               <a href="mailto:solip2202@gmail.com" className="flex items-center gap-2 text-sm text-white font-bold px-5 py-2.5 bg-gray-900 hover:bg-emerald-600 transition-all rounded-full shadow-md"><Mail size={14}/> 이메일 보내기</a>
             </div>
 
-            <div className="space-y-6 text-left border-t border-gray-100 pt-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 text-left border-t border-gray-100 pt-8 w-full">
                {[
                  { title: 'Work', data: workTools, set: setWorkTools },
                  { title: 'Collaboration', data: collabTools, set: setCollabTools },
                  { title: 'Engine', data: engineTools, set: setEngineTools },
                  { title: 'Design', data: designTools, set: setDesignTools }
                ].map(category => (
-                 <div key={category.title} className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6">
-                    <span className="text-xs font-extrabold text-gray-400 uppercase w-32 shrink-0 md:pt-3 tracking-widest">{category.title}</span>
+                 <div key={category.title} className="flex flex-col gap-3">
+                    <span className="text-xs font-extrabold text-gray-400 uppercase tracking-widest">{category.title}</span>
                     <div className="flex flex-wrap gap-2 items-center">
                        {category.data.map((tool: any, idx: number) => {
                           const IconComp = getToolIcon(tool.iconName || tool.name);
@@ -620,24 +632,59 @@ export default function App() {
                      <Target className="text-blue-500"/> Activities & Projects
                    </h2>
                    <div className="space-y-6">
-                      {activitiesRightData.map((act: any, idx: number) => (
-                         <div key={act.id} className="p-6 md:p-8 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
-                            <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-3 gap-2">
-                               <div className="w-full">
-                                  <EditableText isAdmin={isAdmin} value={act.title} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].title = v; setActivitiesRightData(n); }} className="text-xl font-extrabold text-gray-900 mb-1 block" />
-                                  <EditableText isAdmin={isAdmin} value={act.year} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].year = v; setActivitiesRightData(n); }} className="text-sm font-bold text-gray-400 block" />
-                               </div>
-                               <div className="shrink-0">
-                                  <EditableText isAdmin={isAdmin} value={act.badge} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].badge = v; setActivitiesRightData(n); }} className="inline-block px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100" />
-                               </div>
-                            </div>
-                            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                               <EditableText isAdmin={isAdmin} as="textarea" value={act.desc} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].desc = v; setActivitiesRightData(n); }} className="text-gray-600 text-sm leading-relaxed w-full" />
-                            </div>
-                         </div>
-                      ))}
-                      {isAdmin && (
-                         <button onClick={() => setActivitiesRightData([...activitiesRightData, { id: Date.now(), year: 'YYYY.MM', title: '신규 활동', badge: '태그', desc: '설명' }])} className="w-full p-6 border-2 border-dashed border-emerald-300 text-emerald-600 rounded-3xl font-bold hover:bg-emerald-50">+ 대내외 활동 추가</button>
+                       {activitiesRightData.map((act: any, idx: number) => (
+                          <div key={act.id} className="p-6 md:p-8 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+                             <div className="flex flex-col mb-4 gap-2">
+                                <div className="w-full">
+                                   <EditableText isAdmin={isAdmin} value={act.title} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].title = v; setActivitiesRightData(n); }} className="text-xl font-extrabold text-gray-900 mb-1 block" placeholder="활동/프로젝트 제목" />
+                                   <EditableText isAdmin={isAdmin} value={act.year} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].year = v; setActivitiesRightData(n); }} className="text-sm font-bold text-gray-400 block" placeholder="기간 (YYYY.MM - YYYY.MM)" />
+                                </div>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                   {(() => {
+                                      const tags = act.tags || (act.badge ? [{ id: Date.now(), text: act.badge, color: 0 }] : []);
+                                      return (
+                                         <>
+                                            {tags.map((tag: any, tIdx: number) => {
+                                               const p = TAG_COLORS[tag.color] || TAG_COLORS[0];
+                                               return (
+                                                  <div key={tag.id} className="group/tag relative flex items-center">
+                                                     <div className={`px-2.5 py-1 ${p.bg} ${p.text} text-[11px] font-bold rounded-lg border ${p.border} flex items-center gap-1.5 transition-colors`}>
+                                                        <div className={`w-1.5 h-1.5 rounded-full ${p.dot}`}></div>
+                                                        <EditableText isAdmin={isAdmin} value={tag.text} onChange={(v: string) => { const n=[...activitiesRightData]; n[idx].tags[tIdx].text=v; setActivitiesRightData(n); }} className="bg-transparent uppercase tracking-wide" placeholder="태그명" />
+                                                     </div>
+                                                     {isAdmin && (
+                                                        <div className="hidden group-hover/tag:flex absolute top-full left-0 mt-1 bg-white shadow-xl border border-gray-200 rounded-lg p-2 gap-1.5 z-20">
+                                                           {TAG_COLORS.map((pal, pIdx) => (
+                                                              <button key={pIdx} onClick={() => { const n=[...activitiesRightData]; n[idx].tags[tIdx].color=pIdx; setActivitiesRightData(n); }} className={`w-5 h-5 rounded-full ${pal.bg} border ${pal.border} ${tag.color === pIdx ? 'ring-2 ring-offset-1 ring-gray-900' : ''}`} />
+                                                           ))}
+                                                           <button onClick={() => { const n=[...activitiesRightData]; n[idx].tags.splice(tIdx, 1); setActivitiesRightData(n); }} className="w-5 h-5 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center font-bold ml-1">✕</button>
+                                                        </div>
+                                                     )}
+                                                  </div>
+                                               );
+                                            })}
+                                            {isAdmin && (
+                                               <button onClick={() => {
+                                                  const n = [...activitiesRightData];
+                                                  if (!n[idx].tags) n[idx].tags = act.badge ? [{ id: Date.now()-1, text: act.badge, color: 0 }] : [];
+                                                  n[idx].tags.push({ id: Date.now(), text: 'New', color: 0 });
+                                                  setActivitiesRightData(n);
+                                               }} className="px-2.5 py-1 text-[11px] font-bold bg-white border border-dashed border-gray-300 text-gray-500 hover:border-emerald-400 hover:text-emerald-600 rounded-lg transition-colors">
+                                                 + 태그
+                                               </button>
+                                            )}
+                                         </>
+                                      );
+                                   })()}
+                                </div>
+                             </div>
+                             <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                                <EditableText isAdmin={isAdmin} as="textarea" value={act.desc} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].desc = v; setActivitiesRightData(n); }} className="text-gray-600 text-sm leading-relaxed w-full" placeholder="상세 내용" />
+                             </div>
+                          </div>
+                       ))}
+                       {isAdmin && (
+                          <button onClick={() => setActivitiesRightData([...activitiesRightData, { id: Date.now(), year: 'YYYY.MM - YYYY.MM', title: '신규 활동/프로젝트', tags: [], desc: '상세 내용을 기입해주세요.' }])} className="w-full p-6 border-2 border-dashed border-emerald-300 text-emerald-600 rounded-3xl font-bold hover:bg-emerald-50">+ 대내외 활동 및 프로젝트 추가</button>
                       )}
                    </div>
                 </div>
