@@ -663,11 +663,13 @@ export default function App() {
                                                         <EditableText isAdmin={isAdmin} value={tag.text} onChange={(v: string) => { const n=[...activitiesRightData]; n[idx].tags[tIdx].text=v; setActivitiesRightData(n); }} className="bg-transparent uppercase tracking-wide" placeholder="태그명" />
                                                      </div>
                                                      {isAdmin && (
-                                                        <div className="hidden group-hover/tag:flex absolute top-full left-0 mt-1 bg-white shadow-xl border border-gray-200 rounded-lg p-2 gap-1.5 z-20">
-                                                           {TAG_COLORS.map((pal, pIdx) => (
-                                                              <button key={pIdx} onClick={() => { const n=[...activitiesRightData]; n[idx].tags[tIdx].color=pIdx; setActivitiesRightData(n); }} className={`w-5 h-5 rounded-full ${pal.bg} border ${pal.border} ${tag.color === pIdx ? 'ring-2 ring-offset-1 ring-gray-900' : ''}`} />
-                                                           ))}
-                                                           <button onClick={() => { const n=[...activitiesRightData]; n[idx].tags.splice(tIdx, 1); setActivitiesRightData(n); }} className="w-5 h-5 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center font-bold ml-1">✕</button>
+                                                        <div className="hidden group-hover/tag:flex absolute top-full left-0 pt-2 z-20">
+                                                           <div className="bg-white shadow-xl border border-gray-200 rounded-lg p-2 flex gap-1.5 relative">
+                                                              {TAG_COLORS.map((pal, pIdx) => (
+                                                                 <button key={pIdx} onClick={() => { const n=[...activitiesRightData]; n[idx].tags[tIdx].color=pIdx; setActivitiesRightData(n); }} className={`w-5 h-5 rounded-full ${pal.bg} border ${pal.border} ${tag.color === pIdx ? 'ring-2 ring-offset-1 ring-gray-900' : ''}`} />
+                                                              ))}
+                                                              <button onClick={() => { const n=[...activitiesRightData]; n[idx].tags.splice(tIdx, 1); setActivitiesRightData(n); }} className="w-5 h-5 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center font-bold ml-1">✕</button>
+                                                           </div>
                                                         </div>
                                                      )}
                                                   </div>
@@ -769,10 +771,27 @@ export default function App() {
                     </div>
                  </div>
                  <div className="p-8 flex flex-col flex-1">
-                    <h3 className="text-xl font-extrabold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors line-clamp-1">{project.title}</h3>
-                    <span className="inline-block self-start px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold mb-4">{Array.isArray(project.role) ? project.role[0] : project.role} 외</span>
-                    <p className="text-gray-500 text-sm mt-auto line-clamp-2 leading-relaxed">{project.desc}</p>
-                 </div>
+                     <div className="mb-2 text-xs font-bold text-emerald-600">{project.genre}</div>
+                     <h3 className="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-emerald-600 transition-colors line-clamp-1">{project.title}</h3>
+                     <span className="inline-block self-start px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold mb-4">{Array.isArray(project.role) ? project.role[0] : project.role} 외</span>
+                     <p className="text-gray-500 text-sm mb-4 line-clamp-2 leading-relaxed">{project.desc}</p>
+                     
+                     {project.links && project.links.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-2 mt-auto pt-4 border-t border-gray-100">
+                           {project.links.map((link: string) => {
+                              let LinkIcon = ExternalLink;
+                              if (link.includes('Google Play')) LinkIcon = Play;
+                              if (link.includes('Steam')) LinkIcon = Monitor;
+                              if (link.includes('MapleStory')) LinkIcon = Globe;
+                              return (
+                                <span key={link} className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-gray-200 text-gray-600 text-[10px] font-bold rounded-lg shadow-sm">
+                                   <LinkIcon size={12} className={link.includes('Steam') ? 'text-gray-800' : link.includes('Play') ? 'text-green-500' : 'text-blue-500'} /> {link}
+                                </span>
+                              )
+                           })}
+                        </div>
+                     )}
+                  </div>
                </div>
              ))}
 
@@ -869,9 +888,15 @@ export default function App() {
               {isAdmin ? (
                  <div className="space-y-4 bg-gray-50 p-6 rounded-2xl border border-dashed border-emerald-400">
                     <div className="text-emerald-700 font-bold text-sm">💡 기본 정보 수정</div>
-                    <EditableText isAdmin={isAdmin} value={portfolioTab === 'main' ? (Array.isArray(selectedProject?.role) ? selectedProject?.role.join(', ') : selectedProject?.role) : selectedProject?.category} onChange={(v: string) => updateCurrentProject(portfolioTab === 'main' ? 'role' : 'category', portfolioTab === 'main' ? v.split(',').map(s=>s.trim()) : v)} className="font-bold text-sm block" placeholder="역할 또는 카테고리" />
-                    <EditableText isAdmin={isAdmin} value={selectedProject?.title} onChange={(v: string) => updateCurrentProject('title', v)} className="text-4xl font-extrabold block" placeholder="프로젝트 제목" />
-                    <EditableText isAdmin={isAdmin} as="textarea" value={selectedProject?.desc} onChange={(v: string) => updateCurrentProject('desc', v)} className="text-sm w-full block" placeholder="요약 설명" />
+                     <EditableText isAdmin={isAdmin} value={portfolioTab === 'main' ? (Array.isArray(selectedProject?.role) ? selectedProject?.role.join(', ') : selectedProject?.role) : selectedProject?.category} onChange={(v: string) => updateCurrentProject(portfolioTab === 'main' ? 'role' : 'category', portfolioTab === 'main' ? v.split(',').map((s:string)=>s.trim()) : v)} className="font-bold text-sm block" placeholder="역할 또는 카테고리" />
+                     {portfolioTab === 'main' && (
+                        <>
+                           <EditableText isAdmin={isAdmin} value={selectedProject?.genre} onChange={(v: string) => updateCurrentProject('genre', v)} className="text-sm font-bold text-emerald-600 block mt-2" placeholder="게임 장르 (예: 캐주얼 액션 레이싱)" />
+                           <EditableText isAdmin={isAdmin} value={selectedProject?.links ? selectedProject.links.join(', ') : ''} onChange={(v: string) => updateCurrentProject('links', v.split(',').map((s:string)=>s.trim()).filter(Boolean))} className="text-xs font-bold text-blue-500 block w-full" placeholder="외부 링크 (콤마로 구분. 예: Steam, Google Play)" />
+                        </>
+                     )}
+                     <EditableText isAdmin={isAdmin} value={selectedProject?.title} onChange={(v: string) => updateCurrentProject('title', v)} className="text-4xl font-extrabold block w-full mt-4" placeholder="프로젝트 제목" />
+                     <EditableText isAdmin={isAdmin} as="textarea" value={selectedProject?.desc} onChange={(v: string) => updateCurrentProject('desc', v)} className="text-sm w-full block" placeholder="요약 설명" />
                  </div>
               ) : (
                  <>
