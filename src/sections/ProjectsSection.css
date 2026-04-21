@@ -1,0 +1,87 @@
+.projects__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xl);
+}
+.project-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2xl);
+  align-items: center;
+  padding: var(--space-xl);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  transition: all var(--transition-base);
+}
+.project-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-strong);
+  transform: translateY(-2px);
+}
+.project-card:nth-child(even) {
+  direction: rtl;
+}
+.project-card:nth-child(even) > * {
+  direction: ltr;
+}
+.project-card__image {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  background: var(--color-bg-subtle);
+}
+.project-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+.project-card:hover .project-card__image img {
+  transform: scale(1.03);
+}
+.project-card__genre {
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.project-card__title {
+  font-size: var(--text-h3);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+  margin: var(--space-xs) 0 var(--space-md);
+}
+.project-card__desc {
+  font-size: var(--text-body);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-lg);
+}
+.project-card__roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-lg);
+}
+.project-card__links {
+  display: flex;
+  gap: var(--space-md);
+}
+.project-card__link {
+  font-size: var(--text-small);
+  font-weight: var(--weight-medium);
+  color: var(--color-accent);
+  transition: color var(--transition-fast);
+}
+.project-card__link:hover {
+  color: var(--color-accent-hover);
+}
+
+@media (max-width: 768px) {
+  .project-card {
+    grid-template-columns: 1fr;
+  }
+  .project-card:nth-child(even) { direction: ltr; }
+}
