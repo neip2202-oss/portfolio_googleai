@@ -95,7 +95,9 @@ const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (bas
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, width, height);
-        callback(canvas.toDataURL('image/jpeg', 0.8));
+
+        const imgType = file.type === 'image/png' ? 'image/png' : (file.type === 'image/webp' ? 'image/webp' : 'image/jpeg');
+        callback(canvas.toDataURL(imgType, 0.8));
       };
       img.src = event.target?.result as string;
     };
@@ -512,11 +514,11 @@ export default function App() {
              </div>
           </div>
           
-          <div className="md:col-span-8 lg:col-span-9 flex flex-col items-center md:items-start text-center md:text-left">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">이솔잎 <span className="text-2xl text-gray-300 font-bold ml-2">LEE SOLIP</span></h1>
-            <p className="text-emerald-600 font-extrabold mb-8 text-lg md:text-xl tracking-tight">"의도를 구조로 만들고, 구조를 명확히 완성하는 기획자"</p>
+          <div className="md:col-span-8 lg:col-span-9 flex flex-col items-center md:items-start text-center md:text-left h-full justify-center">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">이솔잎 <span className="text-2xl text-gray-300 font-bold ml-2">LEE SOLIP</span></h1>
+            <EditableText isAdmin={isAdmin} value={aboutData.logline || '"의도를 구조로 만들고, 구조를 명확히 완성하는 기획자"'} onChange={(v: string) => setAboutData({...aboutData, logline: v})} className="text-emerald-600 font-extrabold mb-8 text-lg md:text-xl tracking-tight block w-full" placeholder="한 줄 소개글 (로그라인)" />
             
-            <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 mb-10">
+            <div className="flex flex-wrap justify-center md:justify-start items-center gap-3">
               <span className="flex items-center gap-2 text-sm text-gray-500 font-medium px-3 py-2"><Calendar size={16} className="text-gray-400"/> 1996.12.07</span>
               <span className="flex items-center gap-2 text-sm text-gray-500 font-medium px-3 py-2"><MapPin size={16} className="text-gray-400"/> 서울특별시</span>
               <div className="hidden md:block w-px h-5 bg-gray-200 mx-2"></div>
@@ -524,14 +526,19 @@ export default function App() {
               <a href="mailto:solip2202@gmail.com" className="flex items-center gap-2 text-sm text-white font-bold px-5 py-2.5 bg-gray-900 hover:bg-emerald-600 transition-all rounded-full shadow-md"><Mail size={14}/> 이메일 보내기</a>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 text-left border-t border-gray-100 pt-8 w-full">
+          </div>
+        </div>
+
+        <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-gray-200 shadow-sm mb-12">
+            <h3 className="text-xl font-extrabold text-gray-900 mb-8 flex items-center gap-2"><Settings className="text-emerald-500"/> Tech Stacks & Tools</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-10 gap-x-8 text-left w-full">
                {[
                  { title: 'Work', data: workTools, set: setWorkTools },
                  { title: 'Collaboration', data: collabTools, set: setCollabTools },
                  { title: 'Engine', data: engineTools, set: setEngineTools },
                  { title: 'Design', data: designTools, set: setDesignTools }
                ].map(category => (
-                 <div key={category.title} className="flex flex-col gap-3">
+                 <div key={category.title} className="flex flex-col gap-4">
                     <span className="text-xs font-extrabold text-gray-400 uppercase tracking-widest">{category.title}</span>
                     <div className="flex flex-wrap gap-2 items-center">
                        {category.data.map((tool: any, idx: number) => {
@@ -539,8 +546,9 @@ export default function App() {
                           return (
                             <div key={tool.id} className="group relative inline-block">
                                {isAdmin ? (
-                                  <div className="flex flex-col bg-gray-50 border border-emerald-300 rounded-xl p-2 gap-1.5 items-center w-[120px] shadow-sm">
-                                     <label className="cursor-pointer group/icon relative flex items-center justify-center w-10 h-10 rounded-lg bg-white shadow-sm border border-gray-200 hover:border-emerald-500 overflow-hidden shrink-0 transition-colors">
+                                  <div className="flex flex-col bg-gray-50 border border-emerald-300 rounded-xl p-2 gap-1.5 items-center w-[120px] shadow-sm relative">
+                                     <button onClick={() => { const n=[...category.data]; n.splice(idx, 1); category.set(n); }} className="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-xs shadow transition-colors z-20">✕</button>
+                                     <label className="cursor-pointer group/icon relative flex items-center justify-center w-10 h-10 rounded-lg bg-white shadow-sm border border-gray-200 hover:border-emerald-500 overflow-hidden shrink-0 transition-colors mt-2">
                                         {tool.customIcon ? <img src={tool.customIcon} className="w-6 h-6 object-contain" /> : <IconComp size={18} className="text-gray-400" />}
                                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover/icon:opacity-100 transition-opacity">
                                           <span className="text-white font-bold text-[9px] tracking-wider">변경</span>
@@ -572,7 +580,6 @@ export default function App() {
                  </div>
                ))}
             </div>
-          </div>
         </div>
 
         <div className="flex p-1.5 bg-gray-200 rounded-2xl mb-12 shadow-inner">
@@ -593,7 +600,8 @@ export default function App() {
                       <div className="absolute left-[7px] top-0 bottom-0 w-px bg-gray-200"></div>
                       <div className="space-y-10">
                          {timelineLeftData.map((item: any, idx: number) => (
-                            <div key={item.id} className="relative">
+                            <div key={item.id} className="relative group/time">
+                               {isAdmin && <button onClick={() => { const n = [...timelineLeftData]; n.splice(idx, 1); setTimelineLeftData(n); }} className="absolute -top-2 -left-[6px] w-6 h-6 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-xs shadow transition-colors z-20 opacity-0 group-hover/time:opacity-100">✕</button>}
                                <div className={`absolute left-[-24px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white z-10 ${item.type === 'career' ? 'bg-blue-500' : 'bg-gray-400 shadow-sm'}`}></div>
                                <div className="pl-4">
                                  <EditableText isAdmin={isAdmin} value={item.year} onChange={(v: string) => { const n = [...timelineLeftData]; n[idx].year = v; setTimelineLeftData(n); }} className="text-emerald-600 font-bold text-sm mb-1 block" />
@@ -616,7 +624,8 @@ export default function App() {
                    </h2>
                    <div className="space-y-3">
                       {certifications.map((cert: any, idx: number) => (
-                         <div key={cert.id} className="p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center shadow-sm">
+                         <div key={cert.id} className="p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center shadow-sm relative group/cert">
+                            {isAdmin && <button onClick={() => { const n=[...certifications]; n.splice(idx, 1); setCertifications(n); }} className="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-xs shadow transition-colors z-20 opacity-0 group-hover/cert:opacity-100">✕</button>}
                             <EditableText isAdmin={isAdmin} value={cert.title} onChange={(v: string) => { const n=[...certifications]; n[idx].title=v; setCertifications(n); }} className="font-bold text-gray-900 text-sm w-1/2" />
                             <EditableText isAdmin={isAdmin} value={cert.date} onChange={(v: string) => { const n=[...certifications]; n[idx].date=v; setCertifications(n); }} className="text-xs text-gray-400 font-bold bg-gray-50 px-2 py-1 rounded text-right" />
                          </div>
@@ -633,7 +642,8 @@ export default function App() {
                    </h2>
                    <div className="space-y-6">
                        {activitiesRightData.map((act: any, idx: number) => (
-                          <div key={act.id} className="p-6 md:p-8 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+                          <div key={act.id} className="p-6 md:p-8 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative group/act">
+                             {isAdmin && <button onClick={() => { const n=[...activitiesRightData]; n.splice(idx, 1); setActivitiesRightData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-20 opacity-0 group-hover/act:opacity-100">✕</button>}
                              <div className="flex flex-col mb-4 gap-2">
                                 <div className="w-full">
                                    <EditableText isAdmin={isAdmin} value={act.title} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].title = v; setActivitiesRightData(n); }} className="text-xl font-extrabold text-gray-900 mb-1 block" placeholder="활동/프로젝트 제목" />
@@ -702,7 +712,8 @@ export default function App() {
              )}
 
             {coverLetterData.map((letter: any, index: number) => (
-               <div key={letter.id} className="p-8 md:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm relative">
+               <div key={letter.id} className="p-8 md:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm relative group/cover">
+                  {isAdmin && <button onClick={() => { const n=[...coverLetterData]; n.splice(index, 1); setCoverLetterData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-30 opacity-0 group-hover/cover:opacity-100">✕</button>}
                   {isAdmin ? (
                      <div className="space-y-4">
                         <EditableText isAdmin={isAdmin} value={letter.title} onChange={(v: string) => { const n = [...coverLetterData]; n[index].title = v; setCoverLetterData(n); }} className="text-xl font-extrabold block" />
@@ -838,9 +849,20 @@ export default function App() {
     return (
       <div className={`pt-24 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'} bg-[#FAFAFA] min-h-screen`}>
         <div className="max-w-4xl mx-auto px-6 mb-32">
-          <button onClick={() => handleNavClick('portfolio')} className="flex items-center gap-2 text-gray-500 hover:text-gray-900 font-bold mb-8 mt-6 transition-colors">
-            <ArrowLeft size={20} /> 목록으로 돌아가기
-          </button>
+          <div className="flex justify-between items-center mb-8 mt-6">
+              <button onClick={() => handleNavClick('portfolio')} className="flex items-center gap-2 text-gray-500 hover:text-gray-900 font-bold transition-colors">
+                <ArrowLeft size={20} /> 목록으로 돌아가기
+              </button>
+              {isAdmin && (
+                 <button onClick={() => {
+                    if (window.confirm('정말 이 작업물을 삭제하시겠습니까? 관련한 모든 데이터가 완전히 지워집니다.')) {
+                       if (portfolioTab === 'main') setProjectsData(projectsData.filter((p:any) => p.id !== selectedProject.id));
+                       else setOtherWorksData(otherWorksData.filter((p:any) => p.id !== selectedProject.id));
+                       handleNavClick('portfolio');
+                    }
+                 }} className="px-4 py-2 bg-red-50 text-red-600 font-bold text-sm rounded-lg hover:bg-red-500 hover:text-white transition-colors shadow-sm">이 데이터 영구 삭제</button>
+              )}
+          </div>
 
           <div className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-gray-200 shadow-sm">
             <div className="mb-10">
@@ -1079,6 +1101,7 @@ export default function App() {
               .filter((game: any) => historyPageFilter === 'All' || game.platform === historyPageFilter)
               .map((game: any, index: number) => (
               <div key={game.id} className="p-5 md:p-6 rounded-[1.5rem] bg-white border border-gray-200 hover:shadow-lg transition-shadow flex flex-col group relative overflow-hidden h-full">
+                 {isAdmin && <button onClick={() => { const oIdx = playHistoryData.findIndex((p:any)=>p.id===game.id); const n = [...playHistoryData]; n.splice(oIdx, 1); setPlayHistoryData(n); }} className="absolute top-2 right-2 w-7 h-7 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-40 opacity-0 group-hover:opacity-100">✕</button>}
                  {game.image ? (
                      <div className="w-full h-36 mb-5 bg-gray-100 rounded-xl overflow-hidden relative group/img shrink-0">
                         <img src={game.image} className="w-full h-full object-cover" />
