@@ -1446,11 +1446,11 @@ export default function App() {
               언제든 편하게 연락해 주세요.
             </p>
             <div className="space-y-3">
-              <a href="tel:010-1234-5678" className="w-full flex items-center justify-center gap-3 py-4 bg-[#FAFAFA] border border-gray-200 rounded-2xl text-gray-900 font-bold hover:bg-gray-50 hover:border-emerald-300 transition-colors">
-                <Phone className="w-5 h-5 text-gray-500" /> 010-1234-5678
+              <a href="tel:010-2725-1490" className="w-full flex items-center justify-center gap-3 py-4 bg-[#FAFAFA] border border-gray-200 rounded-2xl text-gray-900 font-bold hover:bg-gray-50 hover:border-emerald-300 transition-colors">
+                <Phone className="w-5 h-5 text-gray-500" /> 010-2725-1490
               </a>
-              <a href="mailto:solip2202@gmail.com" className="w-full flex items-center justify-center gap-3 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-emerald-600 transition-colors shadow-lg">
-                <Mail className="w-5 h-5" /> solip2202@gmail.com
+              <a href="mailto:neip2202@gmail.com" className="w-full flex items-center justify-center gap-3 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-emerald-600 transition-colors shadow-lg">
+                <Mail className="w-5 h-5" /> neip2202@gmail.com
               </a>
             </div>
           </div>
