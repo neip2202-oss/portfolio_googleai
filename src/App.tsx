@@ -143,72 +143,14 @@ export default function App() {
     setTimeout(() => setToast({ show: false, message: '', type: 'error' }), 3000);
   };
 
-  const handleExportPdf = async () => {
+  const handleExportPdf = () => {
     setIsPreviewingPdf(true); // Disable admin mode temporarily
     
-    setTimeout(async () => {
-      try {
-        const element = document.getElementById('resume-export-area');
-        if (element) {
-          // Temporarily disable any transitions to prevent layout shifts during capture
-          const originalTransition = element.style.transition;
-          element.style.transition = 'none';
-          
-          const canvasPromise = html2canvas(element, { 
-            scale: 2, 
-            useCORS: true, 
-            backgroundColor: '#FAFAFA',
-            logging: false,
-            allowTaint: true,
-          });
-          
-          // Add a 10 second timeout fallback
-          const timeoutPromise = new Promise<HTMLCanvasElement>((_, reject) => {
-            setTimeout(() => reject(new Error("PDF 생성 시간 초과 (10초)")), 10000);
-          });
-          
-          const canvas = await Promise.race([canvasPromise, timeoutPromise]);
-          
-          element.style.transition = originalTransition;
-          setPdfPreviewData(canvas.toDataURL('image/png'));
-        }
-      } catch (err) {
-        console.error('PDF Preview Generation Error:', err);
-        showToast('PDF 미리보기를 생성하는 중 오류가 발생했습니다.', 'error');
-      } finally {
-        setIsPreviewingPdf(false); // Restore admin mode unconditionally
-      }
-    }, 800); // Give a bit more time for fonts/images to render without admin overlays
-  };
-
-  const handleDownloadPdf = () => {
-    if (!pdfPreviewData) return;
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    
-    // We want to fit the image width to A4 width, and adjust height proportionally.
-    // Assuming the image might be longer than 1 page.
-    const imgProps = pdf.getImageProperties(pdfPreviewData);
-    const ratio = imgProps.width / imgProps.height;
-    
-    const renderedHeight = pdfWidth / ratio;
-    
-    let heightLeft = renderedHeight;
-    let position = 0;
-    
-    pdf.addImage(pdfPreviewData, 'PNG', 0, position, pdfWidth, renderedHeight);
-    heightLeft -= pdfHeight;
-    
-    while (heightLeft >= 0) {
-      position = heightLeft - renderedHeight;
-      pdf.addPage();
-      pdf.addImage(pdfPreviewData, 'PNG', 0, position, pdfWidth, renderedHeight);
-      heightLeft -= pdfHeight;
-    }
-    
-    pdf.save('resume.pdf');
-    setPdfPreviewData(null);
+    // Give React time to re-render without admin UI
+    setTimeout(() => {
+      window.print();
+      setIsPreviewingPdf(false); // Restore admin mode
+    }, 500);
   };
 
   const handleAdminToggle = () => {
@@ -1563,32 +1505,6 @@ export default function App() {
             ))}
          </div>
       )}
-          {/* PDF Preview Modal */}
-      {pdfPreviewData && (
-        <div id="pdf-preview-modal" className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8">
-          <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm" onClick={() => setPdfPreviewData(null)}></div>
-          <div className="relative bg-gray-100 w-full max-w-4xl h-full max-h-[90vh] rounded-2xl p-6 shadow-2xl flex flex-col">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2"><Download className="text-red-500" /> PDF 미리보기</h2>
-              <button onClick={() => setPdfPreviewData(null)} className="text-gray-500 hover:text-gray-900 bg-gray-200 hover:bg-gray-300 rounded-full p-2 transition-colors">✕</button>
-            </div>
-            
-            <div className="flex-1 overflow-auto bg-gray-300 rounded-xl p-4 flex justify-center border border-gray-300 shadow-inner">
-              {/* A4 Proportion Container */}
-              <div className="bg-white shadow-xl relative w-full max-w-[794px]" style={{ minHeight: '1123px' }}>
-                <img src={pdfPreviewData} alt="PDF Preview" className="w-full h-auto block" />
-              </div>
-            </div>
-            
-            <div className="mt-6 flex justify-end gap-3">
-               <button onClick={() => setPdfPreviewData(null)} className="px-6 py-3 bg-white text-gray-700 font-bold rounded-xl border border-gray-300 hover:bg-gray-50 transition-colors">취소</button>
-               <button onClick={handleDownloadPdf} className="px-6 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 shadow-lg flex items-center gap-2 transition-colors">
-                 <Download size={18} /> PDF 저장하기
-               </button>
-            </div>
-          </div>
         </div>
-      )}
-    </div>
   );
 }
