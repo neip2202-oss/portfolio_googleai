@@ -232,6 +232,13 @@ export default function App() {
     { id: 2, title: '컴퓨터활용능력 1급', date: '2021.10' }
   ]);
 
+  const [sectionIcons, setSectionIcons] = useContent<any>('sectionIcons', {
+    tech: '',
+    timeline: '',
+    activities: '',
+    certifications: ''
+  });
+
   const getToolIcon = (name: string) => {
     if(name.toLowerCase().includes('excel')) return Database;
     if(name.toLowerCase().includes('unity')) return Box;
@@ -531,7 +538,7 @@ export default function App() {
             ) : (
                <div className="font-extrabold mb-8 text-lg md:text-xl tracking-tight text-gray-700 w-full whitespace-pre-wrap leading-relaxed">
                   {(aboutData.logline || "'의도를 구조로' 만들고 '구조를 결과로' 완성하는 기획자").split(/'([^']+)'/).map((part: string, index: number) => 
-                     index % 2 === 1 ? <span key={index} className="text-emerald-600 text-2xl md:text-3xl font-black">'{part}'</span> : part
+                     index % 2 === 1 ? <span key={index} className="text-emerald-600 text-2xl md:text-3xl font-black">{part}</span> : part
                   )}
                </div>
             )}
@@ -548,7 +555,16 @@ export default function App() {
         </div>
 
         <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-gray-200 shadow-sm mb-12">
-            <h3 className="text-xl font-extrabold text-gray-900 mb-8 flex items-center gap-2"><Settings className="text-emerald-500"/> Tech Stacks & Tools</h3>
+            <h3 className="text-xl font-extrabold text-gray-900 mb-8 flex items-center gap-2 relative group/section">
+              {sectionIcons.tech ? <img src={sectionIcons.tech} className="w-6 h-6 object-contain" alt="icon" /> : <Settings className="text-emerald-500 w-6 h-6"/>}
+              기술 스택 및 활용 툴
+              {isAdmin && (
+                <label className="absolute -top-4 -left-4 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-pointer bg-white border border-gray-200 shadow-lg p-1 rounded z-20 text-[10px] text-blue-500 font-bold">
+                  + 아이콘 첨부
+                  <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => setSectionIcons({...sectionIcons, tech: b64}))} className="hidden" />
+                </label>
+              )}
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-10 gap-x-8 text-left w-full">
                {[
                  { title: 'Work', data: workTools, set: setWorkTools },
@@ -610,8 +626,15 @@ export default function App() {
              <div className="grid md:grid-cols-12 gap-10 md:gap-16">
                 
                 <div className="md:col-span-5">
-                   <h2 className="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-2 border-b border-gray-200 pb-4">
-                     <Briefcase className="text-emerald-500"/> Timeline
+                   <h2 className="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-2 border-b border-gray-200 pb-4 relative group/section">
+                     {sectionIcons.timeline ? <img src={sectionIcons.timeline} className="w-7 h-7 object-contain" alt="icon" /> : <Briefcase className="text-emerald-500 w-7 h-7"/>}
+                     경력 및 학력
+                     {isAdmin && (
+                       <label className="absolute -top-4 -left-4 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-pointer bg-white border border-gray-200 shadow-lg p-1 rounded z-20 text-[10px] text-blue-500 font-bold">
+                         + 아이콘 첨부
+                         <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => setSectionIcons({...sectionIcons, timeline: b64}))} className="hidden" />
+                       </label>
+                     )}
                    </h2>
                    
                    <div className="relative pl-6">
@@ -647,8 +670,15 @@ export default function App() {
                       </div>
                    </div>
 
-                   <h2 className="text-2xl font-extrabold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-200 pb-4 mt-16">
-                     <Award className="text-orange-500"/> Certifications
+                   <h2 className="text-2xl font-extrabold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-200 pb-4 mt-16 relative group/section">
+                     {sectionIcons.certifications ? <img src={sectionIcons.certifications} className="w-7 h-7 object-contain" alt="icon" /> : <Award className="text-orange-500 w-7 h-7"/>}
+                     자격증
+                     {isAdmin && (
+                       <label className="absolute -top-4 -left-4 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-pointer bg-white border border-gray-200 shadow-lg p-1 rounded z-20 text-[10px] text-blue-500 font-bold">
+                         + 아이콘 첨부
+                         <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => setSectionIcons({...sectionIcons, certifications: b64}))} className="hidden" />
+                       </label>
+                     )}
                    </h2>
                    <div className="space-y-3">
                       {certifications.map((cert: any, idx: number) => (
@@ -665,8 +695,15 @@ export default function App() {
                 </div>
 
                 <div className="md:col-span-7">
-                   <h2 className="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-2 border-b border-gray-200 pb-4">
-                     <Target className="text-blue-500"/> Activities & Projects
+                   <h2 className="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-2 border-b border-gray-200 pb-4 relative group/section">
+                     {sectionIcons.activities ? <img src={sectionIcons.activities} className="w-7 h-7 object-contain" alt="icon" /> : <Target className="text-blue-500 w-7 h-7"/>}
+                     대내외 활동 및 프로젝트
+                     {isAdmin && (
+                       <label className="absolute -top-4 -left-4 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-pointer bg-white border border-gray-200 shadow-lg p-1 rounded z-20 text-[10px] text-blue-500 font-bold">
+                         + 아이콘 첨부
+                         <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => setSectionIcons({...sectionIcons, activities: b64}))} className="hidden" />
+                       </label>
+                     )}
                    </h2>
                    <div className="space-y-6">
                        {activitiesRightData.map((act: any, idx: number) => (
