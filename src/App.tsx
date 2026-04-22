@@ -668,7 +668,7 @@ export default function App() {
                       <div className="absolute left-[7px] top-0 bottom-0 w-px bg-gray-200"></div>
                       <div className="space-y-10">
                          {timelineLeftData.map((item: any, idx: number) => (
-                            <div key={item.id} className="relative group/time">
+                            <div key={item.id} className="relative group/time break-inside-avoid print:break-inside-avoid">
                                {isAdmin && <button onClick={() => { const n = [...timelineLeftData]; n.splice(idx, 1); setTimelineLeftData(n); }} className="absolute -top-2 -left-[6px] w-6 h-6 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-xs shadow transition-colors z-20 opacity-0 group-hover/time:opacity-100">✕</button>}
                                {item.iconImg ? (
                                   <img src={item.iconImg} alt="icon" className="absolute left-[-28px] top-1 w-6 h-6 rounded-full border border-gray-200 bg-white object-cover z-10 shadow-sm" />
@@ -710,7 +710,7 @@ export default function App() {
                    </h2>
                    <div className="space-y-6">
                        {activitiesLeftData.map((act: any, idx: number) => (
-                          <div key={act.id} className="p-6 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative group/act">
+                          <div key={act.id} className="p-6 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative group/act break-inside-avoid print:break-inside-avoid">
                              {isAdmin && <button onClick={() => { const n=[...activitiesLeftData]; n.splice(idx, 1); setActivitiesLeftData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-20 opacity-0 group-hover/act:opacity-100">✕</button>}
                              <div className="flex flex-col mb-4 gap-2">
                                 <div className="w-full">
@@ -781,7 +781,7 @@ export default function App() {
                    </h2>
                    <div className="space-y-3">
                       {certifications.map((cert: any, idx: number) => (
-                         <div key={cert.id} className="p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center shadow-sm relative group/cert">
+                         <div key={cert.id} className="p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center shadow-sm relative group/cert break-inside-avoid print:break-inside-avoid">
                             {isAdmin && <button onClick={() => { const n=[...certifications]; n.splice(idx, 1); setCertifications(n); }} className="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-xs shadow transition-colors z-20 opacity-0 group-hover/cert:opacity-100">✕</button>}
                             <EditableText isAdmin={isAdmin} value={cert.title} onChange={(v: string) => { const n=[...certifications]; n[idx].title=v; setCertifications(n); }} className="font-bold text-gray-900 text-sm w-1/2" />
                             <EditableText isAdmin={isAdmin} value={cert.date} onChange={(v: string) => { const n=[...certifications]; n[idx].date=v; setCertifications(n); }} className="text-xs text-gray-400 font-bold bg-gray-50 px-2 py-1 rounded text-right" />
@@ -806,7 +806,7 @@ export default function App() {
                    </h2>
                    <div className="space-y-6">
                        {activitiesRightData.map((act: any, idx: number) => (
-                          <div key={act.id} className="p-6 md:p-8 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative group/act">
+                          <div key={act.id} className="p-6 md:p-8 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative group/act break-inside-avoid print:break-inside-avoid">
                              {isAdmin && <button onClick={() => { const n=[...activitiesRightData]; n.splice(idx, 1); setActivitiesRightData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-20 opacity-0 group-hover/act:opacity-100">✕</button>}
                              <div className="flex flex-col mb-4 gap-2">
                                 <div className="w-full">
