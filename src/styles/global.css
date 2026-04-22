@@ -68,9 +68,12 @@
     print-color-adjust: exact !important;
     box-shadow: none !important;
   }
-  body, #resume-export-area {
-    background: white !important;
+  html, body, #resume-export-area {
+    background: #FAFAFA !important;
     color: black !important;
+  }
+  @page {
+    background: #FAFAFA !important;
   }
   #resume-export-area {
     width: 100% !important;
