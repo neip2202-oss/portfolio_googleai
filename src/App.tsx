@@ -84,6 +84,13 @@ const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (bas
         let width = img.width;
         let height = img.height;
         const MAX = 1920;
+        
+        // 원본 이미지가 기준치 이하(1920px 이하, 2MB 이하)라면 캔버스(Canvas) 렌더링을 거치지 않고 원본 Base64를 그대로 반환하여 100% 화질 보존
+        if (img.width <= MAX && img.height <= MAX && file.size <= 2 * 1024 * 1024) {
+          callback(event.target?.result as string);
+          return;
+        }
+
         if (width > MAX || height > MAX) {
           if (width > height) {
             height = Math.round(height * (MAX / width));
@@ -96,7 +103,11 @@ const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (bas
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, width, height);
+        }
 
         const imgType = file.type === 'image/png' ? 'image/png' : (file.type === 'image/webp' ? 'image/webp' : 'image/jpeg');
         // 프로필 고화질 유지를 위해 압축률(Quality)을 1.0으로 최대로 설정
