@@ -146,15 +146,39 @@ export default function App() {
   const handleExportPdf = async () => {
     setIsPreviewingPdf(true); // Disable admin mode temporarily
     
-    // Give React time to re-render without admin UI
     setTimeout(async () => {
-      const element = document.getElementById('resume-export-area');
-      if (element) {
-        const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#FAFAFA' });
-        setPdfPreviewData(canvas.toDataURL('image/png'));
+      try {
+        const element = document.getElementById('resume-export-area');
+        if (element) {
+          // Temporarily disable any transitions to prevent layout shifts during capture
+          const originalTransition = element.style.transition;
+          element.style.transition = 'none';
+          
+          const canvasPromise = html2canvas(element, { 
+            scale: 2, 
+            useCORS: true, 
+            backgroundColor: '#FAFAFA',
+            logging: false,
+            allowTaint: true,
+          });
+          
+          // Add a 10 second timeout fallback
+          const timeoutPromise = new Promise<HTMLCanvasElement>((_, reject) => {
+            setTimeout(() => reject(new Error("PDF 생성 시간 초과 (10초)")), 10000);
+          });
+          
+          const canvas = await Promise.race([canvasPromise, timeoutPromise]);
+          
+          element.style.transition = originalTransition;
+          setPdfPreviewData(canvas.toDataURL('image/png'));
+        }
+      } catch (err) {
+        console.error('PDF Preview Generation Error:', err);
+        showToast('PDF 미리보기를 생성하는 중 오류가 발생했습니다.', 'error');
+      } finally {
+        setIsPreviewingPdf(false); // Restore admin mode unconditionally
       }
-      setIsPreviewingPdf(false); // Restore admin mode
-    }, 500);
+    }, 800); // Give a bit more time for fonts/images to render without admin overlays
   };
 
   const handleDownloadPdf = () => {
