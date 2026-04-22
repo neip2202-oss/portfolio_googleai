@@ -556,7 +556,7 @@ export default function App() {
           <div className="shrink-0 flex justify-center">
              <div className="w-40 h-40 md:w-48 md:h-48 bg-gray-100 rounded-full border-4 border-white shadow-lg relative overflow-hidden flex items-center justify-center group">
                {aboutData.profileImage ? (
-                  <img src={aboutData.profileImage} className="w-full h-full object-cover" alt="Profile" />
+                  <img src={aboutData.profileImage} className="w-full h-full object-cover" style={{ imageRendering: '-webkit-optimize-contrast', transform: 'translateZ(0)', backfaceVisibility: 'hidden' }} alt="Profile" />
                ) : (
                   <span className="text-gray-400 font-bold text-sm tracking-widest">Photo</span>
                )}
