@@ -1,3 +1,5 @@
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import React, { useState, useEffect } from 'react';
 import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle } from 'lucide-react';
 
@@ -128,7 +130,10 @@ export default function App() {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   // 관리자 모드 상태
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [isPreviewingPdf, setIsPreviewingPdf] = useState(false);
+  const [pdfPreviewData, setPdfPreviewData] = useState<string | null>(null);
+  const isAdmin = isPreviewingPdf ? false : isAdminMode;
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [adminPwd, setAdminPwd] = useState('');
   const [toast, setToast] = useState({ show: false, message: '', type: 'error' });
@@ -138,9 +143,53 @@ export default function App() {
     setTimeout(() => setToast({ show: false, message: '', type: 'error' }), 3000);
   };
 
+  const handleExportPdf = async () => {
+    setIsPreviewingPdf(true); // Disable admin mode temporarily
+    
+    // Give React time to re-render without admin UI
+    setTimeout(async () => {
+      const element = document.getElementById('resume-export-area');
+      if (element) {
+        const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#FAFAFA' });
+        setPdfPreviewData(canvas.toDataURL('image/png'));
+      }
+      setIsPreviewingPdf(false); // Restore admin mode
+    }, 500);
+  };
+
+  const handleDownloadPdf = () => {
+    if (!pdfPreviewData) return;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    
+    // We want to fit the image width to A4 width, and adjust height proportionally.
+    // Assuming the image might be longer than 1 page.
+    const imgProps = pdf.getImageProperties(pdfPreviewData);
+    const ratio = imgProps.width / imgProps.height;
+    
+    const renderedHeight = pdfWidth / ratio;
+    
+    let heightLeft = renderedHeight;
+    let position = 0;
+    
+    pdf.addImage(pdfPreviewData, 'PNG', 0, position, pdfWidth, renderedHeight);
+    heightLeft -= pdfHeight;
+    
+    while (heightLeft >= 0) {
+      position = heightLeft - renderedHeight;
+      pdf.addPage();
+      pdf.addImage(pdfPreviewData, 'PNG', 0, position, pdfWidth, renderedHeight);
+      heightLeft -= pdfHeight;
+    }
+    
+    pdf.save('resume.pdf');
+    setPdfPreviewData(null);
+  };
+
   const handleAdminToggle = () => {
     if (isAdmin) {
-      setIsAdmin(false); 
+      setIsAdminMode(false); 
       showToast('관리자 환경이 종료되었으며, 변경사항은 이미 저장되었습니다.', 'success');
     } else {
       setIsAuthModalOpen(true);
@@ -149,7 +198,7 @@ export default function App() {
 
   const handleAdminAuth = () => {
     if (adminPwd === '0630') {
-      setIsAdmin(true);
+      setIsAdminMode(true);
       setIsAuthModalOpen(false);
       setAdminPwd('');
       showToast('관리자 환경으로 전환되었습니다.', 'success');
@@ -372,24 +421,32 @@ export default function App() {
             {workProcessData.map((item: any, i: number) => {
               const IconComp = iconsMapping[item.iconName] || Search;
               return (
-              <div key={item.id} className="p-8 rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                <span className="text-sm font-bold text-gray-300 mb-6 block">{item.step}</span>
-                {item.iconImg ? (
-                  <img src={item.iconImg} alt={item.title} className="w-12 h-12 mb-4 object-contain" />
-                ) : (
-                  <IconComp className={`w-8 h-8 ${item.color} mb-4`} strokeWidth={2} />
-                )}
-                {isAdmin && (
-                  <label className="text-[10px] font-bold text-blue-500 hover:text-blue-700 cursor-pointer block mb-4 border border-dashed border-blue-200 rounded p-1.5 text-center bg-blue-50/50 hover:bg-blue-100 transition-colors w-max">
-                    + 커스텀 아이콘 첨부
-                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (b64) => { const n = [...workProcessData]; n[i].iconImg = b64; setWorkProcessData(n); })} />
-                  </label>
-                )}
-                <h3 className="text-xl font-bold mb-3 text-gray-900">
-                   <EditableText isAdmin={isAdmin} value={item.title} onChange={(v: string) => { const n = [...workProcessData]; n[i].title = v; setWorkProcessData(n); }} />
-                </h3>
-                <div className="text-gray-500 text-sm leading-relaxed">
-                   <EditableText isAdmin={isAdmin} as="textarea" value={item.desc} onChange={(v: string) => { const n = [...workProcessData]; n[i].desc = v; setWorkProcessData(n); }} />
+              <div key={item.id} className="p-8 rounded-3xl bg-white border border-gray-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)] transition-all duration-300 relative overflow-hidden group h-[240px] flex flex-col justify-between">
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-8xl md:text-9xl font-black text-gray-50/80 tracking-tighter select-none z-0">
+                  {item.step}
+                </span>
+                
+                <div className="relative z-10 flex flex-col items-start gap-4">
+                  {item.iconImg ? (
+                    <img src={item.iconImg} alt={item.title} className="w-10 h-10 object-contain" />
+                  ) : (
+                    <IconComp className={`w-10 h-10 ${item.color}`} strokeWidth={2} />
+                  )}
+                  {isAdmin && (
+                    <label className="text-[10px] font-bold text-blue-500 hover:text-blue-700 cursor-pointer block border border-dashed border-blue-200 rounded p-1.5 text-center bg-blue-50/50 hover:bg-blue-100 transition-colors w-max">
+                      + 아이콘 첨부
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (b64) => { const n = [...workProcessData]; n[i].iconImg = b64; setWorkProcessData(n); })} />
+                    </label>
+                  )}
+                </div>
+                
+                <div className="relative z-10 mt-auto pt-4">
+                  <h3 className="text-xl font-bold mb-3 text-gray-900 group-hover:scale-[1.03] group-hover:text-emerald-600 origin-left transition-all duration-300">
+                     <EditableText isAdmin={isAdmin} value={item.title} onChange={(v: string) => { const n = [...workProcessData]; n[i].title = v; setWorkProcessData(n); }} />
+                  </h3>
+                  <div className="text-gray-500 text-[13px] leading-relaxed">
+                     <EditableText isAdmin={isAdmin} as="textarea" value={item.desc} onChange={(v: string) => { const n = [...workProcessData]; n[i].desc = v; setWorkProcessData(n); }} />
+                  </div>
                 </div>
               </div>
             )})}
@@ -514,7 +571,7 @@ export default function App() {
   );
 
   const renderResume = () => (
-    <div className={`pt-24 pb-24 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'} bg-[#FAFAFA] min-h-screen`}>
+    <div id="resume-export-area" className={`pt-24 pb-24 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'} bg-[#FAFAFA] min-h-screen`}>
       <div className="max-w-5xl mx-auto px-6">
         
         <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-gray-200 shadow-sm mb-10 grid md:grid-cols-12 gap-10 items-start">
@@ -1436,6 +1493,16 @@ export default function App() {
 
       {currentTab !== 'about' && (
          <div className="fixed bottom-8 right-8 flex flex-col gap-3 z-40">
+            {currentTab === 'resume' && isAdminMode && (
+               <button 
+                 onClick={handleExportPdf}
+                 disabled={isPreviewingPdf}
+                 className="w-14 h-14 md:w-auto md:px-5 bg-red-500 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-red-600 transition-transform hover:-translate-y-1 group gap-0 md:gap-2 font-bold"
+                 title="Export PDF"
+               >
+                  <Download size={24} className="group-hover:-translate-y-1 transition-transform" /> <span className="hidden md:inline">PDF 출력</span>
+               </button>
+            )}
             <button 
               onClick={handleScrollToTop} 
               className="w-12 h-12 bg-white text-gray-600 border border-gray-200 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 hover:text-emerald-500 transition-all group"
@@ -1471,6 +1538,32 @@ export default function App() {
                </a>
             ))}
          </div>
+      )}
+          {/* PDF Preview Modal */}
+      {pdfPreviewData && (
+        <div id="pdf-preview-modal" className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8">
+          <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm" onClick={() => setPdfPreviewData(null)}></div>
+          <div className="relative bg-gray-100 w-full max-w-4xl h-full max-h-[90vh] rounded-2xl p-6 shadow-2xl flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2"><Download className="text-red-500" /> PDF 미리보기</h2>
+              <button onClick={() => setPdfPreviewData(null)} className="text-gray-500 hover:text-gray-900 bg-gray-200 hover:bg-gray-300 rounded-full p-2 transition-colors">✕</button>
+            </div>
+            
+            <div className="flex-1 overflow-auto bg-gray-300 rounded-xl p-4 flex justify-center border border-gray-300 shadow-inner">
+              {/* A4 Proportion Container */}
+              <div className="bg-white shadow-xl relative w-full max-w-[794px]" style={{ minHeight: '1123px' }}>
+                <img src={pdfPreviewData} alt="PDF Preview" className="w-full h-auto block" />
+              </div>
+            </div>
+            
+            <div className="mt-6 flex justify-end gap-3">
+               <button onClick={() => setPdfPreviewData(null)} className="px-6 py-3 bg-white text-gray-700 font-bold rounded-xl border border-gray-300 hover:bg-gray-50 transition-colors">취소</button>
+               <button onClick={handleDownloadPdf} className="px-6 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 shadow-lg flex items-center gap-2 transition-colors">
+                 <Download size={18} /> PDF 저장하기
+               </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
