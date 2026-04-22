@@ -571,11 +571,11 @@ export default function App() {
             )}
             
             <div className="flex flex-wrap justify-center md:justify-start items-center gap-3">
-              <span className="flex items-center gap-2 text-sm text-gray-500 font-medium px-3 py-2"><Calendar size={16} className="text-gray-400"/> 1996.12.07</span>
-              <span className="flex items-center gap-2 text-sm text-gray-500 font-medium px-3 py-2"><MapPin size={16} className="text-gray-400"/> 서울특별시</span>
+              <span className="flex items-center gap-2 text-sm text-gray-500 font-medium px-3 py-2"><Calendar size={16} className="text-gray-400"/> 1996.10.01</span>
+              <span className="flex items-center gap-2 text-sm text-gray-500 font-medium px-3 py-2"><MapPin size={16} className="text-gray-400"/> 인천시 부평구</span>
               <div className="hidden md:block w-px h-5 bg-gray-200 mx-2"></div>
-              <a href="tel:010-1234-5678" className="flex items-center gap-2 text-sm text-gray-800 font-bold px-5 py-2.5 bg-white border-2 border-gray-200 hover:border-emerald-500 hover:text-emerald-600 transition-all rounded-full shadow-sm hover:shadow-md"><Phone size={14}/> 010-1234-5678</a>
-              <a href="mailto:solip2202@gmail.com" className="flex items-center gap-2 text-sm text-white font-bold px-5 py-2.5 bg-gray-900 hover:bg-emerald-600 transition-all rounded-full shadow-md"><Mail size={14}/> 이메일 보내기</a>
+              <a href="tel:010-2725-1490" className="flex items-center gap-2 text-sm text-gray-800 font-bold px-5 py-2.5 bg-white border-2 border-gray-200 hover:border-emerald-500 hover:text-emerald-600 transition-all rounded-full shadow-sm hover:shadow-md"><Phone size={14}/> 010-2725-1490</a>
+              <a href="mailto:neip2202@gmail.com" className="flex items-center gap-2 text-sm text-white font-bold px-5 py-2.5 bg-gray-900 hover:bg-emerald-600 transition-all rounded-full shadow-md"><Mail size={14}/> 이메일 보내기</a>
             </div>
 
           </div>
@@ -644,8 +644,8 @@ export default function App() {
         </div>
 
         <div className="flex p-1.5 bg-gray-200 rounded-2xl mb-12 shadow-inner">
-           <button onClick={() => setResumeSubTab('cv')} className={`flex-1 py-3.5 text-sm font-bold rounded-xl transition-all ${resumeSubTab === 'cv' ? 'bg-white text-gray-900 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}>📝 이력서 (Resume)</button>
-           <button onClick={() => setResumeSubTab('cover-letter')} className={`flex-1 py-3.5 text-sm font-bold rounded-xl transition-all ${resumeSubTab === 'cover-letter' ? 'bg-white text-gray-900 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}>✍️ 자기소개서 (Cover Letter)</button>
+           <button onClick={() => setResumeSubTab('cv')} className={`flex-1 py-3.5 text-sm font-bold rounded-xl transition-all ${resumeSubTab === 'cv' ? 'bg-white text-gray-900 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}>📝 이력서</button>
+           <button onClick={() => setResumeSubTab('cover-letter')} className={`flex-1 py-3.5 text-sm font-bold rounded-xl transition-all ${resumeSubTab === 'cover-letter' ? 'bg-white text-gray-900 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}>✍️ 자기소개서</button>
         </div>
 
         {resumeSubTab === 'cv' && (
@@ -700,7 +700,7 @@ export default function App() {
                    
                    <h2 className="text-2xl font-extrabold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-200 pb-4 mt-16 relative group/section">
                      {sectionIcons.activitiesLeft ? <img src={sectionIcons.activitiesLeft} className="w-7 h-7 object-contain" alt="icon" /> : <Target className="text-blue-500 w-7 h-7"/>}
-                     대내외 활동
+                     기타 활동
                      {isAdmin && (
                        <label className="absolute -top-4 -left-4 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-pointer bg-white border border-gray-200 shadow-lg p-1 rounded z-20 text-[10px] text-blue-500 font-bold">
                          + 아이콘 첨부
@@ -763,7 +763,7 @@ export default function App() {
                        ))}
                        {isAdmin && (
                           <button onClick={() => setActivitiesLeftData([...activitiesLeftData, { id: Date.now(), year: 'YYYY.MM - YYYY.MM', title: '신규 활동', desc: '설명', tags: [] }])} className="w-full py-4 border-2 border-dashed border-emerald-300 text-emerald-600 rounded-3xl text-sm font-bold hover:bg-emerald-50 transition-colors">
-                             + 대내외 활동 추가
+                             + 기타 활동 추가
                           </button>
                        )}
                    </div>
@@ -860,7 +860,7 @@ export default function App() {
                           </div>
                        ))}
                        {isAdmin && (
-                          <button onClick={() => setActivitiesRightData([...activitiesRightData, { id: Date.now(), year: 'YYYY.MM - YYYY.MM', title: '신규 활동/프로젝트', tags: [], desc: '상세 내용을 기입해주세요.' }])} className="w-full p-6 border-2 border-dashed border-emerald-300 text-emerald-600 rounded-3xl font-bold hover:bg-emerald-50">+ 대내외 활동 및 프로젝트 추가</button>
+                          <button onClick={() => setActivitiesRightData([...activitiesRightData, { id: Date.now(), year: 'YYYY.MM - YYYY.MM', title: '신규 프로젝트', tags: [], desc: '상세 내용을 기입해주세요.' }])} className="w-full p-6 border-2 border-dashed border-emerald-300 text-emerald-600 rounded-3xl font-bold hover:bg-emerald-50">+ 프로젝트 추가</button>
                       )}
                    </div>
                 </div>
