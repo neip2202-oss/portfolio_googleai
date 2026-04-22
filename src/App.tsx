@@ -99,7 +99,8 @@ const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (bas
         ctx?.drawImage(img, 0, 0, width, height);
 
         const imgType = file.type === 'image/png' ? 'image/png' : (file.type === 'image/webp' ? 'image/webp' : 'image/jpeg');
-        callback(canvas.toDataURL(imgType, 0.8));
+        // 프로필 고화질 유지를 위해 압축률(Quality)을 1.0으로 최대로 설정
+        callback(canvas.toDataURL(imgType, 1.0));
       };
       img.src = event.target?.result as string;
     };
