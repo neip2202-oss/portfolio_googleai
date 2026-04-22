@@ -307,7 +307,7 @@ export default function App() {
   };
 
   const GlobalFooterCTA = () => (
-    <div className="bg-white border-t border-gray-100 relative overflow-hidden py-16">
+    <div className="bg-white border-t border-gray-100 relative overflow-hidden py-16 print:hidden">
       <div className="max-w-6xl mx-auto px-6">
         <div className="bg-[#F8F9FA] rounded-[2rem] p-10 md:p-14 flex flex-col md:flex-row items-center justify-between gap-8 border border-gray-100">
           <div>
@@ -1366,7 +1366,7 @@ export default function App() {
          </div>
       )}
 
-      <nav className="fixed w-full top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 transition-all">
+      <nav className="print:hidden fixed w-full top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 transition-all">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div 
             onClick={() => handleNavClick('about')} 
@@ -1458,7 +1458,7 @@ export default function App() {
       )}
 
       {currentTab !== 'about' && (
-         <div className="fixed bottom-8 right-8 flex flex-col gap-3 z-40">
+         <div className="print:hidden fixed bottom-8 right-8 flex flex-col gap-3 z-40">
             {currentTab === 'resume' && isAdminMode && (
                <button 
                  onClick={handleExportPdf}
@@ -1487,7 +1487,7 @@ export default function App() {
       )}
 
       {currentTab === 'about' && (
-         <div className="fixed right-6 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-2 p-3 bg-white/70 backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-[2rem] z-40">
+         <div className="print:hidden fixed right-6 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-2 p-3 bg-white/70 backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-[2rem] z-40">
             {[
                { id: 'hero', label: 'Intro' },
                { id: 'process', label: 'Process' },
