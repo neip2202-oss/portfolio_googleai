@@ -540,9 +540,9 @@ export default function App() {
     <div id="resume-export-area" className={`pt-24 pb-24 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'} bg-[#FAFAFA] min-h-screen`}>
       <div className="max-w-5xl mx-auto px-6">
         
-        <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-gray-200 shadow-sm mb-10 grid md:grid-cols-12 gap-10 items-start">
-          <div className="md:col-span-4 lg:col-span-3 flex justify-center md:justify-start">
-             <div className="w-48 h-64 md:w-full md:h-[320px] bg-gray-100 rounded-[2rem] border border-gray-200 shrink-0 relative overflow-hidden shadow-inner flex items-center justify-center group">
+        <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-gray-200 shadow-sm mb-10 flex flex-col md:flex-row items-center md:items-center gap-8 md:gap-12">
+          <div className="shrink-0 flex justify-center">
+             <div className="w-40 h-40 md:w-48 md:h-48 bg-gray-100 rounded-full border-4 border-white shadow-lg relative overflow-hidden flex items-center justify-center group">
                {aboutData.profileImage ? (
                   <img src={aboutData.profileImage} className="w-full h-full object-cover" alt="Profile" />
                ) : (
@@ -558,24 +558,26 @@ export default function App() {
              </div>
           </div>
           
-          <div className="md:col-span-8 lg:col-span-9 flex flex-col items-center md:items-start text-center md:text-left h-full justify-center">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">이솔잎 <span className="text-2xl text-gray-300 font-bold ml-2">LEE SOLIP</span></h1>
+          <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left justify-center w-full">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-3 tracking-tight">이솔잎 <span className="text-2xl text-gray-300 font-bold ml-2">LEE SOLIP</span></h1>
             {isAdmin ? (
-               <EditableText isAdmin={isAdmin} value={aboutData.logline || "'의도를 구조로' 만들고 '구조를 결과로' 완성하는 기획자"} onChange={(v: string) => setAboutData({...aboutData, logline: v})} className="text-emerald-600 font-extrabold mb-8 text-lg md:text-xl tracking-tight block w-full" placeholder="한 줄 소개글 (로그라인)" />
+               <EditableText isAdmin={isAdmin} value={aboutData.logline || "'의도를 구조로' 만들고 '구조를 결과로' 완성하는 기획자"} onChange={(v: string) => setAboutData({...aboutData, logline: v})} className="text-emerald-600 font-extrabold mb-6 text-lg md:text-xl tracking-tight block w-full" placeholder="한 줄 소개글 (로그라인)" />
             ) : (
-               <div className="font-extrabold mb-8 text-lg md:text-xl tracking-tight text-gray-700 w-full whitespace-pre-wrap leading-relaxed">
+               <div className="font-extrabold mb-6 text-lg md:text-xl tracking-tight text-gray-700 w-full whitespace-pre-wrap leading-relaxed">
                   {(aboutData.logline || "'의도를 구조로' 만들고 '구조를 결과로' 완성하는 기획자").split(/'([^']+)'/).map((part: string, index: number) => 
-                     index % 2 === 1 ? <span key={index} className="text-emerald-600 text-2xl md:text-3xl font-black">{part}</span> : part
+                     index % 2 === 1 ? <span key={index} className="text-emerald-600 text-xl md:text-2xl font-black">{part}</span> : part
                   )}
                </div>
             )}
             
-            <div className="flex flex-wrap justify-center md:justify-start items-center gap-3">
-              <span className="flex items-center gap-2 text-sm text-gray-500 font-medium px-3 py-2"><Calendar size={16} className="text-gray-400"/> 1996.10.01</span>
-              <span className="flex items-center gap-2 text-sm text-gray-500 font-medium px-3 py-2"><MapPin size={16} className="text-gray-400"/> 인천시 부평구</span>
+            <div className="flex flex-wrap justify-center md:justify-start items-center gap-2.5">
+              <span className="flex items-center gap-1.5 text-sm text-gray-500 font-bold px-3 py-2 bg-gray-50 rounded-lg border border-gray-100"><Calendar size={16} className="text-emerald-500"/> 1996.10.01</span>
+              <span className="flex items-center gap-1.5 text-sm text-gray-500 font-bold px-3 py-2 bg-gray-50 rounded-lg border border-gray-100"><MapPin size={16} className="text-emerald-500"/> 인천시 부평구</span>
               <div className="hidden md:block w-px h-5 bg-gray-200 mx-2"></div>
-              <a href="tel:010-2725-1490" className="flex items-center gap-2 text-sm text-gray-800 font-bold px-5 py-2.5 bg-white border-2 border-gray-200 hover:border-emerald-500 hover:text-emerald-600 transition-all rounded-full shadow-sm hover:shadow-md"><Phone size={14}/> 010-2725-1490</a>
-              <a href="mailto:neip2202@gmail.com" className="flex items-center gap-2 text-sm text-white font-bold px-5 py-2.5 bg-gray-900 hover:bg-emerald-600 transition-all rounded-full shadow-md"><Mail size={14}/> 이메일 보내기</a>
+              {isAdminMode && (
+                <a href="tel:010-2725-1490" className="flex items-center gap-2 text-sm text-gray-800 font-bold px-5 py-2.5 bg-white border-2 border-gray-200 hover:border-emerald-500 hover:text-emerald-600 transition-all rounded-xl shadow-sm hover:shadow-md"><Phone size={14}/> 010-2725-1490</a>
+              )}
+              <a href="mailto:neip2202@gmail.com" className="flex items-center gap-2 text-sm text-white font-bold px-5 py-2.5 bg-gray-900 hover:bg-emerald-600 transition-all rounded-xl shadow-md"><Mail size={14}/> 이메일 보내기</a>
             </div>
 
           </div>
@@ -1446,9 +1448,6 @@ export default function App() {
               언제든 편하게 연락해 주세요.
             </p>
             <div className="space-y-3">
-              <a href="tel:010-2725-1490" className="w-full flex items-center justify-center gap-3 py-4 bg-[#FAFAFA] border border-gray-200 rounded-2xl text-gray-900 font-bold hover:bg-gray-50 hover:border-emerald-300 transition-colors">
-                <Phone className="w-5 h-5 text-gray-500" /> 010-2725-1490
-              </a>
               <a href="mailto:neip2202@gmail.com" className="w-full flex items-center justify-center gap-3 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-emerald-600 transition-colors shadow-lg">
                 <Mail className="w-5 h-5" /> neip2202@gmail.com
               </a>
