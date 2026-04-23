@@ -302,9 +302,12 @@ export default function App() {
     } else {
       document.body.style.overflow = 'unset';
     }
+  }, [isContactModalOpen, isAuthModalOpen]);
+
+  useEffect(() => {
     document.documentElement.style.scrollBehavior = 'smooth';
     window.scrollTo(0, 0);
-  }, [isContactModalOpen, isAuthModalOpen, currentTab, resumeSubTab, portfolioTab]);
+  }, [currentTab]);
 
   const handleNavClick = (tab: string) => {
     setCurrentTab(tab);
