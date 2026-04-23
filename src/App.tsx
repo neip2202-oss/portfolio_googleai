@@ -75,6 +75,22 @@ const EditableText: React.FC<any> = ({ value, onChange, as = 'input', className 
 const MarkdownRenderer: React.FC<any> = ({ content }) => {
   const createMarkup = () => {
     let html = content || '';
+    
+    // 그리드 블록 (:::grid ... :::)
+    html = html.replace(/:::grid([\s\S]*?):::/g, (_, inner) => {
+       const items = inner.trim().split('\n').map((line: string) => {
+          const match = line.match(/\[(.*?)\](.*)/);
+          if (match) {
+             return `<div class="flex-1 p-6 bg-white border border-blue-50 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col gap-3 border-t-4 border-t-blue-500/10">
+                <div class="text-blue-600 font-black text-xl tracking-tight">${match[1].trim()}</div>
+                <div class="text-gray-500 text-sm leading-relaxed font-bold">${match[2].trim()}</div>
+             </div>`;
+          }
+          return '';
+       }).join('');
+       return `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 my-10 print:grid-cols-2">${items}</div>`;
+    });
+
     html = html.replace(/!\[([^\]]+)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="w-full rounded-2xl my-6 border border-gray-200 shadow-sm" />');
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-emerald-600 font-bold hover:underline">$1</a>');
     html = html.replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold text-gray-900 mt-8 mb-3 border-b border-gray-100 pb-2">$1</h3>');
