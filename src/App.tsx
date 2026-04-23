@@ -77,17 +77,25 @@ const MarkdownRenderer: React.FC<any> = ({ content }) => {
     let html = content || '';
     
     // 그리드 블록 (:::grid ... :::)
-    html = html.replace(/:::grid([\s\S]*?):::/g, (_, inner) => {
-       const items = inner.trim().split('\n').map((line: string) => {
-          const match = line.match(/\[(.*?)\](.*)/);
+    html = html.replace(/:::grid\s*([\s\S]*?)\s*:::/g, (_, inner) => {
+       const lines = inner.split(/\r?\n/);
+       const items = lines.map((line: string) => {
+          const trimmed = line.trim();
+          if (!trimmed) return '';
+          // [제목] 내용 또는 [제목]: 내용 형식 지원
+          const match = trimmed.match(/\[(.*?)\][:\s]*(.*)/);
           if (match) {
+             const title = match[1].trim();
+             const desc = match[2].trim();
              return `<div class="flex-1 p-6 bg-white border border-blue-50 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col gap-3 border-t-4 border-t-blue-500/10">
-                <div class="text-blue-600 font-black text-xl tracking-tight">${match[1].trim()}</div>
-                <div class="text-gray-500 text-sm leading-relaxed font-bold">${match[2].trim()}</div>
+                <div class="text-blue-600 font-black text-xl tracking-tight">${title}</div>
+                <div class="text-gray-500 text-sm leading-relaxed font-bold">${desc}</div>
              </div>`;
           }
           return '';
        }).join('');
+       
+       if (!items.trim()) return _; // 유효한 아이템이 없으면 원본 텍스트 유지
        return `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 my-10 print:grid-cols-2">${items}</div>`;
     });
 
