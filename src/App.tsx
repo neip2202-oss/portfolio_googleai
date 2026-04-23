@@ -1303,22 +1303,53 @@ export default function App() {
 
                                  <div className="flex gap-2">
                                     <button onClick={() => {
-                                       const newDocs = [...projectDocs];
-                                       const newSlides = [...currentSlides];
-                                       newSlides.splice(docSlideIndex, 1);
-                                       if (newSlides.length === 0) newSlides.push('');
-                                       newDocs[currentDocIndex].slides = newSlides;
+                                       const newDocs = JSON.parse(JSON.stringify(projectDocs));
+                                       newDocs[currentDocIndex].slides.splice(docSlideIndex, 1);
+                                       if (newDocs[currentDocIndex].slides.length === 0) newDocs[currentDocIndex].slides.push('');
                                        updateMedia('documents', newDocs);
                                        setDocSlideIndex(Math.max(0, docSlideIndex - 1));
                                     }} className="flex-1 py-2 bg-red-50 text-red-600 font-bold text-xs rounded transition-colors hover:bg-red-100">현재 삭제</button>
                                     <button onClick={() => {
-                                       const newDocs = [...projectDocs];
-                                       const newSlides = [...currentSlides, ''];
-                                       newDocs[currentDocIndex].slides = newSlides;
+                                       const newDocs = JSON.parse(JSON.stringify(projectDocs));
+                                       newDocs[currentDocIndex].slides.push('');
                                        updateMedia('documents', newDocs);
-                                       setDocSlideIndex(newSlides.length - 1);
+                                       setDocSlideIndex(newDocs[currentDocIndex].slides.length - 1);
                                     }} className="flex-1 py-2 bg-gray-900 text-white font-bold text-xs rounded transition-colors hover:bg-emerald-600">+ 새 페이지 추가</button>
                                  </div>
+                                 
+                                 {projectDocs.length > 1 && (
+                                    <div className="mt-3 border-t border-gray-100 pt-3">
+                                       <div className="text-[10px] font-bold text-gray-500 mb-1">현재 페이지를 다른 문서로 이동</div>
+                                       <select 
+                                         className="w-full bg-gray-50 border border-gray-200 rounded px-2 py-1.5 text-xs outline-none"
+                                         onChange={(e) => {
+                                            const targetIndex = Number(e.target.value);
+                                            if (targetIndex === -1 || targetIndex === currentDocIndex) return;
+                                            
+                                            const newDocs = JSON.parse(JSON.stringify(projectDocs));
+                                            const slideToMove = newDocs[currentDocIndex].slides[docSlideIndex];
+                                            
+                                            newDocs[currentDocIndex].slides.splice(docSlideIndex, 1);
+                                            if (newDocs[currentDocIndex].slides.length === 0) newDocs[currentDocIndex].slides.push('');
+                                            
+                                            if (newDocs[targetIndex].slides.length === 1 && newDocs[targetIndex].slides[0] === '') {
+                                               newDocs[targetIndex].slides[0] = slideToMove;
+                                            } else {
+                                               newDocs[targetIndex].slides.push(slideToMove);
+                                            }
+                                            
+                                            updateMedia('documents', newDocs);
+                                            setDocSlideIndex(Math.max(0, docSlideIndex - 1));
+                                            e.target.value = "-1";
+                                         }}
+                                       >
+                                         <option value="-1">-- 이동할 문서 선택 --</option>
+                                         {projectDocs.map((d: any, i: number) => i !== currentDocIndex && (
+                                            <option key={d.id} value={i}>{d.title}</option>
+                                         ))}
+                                       </select>
+                                    </div>
+                                 )}
                               </div>
                            )}
                         </div>
