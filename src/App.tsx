@@ -54,22 +54,22 @@ const SortableDocItem = ({ doc, index, isActive, onSelect, onTitleChange, onRemo
     <div ref={setNodeRef} style={style} className={`flex items-center gap-2 p-2 rounded-lg ${isActive ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50 border-transparent'} border transition-colors mb-1`}>
       {isAdmin && <div {...attributes} {...listeners} className="text-gray-300 hover:text-gray-500 cursor-grab px-1"><GripVertical size={16}/></div>}
       <div className="flex-1 cursor-pointer" onClick={onSelect}>
-        <EditableText isAdmin={isAdmin} value={doc.title} onChange={onTitleChange} className="text-sm font-bold w-full text-gray-700" />
+        <EditableText isAdmin={isAdmin} value={doc.title} onChange={onTitleChange} onFocus={onSelect} className="text-sm font-bold w-full text-gray-700" />
       </div>
       {isAdmin && <button onClick={onRemove} className="text-gray-400 hover:text-red-500 p-1"><Trash2 size={14}/></button>}
     </div>
   );
 };
 
-const EditableText: React.FC<any> = ({ value, onChange, as = 'input', className = '', placeholder = '', isAdmin }) => {
+const EditableText: React.FC<any> = ({ value, onChange, as = 'input', className = '', placeholder = '', isAdmin, onFocus }) => {
   if (!isAdmin) return <span className={className}>{value}</span>;
   
   const adminClasses = `w-full bg-emerald-50/30 border border-dashed border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded px-2 py-1 my-1 text-black font-normal transition-all ${className}`;
   
   if (as === 'textarea') {
-    return <textarea value={value} onChange={(e) => onChange(e.target.value)} className={`${adminClasses} resize-y min-h-[80px]`} placeholder={placeholder} onClick={e => e.stopPropagation()} />;
+    return <textarea value={value} onChange={(e) => onChange(e.target.value)} className={`${adminClasses} resize-y min-h-[80px]`} placeholder={placeholder} onClick={e => e.stopPropagation()} onFocus={onFocus} />;
   }
-  return <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={adminClasses} placeholder={placeholder} onClick={e => e.stopPropagation()} />;
+  return <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={adminClasses} placeholder={placeholder} onClick={e => e.stopPropagation()} onFocus={onFocus} />;
 };
 
 const MarkdownRenderer: React.FC<any> = ({ content }) => {
@@ -1199,7 +1199,10 @@ export default function App() {
                                       {projectDocs.map((doc: any, idx: number) => (
                                         <SortableDocItem 
                                           key={doc.id} doc={doc} index={idx} isAdmin={isAdmin} isActive={idx === currentDocIndex}
-                                          onSelect={() => { setCurrentDocIndex(idx); setIsDocDropdownOpen(false); }}
+                                          onSelect={() => { 
+                                             setCurrentDocIndex(idx); 
+                                             if (!isAdmin) setIsDocDropdownOpen(false); 
+                                          }}
                                           onTitleChange={(v: string) => {
                                              const newDocs = [...projectDocs];
                                              newDocs[idx].title = v;
