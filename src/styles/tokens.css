@@ -23,8 +23,9 @@
   --color-highlight:      #f43f5e;
 
   /* === Typography === */
-  --font-heading: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body:    'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: 'SUIT', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body:    'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-accent:  'Montserrat', sans-serif;
 
   --text-hero:    clamp(2.25rem, 5vw, 3.5rem);
   --text-h2:      clamp(1.5rem, 3vw, 2rem);

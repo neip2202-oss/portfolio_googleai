@@ -605,7 +605,7 @@ export default function App() {
                {aboutData.profileImage ? (
                   <img src={aboutData.profileImage} className="w-full h-full object-cover" style={{ imageRendering: '-webkit-optimize-contrast', transform: 'translateZ(0)', backfaceVisibility: 'hidden' }} alt="Profile" />
                ) : (
-                  <span className="text-gray-400 font-bold text-sm tracking-widest">Photo</span>
+                  <span className="text-gray-400 font-bold text-sm tracking-widest font-accent uppercase">Photo</span>
                )}
                {isAdmin && (
                   <label className="absolute inset-0 bg-black/50 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10 w-full h-full">
@@ -618,7 +618,7 @@ export default function App() {
           </div>
           
           <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left justify-center w-full">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-3 tracking-tight">이솔잎 <span className="text-2xl text-gray-300 font-bold ml-2">LEE SOLIP</span></h1>
+            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-3 tracking-tight">이솔잎 <span className="text-2xl text-gray-300 font-bold ml-2 font-accent">LEE SOLIP</span></h1>
             {isAdmin ? (
                <EditableText isAdmin={isAdmin} value={aboutData.logline || "'의도를 구조로' 만들고 '구조를 결과로' 완성하는 기획자"} onChange={(v: string) => setAboutData({...aboutData, logline: v})} className="text-emerald-600 font-extrabold mb-6 text-lg md:text-xl tracking-tight block w-full" placeholder="한 줄 소개글 (로그라인)" />
             ) : (
@@ -630,13 +630,13 @@ export default function App() {
             )}
             
             <div className="flex flex-wrap justify-center md:justify-start items-center gap-2.5">
-              <span className="flex items-center gap-1.5 text-sm text-gray-500 font-bold px-3 py-2 bg-gray-50 rounded-lg border border-gray-100"><Calendar size={16} className="text-emerald-500"/> 1996.10.01</span>
+              <span className="flex items-center gap-1.5 text-sm text-gray-500 font-bold px-3 py-2 bg-gray-50 rounded-lg border border-gray-100 font-accent"><Calendar size={16} className="text-emerald-500"/> 1996.10.01</span>
               <span className="flex items-center gap-1.5 text-sm text-gray-500 font-bold px-3 py-2 bg-gray-50 rounded-lg border border-gray-100"><MapPin size={16} className="text-emerald-500"/> 인천시 부평구</span>
               <div className="hidden md:block w-px h-5 bg-gray-200 mx-2"></div>
               {isAdminMode && (
                 <a href="tel:010-2725-1490" className="flex items-center gap-2 text-sm text-gray-800 font-bold px-5 py-2.5 bg-white border-2 border-gray-200 hover:border-emerald-500 hover:text-emerald-600 transition-all rounded-xl shadow-sm hover:shadow-md"><Phone size={14}/> 010-2725-1490</a>
               )}
-              <a href="mailto:neip2202@gmail.com" className="flex items-center gap-2 text-sm text-white font-bold px-5 py-2.5 bg-gray-900 hover:bg-emerald-600 transition-all rounded-xl shadow-md"><Mail size={14}/> neip2202@gmail.com</a>
+              <a href="mailto:neip2202@gmail.com" className="flex items-center gap-2 text-sm text-white font-bold px-5 py-2.5 bg-gray-900 hover:bg-emerald-600 transition-all rounded-xl shadow-md font-accent"><Mail size={14}/> neip2202@gmail.com</a>
             </div>
 
           </div>
@@ -661,7 +661,7 @@ export default function App() {
                  { title: 'Design', data: designTools, set: setDesignTools }
                ].map(category => (
                  <div key={category.title} className="flex flex-col gap-4">
-                    <span className="text-xs font-extrabold text-gray-400 uppercase tracking-widest">{category.title}</span>
+                    <span className="text-xs font-extrabold text-gray-400 uppercase tracking-widest font-accent">{category.title}</span>
                     <div className="flex flex-wrap gap-2 items-center">
                        {category.data.map((tool: any, idx: number) => {
                           const IconComp = getToolIcon(tool.iconName || tool.name);
@@ -743,8 +743,8 @@ export default function App() {
                                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (b64) => { const n = [...timelineLeftData]; n[idx].iconImg = b64; setTimelineLeftData(n); })} />
                                    </label>
                                  )}
-                                 <EditableText isAdmin={isAdmin} value={item.year} onChange={(v: string) => { const n = [...timelineLeftData]; n[idx].year = v; setTimelineLeftData(n); }} className="text-emerald-600 font-bold text-sm mb-1 block" />
-                                 <EditableText isAdmin={isAdmin} value={item.title} onChange={(v: string) => { const n = [...timelineLeftData]; n[idx].title = v; setTimelineLeftData(n); }} className="text-lg font-extrabold text-gray-900 mb-1 block" />
+                                 <EditableText isAdmin={isAdmin} value={item.year} onChange={(v: string) => { const n = [...timelineLeftData]; n[idx].year = v; setTimelineLeftData(n); }} className="text-emerald-600 font-bold text-sm mb-1 block font-accent" />
+                                 <EditableText isAdmin={isAdmin} value={item.title} onChange={(v: string) => { const n = [...timelineLeftData]; n[idx].title = v; setTimelineLeftData(n); }} className="text-lg font-extrabold text-gray-900 mb-1 block font-accent" />
                                  <EditableText isAdmin={isAdmin} value={item.subtitle} onChange={(v: string) => { const n = [...timelineLeftData]; n[idx].subtitle = v; setTimelineLeftData(n); }} className="text-xs font-bold text-gray-500 mb-2 block" />
                                  <EditableText isAdmin={isAdmin} as="textarea" value={item.desc} onChange={(v: string) => { const n = [...timelineLeftData]; n[idx].desc = v; setTimelineLeftData(n); }} className="text-gray-600 text-sm leading-relaxed block" />
                                </div>
@@ -776,7 +776,7 @@ export default function App() {
                              <div className="flex flex-col mb-4 gap-2">
                                 <div className="w-full">
                                    <EditableText isAdmin={isAdmin} value={act.title} onChange={(v: string) => { const n = [...activitiesLeftData]; n[idx].title = v; setActivitiesLeftData(n); }} className="text-xl font-extrabold text-gray-900 mb-1 block" placeholder="활동 제목" />
-                                   <EditableText isAdmin={isAdmin} value={act.year} onChange={(v: string) => { const n = [...activitiesLeftData]; n[idx].year = v; setActivitiesLeftData(n); }} className="text-sm font-bold text-gray-400 block" placeholder="기간 (YYYY.MM - YYYY.MM)" />
+                                   <EditableText isAdmin={isAdmin} value={act.year} onChange={(v: string) => { const n = [...activitiesLeftData]; n[idx].year = v; setActivitiesLeftData(n); }} className="text-sm font-bold text-gray-400 block font-accent" placeholder="기간 (YYYY.MM - YYYY.MM)" />
                                 </div>
                                 <div className="flex flex-wrap gap-2 mt-1">
                                    {(() => {
@@ -872,7 +872,7 @@ export default function App() {
                              <div className="flex flex-col mb-4 gap-2">
                                 <div className="w-full">
                                    <EditableText isAdmin={isAdmin} value={act.title} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].title = v; setActivitiesRightData(n); }} className="text-xl font-extrabold text-gray-900 mb-1 block" placeholder="활동/프로젝트 제목" />
-                                   <EditableText isAdmin={isAdmin} value={act.year} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].year = v; setActivitiesRightData(n); }} className="text-sm font-bold text-gray-400 block" placeholder="기간 (YYYY.MM - YYYY.MM)" />
+                                   <EditableText isAdmin={isAdmin} value={act.year} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].year = v; setActivitiesRightData(n); }} className="text-sm font-bold text-gray-400 block font-accent" placeholder="기간 (YYYY.MM - YYYY.MM)" />
                                 </div>
                                 <div className="flex flex-wrap gap-2 mt-1">
                                    {(() => {
