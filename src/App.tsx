@@ -78,7 +78,9 @@ const MarkdownRenderer: React.FC<any> = ({ content }) => {
     html = html.replace(/!\[([^\]]+)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="w-full rounded-2xl my-6 border border-gray-200 shadow-sm" />');
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-emerald-600 font-bold hover:underline">$1</a>');
     html = html.replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold text-gray-900 mt-8 mb-3 border-b border-gray-100 pb-2">$1</h3>');
+    html = html.replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-emerald-500 pl-4 py-2 my-4 bg-emerald-50/30 text-emerald-800 font-medium rounded-r-lg">$1</blockquote>');
     html = html.replace(/\*\*(.*?)\*\*/gim, '<strong class="text-black font-black">$1</strong>');
+    html = html.replace(/==(.*?)==/gim, '<mark class="bg-emerald-100 text-emerald-900 px-1 rounded font-bold">$1</mark>');
     html = html.replace(/^- (.*$)/gim, '<li class="ml-5 list-disc marker:text-emerald-500 mb-1">$1</li>');
     html = html.replace(/\n/g, '<br/>');
     return { __html: html };
