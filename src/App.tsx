@@ -760,15 +760,15 @@ export default function App() {
                                                   <div key={tag.id} className="group/tag relative flex items-center">
                                                      <div className={`px-2.5 py-1 ${p.bg} ${p.text} text-[11px] font-bold rounded-lg border ${p.border} flex items-center gap-1.5 transition-colors`}>
                                                         <div className={`w-1.5 h-1.5 rounded-full ${p.dot}`}></div>
-                                                        <EditableText isAdmin={isAdmin} value={tag.text} onChange={(v: string) => { const n=[...activitiesLeftData]; n[idx].tags[tIdx].text=v; setActivitiesLeftData(n); }} className="bg-transparent uppercase tracking-wide" placeholder="태그명" />
+                                                        <EditableText isAdmin={isAdmin} value={tag.text} onChange={(v: string) => { const n=JSON.parse(JSON.stringify(activitiesLeftData)); if(!n[idx].tags) n[idx].tags = act.badge ? [{ id: Date.now(), text: act.badge, color: 0 }] : []; n[idx].tags[tIdx].text=v; setActivitiesLeftData(n); }} className="bg-transparent uppercase tracking-wide" placeholder="태그명" />
                                                      </div>
                                                      {isAdmin && (
                                                         <div className="hidden group-hover/tag:flex absolute top-full left-0 pt-2 z-20">
                                                            <div className="bg-white shadow-xl border border-gray-200 rounded-lg p-2 flex gap-1.5 relative">
                                                               {TAG_COLORS.map((pal, pIdx) => (
-                                                                 <button key={pIdx} onClick={() => { const n=[...activitiesLeftData]; n[idx].tags[tIdx].color=pIdx; setActivitiesLeftData(n); }} className={`w-5 h-5 rounded-full ${pal.bg} border ${pal.border} ${tag.color === pIdx ? 'ring-2 ring-offset-1 ring-gray-900' : ''}`} />
+                                                                 <button key={pIdx} onClick={() => { const n=JSON.parse(JSON.stringify(activitiesLeftData)); if(!n[idx].tags) n[idx].tags = act.badge ? [{ id: Date.now(), text: act.badge, color: 0 }] : []; n[idx].tags[tIdx].color=pIdx; setActivitiesLeftData(n); }} className={`w-5 h-5 rounded-full ${pal.bg} border ${pal.border} ${tag.color === pIdx ? 'ring-2 ring-offset-1 ring-gray-900' : ''}`} />
                                                               ))}
-                                                              <button onClick={() => { const n=[...activitiesLeftData]; n[idx].tags.splice(tIdx, 1); setActivitiesLeftData(n); }} className="w-5 h-5 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center font-bold ml-1">✕</button>
+                                                              <button onClick={() => { const n=JSON.parse(JSON.stringify(activitiesLeftData)); if(!n[idx].tags) n[idx].tags = act.badge ? [{ id: Date.now(), text: act.badge, color: 0 }] : []; n[idx].tags.splice(tIdx, 1); setActivitiesLeftData(n); }} className="w-5 h-5 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center font-bold ml-1">✕</button>
                                                            </div>
                                                         </div>
                                                      )}
@@ -856,15 +856,15 @@ export default function App() {
                                                   <div key={tag.id} className="group/tag relative flex items-center">
                                                      <div className={`px-2.5 py-1 ${p.bg} ${p.text} text-[11px] font-bold rounded-lg border ${p.border} flex items-center gap-1.5 transition-colors`}>
                                                         <div className={`w-1.5 h-1.5 rounded-full ${p.dot}`}></div>
-                                                        <EditableText isAdmin={isAdmin} value={tag.text} onChange={(v: string) => { const n=[...activitiesRightData]; n[idx].tags[tIdx].text=v; setActivitiesRightData(n); }} className="bg-transparent uppercase tracking-wide" placeholder="태그명" />
+                                                        <EditableText isAdmin={isAdmin} value={tag.text} onChange={(v: string) => { const n=JSON.parse(JSON.stringify(activitiesRightData)); if(!n[idx].tags) n[idx].tags = act.badge ? [{ id: Date.now(), text: act.badge, color: 0 }] : []; n[idx].tags[tIdx].text=v; setActivitiesRightData(n); }} className="bg-transparent uppercase tracking-wide" placeholder="태그명" />
                                                      </div>
                                                      {isAdmin && (
                                                         <div className="hidden group-hover/tag:flex absolute top-full left-0 pt-2 z-20">
                                                            <div className="bg-white shadow-xl border border-gray-200 rounded-lg p-2 flex gap-1.5 relative">
                                                               {TAG_COLORS.map((pal, pIdx) => (
-                                                                 <button key={pIdx} onClick={() => { const n=[...activitiesRightData]; n[idx].tags[tIdx].color=pIdx; setActivitiesRightData(n); }} className={`w-5 h-5 rounded-full ${pal.bg} border ${pal.border} ${tag.color === pIdx ? 'ring-2 ring-offset-1 ring-gray-900' : ''}`} />
+                                                                 <button key={pIdx} onClick={() => { const n=JSON.parse(JSON.stringify(activitiesRightData)); if(!n[idx].tags) n[idx].tags = act.badge ? [{ id: Date.now(), text: act.badge, color: 0 }] : []; n[idx].tags[tIdx].color=pIdx; setActivitiesRightData(n); }} className={`w-5 h-5 rounded-full ${pal.bg} border ${pal.border} ${tag.color === pIdx ? 'ring-2 ring-offset-1 ring-gray-900' : ''}`} />
                                                               ))}
-                                                              <button onClick={() => { const n=[...activitiesRightData]; n[idx].tags.splice(tIdx, 1); setActivitiesRightData(n); }} className="w-5 h-5 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center font-bold ml-1">✕</button>
+                                                              <button onClick={() => { const n=JSON.parse(JSON.stringify(activitiesRightData)); if(!n[idx].tags) n[idx].tags = act.badge ? [{ id: Date.now(), text: act.badge, color: 0 }] : []; n[idx].tags.splice(tIdx, 1); setActivitiesRightData(n); }} className="w-5 h-5 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center font-bold ml-1">✕</button>
                                                            </div>
                                                         </div>
                                                      )}
