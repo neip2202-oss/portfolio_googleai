@@ -1,7 +1,5 @@
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 import React, { useState, useEffect } from 'react';
-import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle } from 'lucide-react';
+import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle, ChevronDown, Maximize2 } from 'lucide-react';
 
 const getExternalEmbedUrl = (url: string) => {
     if (!url) return url;
@@ -136,6 +134,8 @@ export default function App() {
   const [portfolioTab, setPortfolioTab] = useState('main'); 
   const [activeMedia, setActiveMedia] = useState('thumbnail'); 
   const [docSlideIndex, setDocSlideIndex] = useState(0);
+  const [currentDocIndex, setCurrentDocIndex] = useState(0);
+  const [isDocDropdownOpen, setIsDocDropdownOpen] = useState(false);
   const [homePlayFilter, setHomePlayFilter] = useState('PC'); 
   const [historyPageFilter, setHistoryPageFilter] = useState('All'); 
   const [isVisible, setIsVisible] = useState(false);
@@ -1142,73 +1142,148 @@ export default function App() {
                     </div>
                  )}
 
-                 {activeMedia === 'document' && (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-white relative animate-in fade-in duration-300">
-                        {(() => {
-                           const currentSlide = selectedProject?.media?.slides && selectedProject.media.slides[docSlideIndex];
-                           if (currentSlide) {
-                              if (isNativeEmbeddedDoc(currentSlide)) {
-                                 return <iframe src={getExternalEmbedUrl(currentSlide)} className="w-full h-full border-none" allowFullScreen />;
-                              } else {
-                                 return <img src={currentSlide} alt="slide" className="w-full h-full object-contain" />;
-                              }
-                           } else {
-                              return (
-                                 <>
-                                    <span className="text-2xl font-extrabold text-gray-800 mb-2">상세 기획서 Page {docSlideIndex + 1}</span>
-                                    <span className="text-gray-400 font-medium">({['기획서 표지', '목차 및 시스템 개요', '핵심 룰 구조도', '밸런스 데이터 테이블', 'UI 와이어프레임'][docSlideIndex] || '추가 페이지'})</span>
-                                 </>
-                              );
-                           }
-                        })()}
-                        
-                        {!isNativeEmbeddedDoc(selectedProject?.media?.slides?.[docSlideIndex] || '') && (
-                           <>
-                              <div className="absolute bottom-6 bg-gray-900/80 backdrop-blur text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg z-10">
-                                 {docSlideIndex + 1} / {(selectedProject?.media?.slides || [1, 2, 3, 4, 5]).length}
+                 {activeMedia === 'document' && (() => {
+                    const projectDocs = selectedProject?.media?.documents || (selectedProject?.media?.slides ? [{ id: `doc-${selectedProject.id}`, title: '기본 기획 문서', slides: selectedProject.media.slides }] : []);
+                    const currentDoc = projectDocs[currentDocIndex] || null;
+                    const currentSlides = currentDoc?.slides || [];
+
+                    return (
+                    <div className="w-full h-full flex flex-col bg-gray-50 relative animate-in fade-in duration-300 rounded-2xl overflow-hidden">
+                        {/* 상단 툴바 */}
+                        <div className="absolute top-4 left-4 right-4 z-50 flex justify-between items-start pointer-events-none">
+                          {/* 드롭다운 UI */}
+                          <div className="relative pointer-events-auto">
+                            {(projectDocs.length >= 2 || isAdmin) && (
+                               <button onClick={() => setIsDocDropdownOpen(!isDocDropdownOpen)} className="flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur border border-gray-200 rounded-full shadow-sm text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all">
+                                  <FileText size={16} className="text-blue-500" />
+                                  {currentDoc?.title || '문서 선택'}
+                                  <ChevronDown size={16} className={`transition-transform ${isDocDropdownOpen ? 'rotate-180' : ''}`} />
+                               </button>
+                            )}
+                            {isDocDropdownOpen && (
+                              <div className="absolute top-full left-0 mt-2 w-72 bg-white border border-gray-200 rounded-2xl shadow-xl p-3 z-50 max-h-64 overflow-y-auto">
+                                <div className="space-y-1">
+                                  {projectDocs.map((doc: any, idx: number) => (
+                                    <div key={doc.id} className={`flex items-center gap-2 p-2 rounded-lg ${idx === currentDocIndex ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50 border-transparent'} border transition-colors cursor-pointer`}>
+                                      <div className="flex-1" onClick={() => { setCurrentDocIndex(idx); setDocSlideIndex(0); setIsDocDropdownOpen(false); }}>
+                                        <EditableText isAdmin={isAdmin} value={doc.title} onChange={(v: string) => {
+                                           const newDocs = [...projectDocs];
+                                           newDocs[idx].title = v;
+                                           updateMedia('documents', newDocs);
+                                        }} className="text-sm font-bold w-full text-gray-700" />
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                                {isAdmin && (
+                                  <button onClick={() => {
+                                     updateMedia('documents', [...projectDocs, { id: `doc-${Date.now()}`, title: '새 기획 문서', slides: [''] }]);
+                                  }} className="w-full mt-2 flex items-center justify-center gap-1 py-2 text-sm font-bold text-emerald-600 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors">
+                                     <Plus size={14} /> 문서 추가
+                                  </button>
+                                )}
                               </div>
-                              
-                              <button onClick={() => setDocSlideIndex((prev: number) => prev === 0 ? (selectedProject?.media?.slides?.length || 5) - 1 : prev - 1)} className="absolute left-6 w-12 h-12 bg-white border border-gray-200 hover:bg-gray-50 hover:border-emerald-300 rounded-full flex items-center justify-center shadow-md hover:shadow-xl transition-all text-gray-700 hover:text-emerald-600 z-20">
-                                 <ChevronLeft size={28} />
-                              </button>
-                              <button onClick={() => setDocSlideIndex((prev: number) => (prev + 1) % (selectedProject?.media?.slides?.length || 5))} className="absolute right-6 w-12 h-12 bg-white border border-gray-200 hover:bg-gray-50 hover:border-emerald-300 rounded-full flex items-center justify-center shadow-md hover:shadow-xl transition-all text-gray-700 hover:text-emerald-600 z-20">
-                                 <ChevronRight size={28} />
-                              </button>
-                           </>
-                        )}
-
-                       {isAdmin && (
-                          <div className="absolute top-4 right-4 z-30 w-full max-w-xs bg-white/90 backdrop-blur p-4 rounded-2xl shadow-xl border border-gray-200" onClick={e => e.stopPropagation()}>
-                            <div className="text-xs font-bold text-emerald-600 mb-2">🔗 현재 슬라이드 이미지/PDF URL</div>
-                            <input type="text" placeholder="https://..." 
-                               value={(selectedProject?.media?.slides && selectedProject.media.slides[docSlideIndex]) || ''} 
-                               onChange={e => {
-                                  const newSlides = [...(selectedProject.media?.slides || ['', '', '', '', ''])];
-                                  newSlides[docSlideIndex] = e.target.value;
-                                  updateMedia('slides', newSlides);
-                               }} 
-                               className="w-full bg-white border border-gray-200 rounded px-3 py-2 text-xs outline-none focus:border-emerald-500 mb-3 transition-colors" 
-                            />
-                            
-                            <div className="text-xs font-bold text-emerald-600 mb-2 border-t border-emerald-100 pt-3">📁 현재 페이지 로컬 파일 업로드</div>
-                            <label className="w-full py-2 bg-emerald-50 text-emerald-700 text-xs font-bold rounded flex items-center justify-center gap-1.5 cursor-pointer hover:bg-emerald-100 transition-colors border border-emerald-200 mb-3">
-                               <FileText size={14} /> 파일 업로드 (이미지/PDF)
-                               <input type="file" accept="image/*,application/pdf" onChange={(e) => handleFileUpload(e, (b64) => {
-                                  const newSlides = [...(selectedProject.media?.slides || ['', '', '', '', ''])];
-                                  newSlides[docSlideIndex] = b64;
-                                  updateMedia('slides', newSlides);
-                               })} className="hidden" />
-                            </label>
-
-                            <button onClick={() => {
-                                const newSlides = [...(selectedProject.media?.slides || ['', '', '', '', '']), ''];
-                                updateMedia('slides', newSlides);
-                                setDocSlideIndex(newSlides.length - 1);
-                            }} className="w-full py-2 bg-gray-900 text-white font-bold text-xs rounded transition-colors hover:bg-emerald-600">+ 새 페이지로 추가</button>
+                            )}
                           </div>
-                       )}
+                          {/* 전체 화면 보기 */}
+                          <div className="pointer-events-auto">
+                            {currentSlides[docSlideIndex] && (
+                               <button onClick={() => {
+                                  const url = isNativeEmbeddedDoc(currentSlides[docSlideIndex]) ? getExternalEmbedUrl(currentSlides[docSlideIndex]) : currentSlides[docSlideIndex];
+                                  window.open(url, '_blank');
+                               }} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur border border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-full shadow-sm text-xs font-bold transition-colors">
+                                  <Maximize2 size={14} /> 전체 화면 보기
+                               </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 메인 뷰어 */}
+                        <div className="flex-1 flex flex-col items-center justify-center relative bg-white" onClick={() => setIsDocDropdownOpen(false)}>
+                           {(() => {
+                              const currentSlide = currentSlides[docSlideIndex];
+                              if (currentSlide) {
+                                 if (isNativeEmbeddedDoc(currentSlide)) {
+                                    return <iframe src={getExternalEmbedUrl(currentSlide)} className="w-full h-full border-none" allowFullScreen />;
+                                 } else {
+                                    return <img src={currentSlide} alt="slide" className="w-full h-full object-contain" />;
+                                 }
+                              } else {
+                                 return (
+                                    <>
+                                       <span className="text-2xl font-extrabold text-gray-300 mb-2 tracking-widest">Document Slide {docSlideIndex + 1}</span>
+                                    </>
+                                 );
+                              }
+                           })()}
+
+                           {/* 슬라이드 네비게이션 */}
+                           {currentSlides.length > 0 && (
+                              <>
+                                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-2xl z-20 flex items-center gap-6">
+                                   <button onClick={() => setDocSlideIndex((prev: number) => prev === 0 ? currentSlides.length - 1 : prev - 1)} className="hover:text-emerald-400 hover:-translate-x-1 transition-all">
+                                      <ChevronLeft size={20} />
+                                   </button>
+                                   <span className="min-w-[40px] text-center tracking-widest">{docSlideIndex + 1} / {currentSlides.length || 1}</span>
+                                   <button onClick={() => setDocSlideIndex((prev: number) => (prev + 1) % currentSlides.length)} className="hover:text-emerald-400 hover:translate-x-1 transition-all">
+                                      <ChevronRight size={20} />
+                                   </button>
+                                 </div>
+                              </>
+                           )}
+
+                           {/* 관리자 툴 */}
+                           {isAdmin && (
+                              <div className="absolute bottom-4 right-4 z-30 w-full max-w-xs bg-white/95 backdrop-blur p-4 rounded-2xl shadow-2xl border border-gray-200" onClick={e => e.stopPropagation()}>
+                                 <div className="text-xs font-bold text-emerald-600 mb-2">🔗 현재 슬라이드 이미지/PDF URL</div>
+                                 <input type="text" placeholder="https://..." 
+                                    value={currentSlides[docSlideIndex] || ''} 
+                                    onChange={e => {
+                                       const newDocs = [...projectDocs];
+                                       const newSlides = [...currentSlides];
+                                       newSlides[docSlideIndex] = e.target.value;
+                                       newDocs[currentDocIndex].slides = newSlides;
+                                       updateMedia('documents', newDocs);
+                                    }} 
+                                    className="w-full bg-white border border-gray-200 rounded px-3 py-2 text-xs outline-none focus:border-emerald-500 mb-3 transition-colors" 
+                                 />
+                                 
+                                 <div className="text-xs font-bold text-emerald-600 mb-2 border-t border-emerald-100 pt-3">📁 현재 페이지 로컬 파일 업로드</div>
+                                 <label className="w-full py-2 bg-emerald-50 text-emerald-700 text-xs font-bold rounded flex items-center justify-center gap-1.5 cursor-pointer hover:bg-emerald-100 transition-colors border border-emerald-200 mb-3">
+                                    <FileText size={14} /> 파일 업로드 (이미지/PDF)
+                                    <input type="file" accept="image/*,application/pdf" onChange={(e) => handleFileUpload(e, (b64) => {
+                                       const newDocs = [...projectDocs];
+                                       const newSlides = [...currentSlides];
+                                       newSlides[docSlideIndex] = b64;
+                                       newDocs[currentDocIndex].slides = newSlides;
+                                       updateMedia('documents', newDocs);
+                                    })} className="hidden" />
+                                 </label>
+
+                                 <div className="flex gap-2">
+                                    <button onClick={() => {
+                                       const newDocs = [...projectDocs];
+                                       const newSlides = [...currentSlides];
+                                       newSlides.splice(docSlideIndex, 1);
+                                       if (newSlides.length === 0) newSlides.push('');
+                                       newDocs[currentDocIndex].slides = newSlides;
+                                       updateMedia('documents', newDocs);
+                                       setDocSlideIndex(Math.max(0, docSlideIndex - 1));
+                                    }} className="flex-1 py-2 bg-red-50 text-red-600 font-bold text-xs rounded transition-colors hover:bg-red-100">현재 삭제</button>
+                                    <button onClick={() => {
+                                       const newDocs = [...projectDocs];
+                                       const newSlides = [...currentSlides, ''];
+                                       newDocs[currentDocIndex].slides = newSlides;
+                                       updateMedia('documents', newDocs);
+                                       setDocSlideIndex(newSlides.length - 1);
+                                    }} className="flex-1 py-2 bg-gray-900 text-white font-bold text-xs rounded transition-colors hover:bg-emerald-600">+ 새 페이지 추가</button>
+                                 </div>
+                              </div>
+                           )}
+                        </div>
                     </div>
-                 )}
+                    );
+                 })()}
               </div>
 
               <div className="grid grid-cols-3 gap-4">
@@ -1220,9 +1295,14 @@ export default function App() {
                     <PlayCircle size={24} />
                     <span className="font-bold text-sm">플레이 영상</span>
                  </button>
-                 <button onClick={() => setActiveMedia('document')} className={`p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 ${activeMedia === 'document' ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-lg' : 'border-gray-200 bg-white hover:border-blue-300 text-gray-500 hover:text-blue-600'}`}>
+                 <button onClick={() => { setActiveMedia('document'); setDocSlideIndex(0); setCurrentDocIndex(0); }} className={`relative p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 ${activeMedia === 'document' ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-lg' : 'border-gray-200 bg-white hover:border-blue-300 text-gray-500 hover:text-blue-600'}`}>
                     <FileText size={24} />
-                    <span className="font-bold text-sm">기획서 슬라이드</span>
+                    <span className="font-bold text-sm">기획 문서</span>
+                    {((selectedProject?.media?.documents?.length || 0) > 0 || (selectedProject?.media?.slides?.length > 0 && !selectedProject?.media?.documents)) && (
+                       <span className="absolute top-2 right-2 bg-blue-100 text-blue-600 text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                          {selectedProject?.media?.documents ? selectedProject.media.documents.length : 1}
+                       </span>
+                    )}
                  </button>
               </div>
             </div>
