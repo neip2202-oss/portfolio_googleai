@@ -607,7 +607,7 @@ export default function App() {
               {isAdminMode && (
                 <a href="tel:010-2725-1490" className="flex items-center gap-2 text-sm text-gray-800 font-bold px-5 py-2.5 bg-white border-2 border-gray-200 hover:border-emerald-500 hover:text-emerald-600 transition-all rounded-xl shadow-sm hover:shadow-md"><Phone size={14}/> 010-2725-1490</a>
               )}
-              <a href="mailto:neip2202@gmail.com" className="flex items-center gap-2 text-sm text-white font-bold px-5 py-2.5 bg-gray-900 hover:bg-emerald-600 transition-all rounded-xl shadow-md"><Mail size={14}/> 이메일 보내기</a>
+              <a href="mailto:neip2202@gmail.com" className="flex items-center gap-2 text-sm text-white font-bold px-5 py-2.5 bg-gray-900 hover:bg-emerald-600 transition-all rounded-xl shadow-md"><Mail size={14}/> neip2202@gmail.com</a>
             </div>
 
           </div>
