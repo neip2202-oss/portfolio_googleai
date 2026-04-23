@@ -1104,10 +1104,10 @@ export default function App() {
             </div>
 
             <div className="mb-16">
-              <div className={`aspect-[16/9] ${selectedProject?.imgColor || 'bg-gray-100'} rounded-3xl mb-6 flex items-center justify-center text-gray-500 font-bold border border-gray-200 shadow-inner relative overflow-hidden group transition-all duration-500`}>
+              <div className={`${selectedProject?.imgColor || 'bg-gray-100'} rounded-3xl mb-6 flex flex-col text-gray-500 font-bold border border-gray-200 shadow-inner relative overflow-hidden group transition-all duration-500`}>
                  
                  {activeMedia === 'thumbnail' && (
-                    <div className="w-full h-full flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300">
+                    <div className="aspect-[16/9] w-full flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300 relative">
                        {selectedProject?.media?.thumbnail ? (
                           <img src={selectedProject.media.thumbnail} alt="thumbnail" className="w-full h-full object-cover" />
                        ) : (
@@ -1132,7 +1132,7 @@ export default function App() {
                  )}
 
                  {activeMedia === 'gameplay' && (
-                    <div className="w-full h-full bg-black flex flex-col items-center justify-center animate-in fade-in duration-300">
+                    <div className="aspect-[16/9] w-full bg-black flex flex-col items-center justify-center animate-in fade-in duration-300 relative">
                        {selectedProject?.media?.video ? (
                           selectedProject.media.video.startsWith('data:') && selectedProject.media.video.includes('video/') ? (
                              <video src={selectedProject.media.video} controls className="w-full h-full object-contain" />
@@ -1179,7 +1179,7 @@ export default function App() {
                     };
 
                     return (
-                    <div className="w-full h-full flex flex-col bg-gray-50 relative animate-in fade-in duration-300 rounded-2xl overflow-hidden">
+                    <div className="w-full flex flex-col bg-gray-50 relative animate-in fade-in duration-300">
                         {/* 상단 툴바 (헤더 영역으로 분리) */}
                         <div className="w-full bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-40">
                           {/* 드롭다운 UI */}
@@ -1232,7 +1232,7 @@ export default function App() {
                         </div>
 
                         {/* 메인 뷰어 */}
-                        <div className="flex-1 flex flex-col items-center justify-center relative bg-white" onClick={() => setIsDocDropdownOpen(false)}>
+                        <div className="aspect-[16/9] w-full flex flex-col items-center justify-center relative bg-white" onClick={() => setIsDocDropdownOpen(false)}>
                            {(() => {
                               const currentSlide = currentSlides[0];
                               if (currentSlide) {
