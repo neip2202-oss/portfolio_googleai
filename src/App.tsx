@@ -109,7 +109,7 @@ const MarkdownRenderer: React.FC<any> = ({ content }) => {
     html = html.replace(/\n/g, '<br/>');
     return { __html: html };
   };
-  return <div className="markdown-body text-gray-600 leading-relaxed text-sm md:text-base" dangerouslySetInnerHTML={createMarkup()} />;
+  return <div className="markdown-body text-gray-800 font-medium leading-relaxed text-base md:text-[17px] tracking-tight" dangerouslySetInnerHTML={createMarkup()} />;
 };
 
 const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (base64: string) => void) => {
@@ -947,13 +947,24 @@ export default function App() {
                         <EditableText isAdmin={isAdmin} as="textarea" value={letter.content} onChange={(v: string) => { const n = [...coverLetterData]; n[index].content = v; setCoverLetterData(n); }} className="text-sm font-mono bg-gray-900 text-gray-200 p-4 rounded-xl min-h-[150px] w-full block" />
                      </div>
                   ) : (
-                     <>
-                        <h3 className="text-xl font-bold text-gray-900 mb-5 flex items-center gap-3 border-b border-gray-100 pb-5 tracking-tight">
-                           <span className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-sm font-bold shadow-md">{index + 1}</span>
-                           {letter.title}
-                        </h3>
-                        <MarkdownRenderer content={letter.content} />
-                     </>
+                     <div className="flex flex-col md:grid md:grid-cols-12 gap-8 md:gap-12 lg:gap-16">
+                        {/* 좌측: 문항 번호와 제목 (약 30%) */}
+                        <div className="md:col-span-4 lg:col-span-3">
+                           <h3 className="text-xl font-black text-gray-900 flex flex-col gap-4 sticky top-24">
+                              <span className="w-10 h-10 rounded-2xl bg-gray-900 text-white flex items-center justify-center text-lg font-black shadow-lg font-accent">
+                                 {index + 1}
+                              </span>
+                              <span className="leading-tight tracking-tighter break-keep">
+                                 {letter.title}
+                              </span>
+                           </h3>
+                        </div>
+                        
+                        {/* 우측: 본문 내용 (약 70%) */}
+                        <div className="md:col-span-8 lg:col-span-9 border-l-0 md:border-l border-gray-100 md:pl-10 lg:pl-12">
+                           <MarkdownRenderer content={letter.content} />
+                        </div>
+                     </div>
                   )}
                </div>
             ))}
