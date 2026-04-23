@@ -1199,7 +1199,7 @@ export default function App() {
                                       {projectDocs.map((doc: any, idx: number) => (
                                         <SortableDocItem 
                                           key={doc.id} doc={doc} index={idx} isAdmin={isAdmin} isActive={idx === currentDocIndex}
-                                          onSelect={() => { setCurrentDocIndex(idx); setDocSlideIndex(0); setIsDocDropdownOpen(false); }}
+                                          onSelect={() => { setCurrentDocIndex(idx); setIsDocDropdownOpen(false); }}
                                           onTitleChange={(v: string) => {
                                              const newDocs = [...projectDocs];
                                              newDocs[idx].title = v;
@@ -1226,23 +1226,12 @@ export default function App() {
                               </div>
                             )}
                           </div>
-                          {/* 전체 화면 보기 */}
-                          <div className="pointer-events-auto">
-                            {currentSlides[docSlideIndex] && (
-                               <button onClick={() => {
-                                  const url = isNativeEmbeddedDoc(currentSlides[docSlideIndex]) ? getExternalEmbedUrl(currentSlides[docSlideIndex]) : currentSlides[docSlideIndex];
-                                  window.open(url, '_blank');
-                               }} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur border border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-full shadow-sm text-xs font-bold transition-colors">
-                                  <Maximize2 size={14} /> 전체 화면 보기
-                               </button>
-                            )}
-                          </div>
                         </div>
 
                         {/* 메인 뷰어 */}
                         <div className="flex-1 flex flex-col items-center justify-center relative bg-white" onClick={() => setIsDocDropdownOpen(false)}>
                            {(() => {
-                              const currentSlide = currentSlides[docSlideIndex];
+                              const currentSlide = currentSlides[0];
                               if (currentSlide) {
                                  if (isNativeEmbeddedDoc(currentSlide)) {
                                     return <iframe src={getExternalEmbedUrl(currentSlide)} className="w-full h-full border-none" allowFullScreen />;
@@ -1251,105 +1240,37 @@ export default function App() {
                                  }
                               } else {
                                  return (
-                                    <>
-                                       <span className="text-2xl font-extrabold text-gray-300 mb-2 tracking-widest">Document Slide {docSlideIndex + 1}</span>
-                                    </>
+                                    <div className="flex flex-col items-center text-gray-400">
+                                       <FileText size={48} className="mb-4 opacity-50" />
+                                       <span className="text-xl font-bold tracking-widest">등록된 파일이 없습니다</span>
+                                    </div>
                                  );
                               }
                            })()}
 
-                           {/* 슬라이드 네비게이션 */}
-                           {currentSlides.length > 1 && (
-                              <>
-                                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-2xl z-20 flex items-center gap-6">
-                                   <button onClick={() => setDocSlideIndex((prev: number) => prev === 0 ? currentSlides.length - 1 : prev - 1)} className="hover:text-emerald-400 hover:-translate-x-1 transition-all">
-                                      <ChevronLeft size={20} />
-                                   </button>
-                                   <span className="min-w-[40px] text-center tracking-widest">{docSlideIndex + 1} / {currentSlides.length || 1}</span>
-                                   <button onClick={() => setDocSlideIndex((prev: number) => (prev + 1) % currentSlides.length)} className="hover:text-emerald-400 hover:translate-x-1 transition-all">
-                                      <ChevronRight size={20} />
-                                   </button>
-                                 </div>
-                              </>
-                           )}
-
                            {/* 관리자 툴 */}
                            {isAdmin && (
                               <div className="absolute bottom-4 right-4 z-30 w-full max-w-xs bg-white/95 backdrop-blur p-4 rounded-2xl shadow-2xl border border-gray-200" onClick={e => e.stopPropagation()}>
-                                 <div className="text-xs font-bold text-emerald-600 mb-2">🔗 현재 슬라이드 이미지/PDF URL</div>
+                                 <div className="text-xs font-bold text-emerald-600 mb-2">🔗 문서 파일 URL / Google Drive 링크</div>
                                  <input type="text" placeholder="https://..." 
-                                    value={currentSlides[docSlideIndex] || ''} 
+                                    value={currentSlides[0] || ''} 
                                     onChange={e => {
-                                       const newDocs = [...projectDocs];
-                                       const newSlides = [...currentSlides];
-                                       newSlides[docSlideIndex] = e.target.value;
-                                       newDocs[currentDocIndex] = { ...newDocs[currentDocIndex], slides: newSlides };
+                                       const newDocs = JSON.parse(JSON.stringify(projectDocs));
+                                       newDocs[currentDocIndex].slides = [e.target.value];
                                        updateMedia('documents', newDocs);
                                     }} 
                                     className="w-full bg-white border border-gray-200 rounded px-3 py-2 text-xs outline-none focus:border-emerald-500 mb-3 transition-colors" 
                                  />
                                  
-                                 <div className="text-xs font-bold text-emerald-600 mb-2 border-t border-emerald-100 pt-3">📁 현재 페이지 로컬 파일 업로드</div>
-                                 <label className="w-full py-2 bg-emerald-50 text-emerald-700 text-xs font-bold rounded flex items-center justify-center gap-1.5 cursor-pointer hover:bg-emerald-100 transition-colors border border-emerald-200 mb-3">
-                                    <FileText size={14} /> 파일 업로드 (이미지/PDF)
+                                 <div className="text-xs font-bold text-emerald-600 mb-2 border-t border-emerald-100 pt-3">📁 현재 문서 교체 (로컬 파일 업로드)</div>
+                                 <label className="w-full py-2 bg-emerald-50 text-emerald-700 text-xs font-bold rounded flex items-center justify-center gap-1.5 cursor-pointer hover:bg-emerald-100 transition-colors border border-emerald-200">
+                                    <FileText size={14} /> 문서 업로드 (PDF/이미지)
                                     <input type="file" accept="image/*,application/pdf" onChange={(e) => handleFileUpload(e, (b64) => {
-                                       const newDocs = [...projectDocs];
-                                       const newSlides = [...currentSlides];
-                                       newSlides[docSlideIndex] = b64;
-                                       newDocs[currentDocIndex] = { ...newDocs[currentDocIndex], slides: newSlides };
+                                       const newDocs = JSON.parse(JSON.stringify(projectDocs));
+                                       newDocs[currentDocIndex].slides = [b64];
                                        updateMedia('documents', newDocs);
                                     })} className="hidden" />
                                  </label>
-
-                                 <div className="flex gap-2">
-                                    <button onClick={() => {
-                                       const newDocs = JSON.parse(JSON.stringify(projectDocs));
-                                       newDocs[currentDocIndex].slides.splice(docSlideIndex, 1);
-                                       if (newDocs[currentDocIndex].slides.length === 0) newDocs[currentDocIndex].slides.push('');
-                                       updateMedia('documents', newDocs);
-                                       setDocSlideIndex(Math.max(0, docSlideIndex - 1));
-                                    }} className="flex-1 py-2 bg-red-50 text-red-600 font-bold text-xs rounded transition-colors hover:bg-red-100">현재 삭제</button>
-                                    <button onClick={() => {
-                                       const newDocs = JSON.parse(JSON.stringify(projectDocs));
-                                       newDocs[currentDocIndex].slides.push('');
-                                       updateMedia('documents', newDocs);
-                                       setDocSlideIndex(newDocs[currentDocIndex].slides.length - 1);
-                                    }} className="flex-1 py-2 bg-gray-900 text-white font-bold text-xs rounded transition-colors hover:bg-emerald-600">+ 새 페이지 추가</button>
-                                 </div>
-                                 
-                                 {projectDocs.length > 1 && (
-                                    <div className="mt-3 border-t border-gray-100 pt-3">
-                                       <div className="text-[10px] font-bold text-gray-500 mb-1">현재 페이지를 다른 문서로 이동</div>
-                                       <select 
-                                         className="w-full bg-gray-50 border border-gray-200 rounded px-2 py-1.5 text-xs outline-none"
-                                         onChange={(e) => {
-                                            const targetIndex = Number(e.target.value);
-                                            if (targetIndex === -1 || targetIndex === currentDocIndex) return;
-                                            
-                                            const newDocs = JSON.parse(JSON.stringify(projectDocs));
-                                            const slideToMove = newDocs[currentDocIndex].slides[docSlideIndex];
-                                            
-                                            newDocs[currentDocIndex].slides.splice(docSlideIndex, 1);
-                                            if (newDocs[currentDocIndex].slides.length === 0) newDocs[currentDocIndex].slides.push('');
-                                            
-                                            if (newDocs[targetIndex].slides.length === 1 && newDocs[targetIndex].slides[0] === '') {
-                                               newDocs[targetIndex].slides[0] = slideToMove;
-                                            } else {
-                                               newDocs[targetIndex].slides.push(slideToMove);
-                                            }
-                                            
-                                            updateMedia('documents', newDocs);
-                                            setDocSlideIndex(Math.max(0, docSlideIndex - 1));
-                                            e.target.value = "-1";
-                                         }}
-                                       >
-                                         <option value="-1">-- 이동할 문서 선택 --</option>
-                                         {projectDocs.map((d: any, i: number) => i !== currentDocIndex && (
-                                            <option key={d.id} value={i}>{d.title}</option>
-                                         ))}
-                                       </select>
-                                    </div>
-                                 )}
                               </div>
                            )}
                         </div>
