@@ -1170,7 +1170,11 @@ export default function App() {
                       if (active && over && active.id !== over.id) {
                         const oldIndex = projectDocs.findIndex((d: any) => d.id === active.id);
                         const newIndex = projectDocs.findIndex((d: any) => d.id === over.id);
-                        updateMedia('documents', arrayMove(projectDocs, oldIndex, newIndex));
+                        const newDocs = arrayMove(projectDocs, oldIndex, newIndex);
+                        const currentDocId = projectDocs[currentDocIndex]?.id;
+                        updateMedia('documents', newDocs);
+                        const updatedIndex = newDocs.findIndex((d: any) => d.id === currentDocId);
+                        setCurrentDocIndex(updatedIndex >= 0 ? updatedIndex : 0);
                       }
                     };
 
@@ -1255,7 +1259,7 @@ export default function App() {
                            })()}
 
                            {/* 슬라이드 네비게이션 */}
-                           {currentSlides.length > 0 && (
+                           {currentSlides.length > 1 && (
                               <>
                                  <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-2xl z-20 flex items-center gap-6">
                                    <button onClick={() => setDocSlideIndex((prev: number) => prev === 0 ? currentSlides.length - 1 : prev - 1)} className="hover:text-emerald-400 hover:-translate-x-1 transition-all">
@@ -1279,7 +1283,7 @@ export default function App() {
                                        const newDocs = [...projectDocs];
                                        const newSlides = [...currentSlides];
                                        newSlides[docSlideIndex] = e.target.value;
-                                       newDocs[currentDocIndex].slides = newSlides;
+                                       newDocs[currentDocIndex] = { ...newDocs[currentDocIndex], slides: newSlides };
                                        updateMedia('documents', newDocs);
                                     }} 
                                     className="w-full bg-white border border-gray-200 rounded px-3 py-2 text-xs outline-none focus:border-emerald-500 mb-3 transition-colors" 
@@ -1292,7 +1296,7 @@ export default function App() {
                                        const newDocs = [...projectDocs];
                                        const newSlides = [...currentSlides];
                                        newSlides[docSlideIndex] = b64;
-                                       newDocs[currentDocIndex].slides = newSlides;
+                                       newDocs[currentDocIndex] = { ...newDocs[currentDocIndex], slides: newSlides };
                                        updateMedia('documents', newDocs);
                                     })} className="hidden" />
                                  </label>
@@ -1333,13 +1337,15 @@ export default function App() {
                     <span className="font-bold text-sm">플레이 영상</span>
                  </button>
                  <button onClick={() => { setActiveMedia('document'); setDocSlideIndex(0); setCurrentDocIndex(0); }} className={`relative p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 ${activeMedia === 'document' ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-lg' : 'border-gray-200 bg-white hover:border-blue-300 text-gray-500 hover:text-blue-600'}`}>
-                    <FileText size={24} />
-                    <span className="font-bold text-sm">기획 문서</span>
-                    {((selectedProject?.media?.documents?.length || 0) > 0 || (selectedProject?.media?.slides?.length > 0 && !selectedProject?.media?.documents)) && (
-                       <span className="absolute top-2 right-2 bg-blue-100 text-blue-600 text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                          {selectedProject?.media?.documents ? selectedProject.media.documents.length : 1}
-                       </span>
-                    )}
+                    <div className="relative">
+                       <FileText size={24} />
+                       {((selectedProject?.media?.documents?.length || 0) > 0 || (selectedProject?.media?.slides?.length > 0 && !selectedProject?.media?.documents)) && (
+                          <span className="absolute -top-2 -right-3 bg-white border border-blue-100 text-blue-600 text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm">
+                             {selectedProject?.media?.documents ? selectedProject.media.documents.length : 1}
+                          </span>
+                       )}
+                    </div>
+                    <span className="font-bold text-sm">작업 문서</span>
                  </button>
               </div>
             </div>
