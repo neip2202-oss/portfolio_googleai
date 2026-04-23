@@ -787,9 +787,9 @@ export default function App() {
                                                const p = TAG_COLORS[tag.color] || TAG_COLORS[0];
                                                return (
                                                   <div key={tag.id} className="group/tag relative flex items-center">
-                                                     <div className={`px-2.5 py-1 ${p.bg} ${p.text} text-[11px] font-bold rounded-lg border ${p.border} flex items-center gap-1.5 transition-colors`}>
+                                                     <div className={`px-2.5 py-1 ${p.bg} ${p.text} text-xs font-extrabold rounded-lg border font-heading antialiased ${p.border} flex items-center gap-1.5 transition-colors`}>
                                                         <div className={`w-1.5 h-1.5 rounded-full ${p.dot}`}></div>
-                                                        <EditableText isAdmin={isAdmin} value={tag.text} onChange={(v: string) => { const n=JSON.parse(JSON.stringify(activitiesLeftData)); if(!n[idx].tags) n[idx].tags = act.badge ? [{ id: Date.now(), text: act.badge, color: 0 }] : []; n[idx].tags[tIdx].text=v; setActivitiesLeftData(n); }} className="bg-transparent tracking-tight" placeholder="태그명" />
+                                                        <EditableText isAdmin={isAdmin} value={tag.text} onChange={(v: string) => { const n=JSON.parse(JSON.stringify(activitiesLeftData)); if(!n[idx].tags) n[idx].tags = act.badge ? [{ id: Date.now(), text: act.badge, color: 0 }] : []; n[idx].tags[tIdx].text=v; setActivitiesLeftData(n); }} className="bg-transparent" placeholder="태그명" />
                                                      </div>
                                                      {isAdmin && (
                                                         <div className="hidden group-hover/tag:flex absolute top-full left-0 pt-2 z-20">
@@ -883,9 +883,9 @@ export default function App() {
                                                const p = TAG_COLORS[tag.color] || TAG_COLORS[0];
                                                return (
                                                   <div key={tag.id} className="group/tag relative flex items-center">
-                                                     <div className={`px-2.5 py-1 ${p.bg} ${p.text} text-[11px] font-bold rounded-lg border ${p.border} flex items-center gap-1.5 transition-colors`}>
+                                                     <div className={`px-2.5 py-1 ${p.bg} ${p.text} text-xs font-extrabold rounded-lg border font-heading antialiased ${p.border} flex items-center gap-1.5 transition-colors`}>
                                                         <div className={`w-1.5 h-1.5 rounded-full ${p.dot}`}></div>
-                                                        <EditableText isAdmin={isAdmin} value={tag.text} onChange={(v: string) => { const n=JSON.parse(JSON.stringify(activitiesRightData)); if(!n[idx].tags) n[idx].tags = act.badge ? [{ id: Date.now(), text: act.badge, color: 0 }] : []; n[idx].tags[tIdx].text=v; setActivitiesRightData(n); }} className="bg-transparent tracking-tight" placeholder="태그명" />
+                                                        <EditableText isAdmin={isAdmin} value={tag.text} onChange={(v: string) => { const n=JSON.parse(JSON.stringify(activitiesRightData)); if(!n[idx].tags) n[idx].tags = act.badge ? [{ id: Date.now(), text: act.badge, color: 0 }] : []; n[idx].tags[tIdx].text=v; setActivitiesRightData(n); }} className="bg-transparent" placeholder="태그명" />
                                                      </div>
                                                      {isAdmin && (
                                                         <div className="hidden group-hover/tag:flex absolute top-full left-0 pt-2 z-20">
