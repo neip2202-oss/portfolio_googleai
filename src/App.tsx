@@ -1180,12 +1180,12 @@ export default function App() {
 
                     return (
                     <div className="w-full h-full flex flex-col bg-gray-50 relative animate-in fade-in duration-300 rounded-2xl overflow-hidden">
-                        {/* 상단 툴바 */}
-                        <div className="absolute top-4 left-4 right-4 z-50 flex justify-between items-start pointer-events-none">
+                        {/* 상단 툴바 (헤더 영역으로 분리) */}
+                        <div className="w-full bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-40">
                           {/* 드롭다운 UI */}
-                          <div className="relative pointer-events-auto">
+                          <div className="relative">
                             {(projectDocs.length >= 2 || isAdmin) && (
-                               <button onClick={() => setIsDocDropdownOpen(!isDocDropdownOpen)} className="flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur border border-gray-200 rounded-full shadow-sm text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all">
+                               <button onClick={() => setIsDocDropdownOpen(!isDocDropdownOpen)} className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-100 transition-all">
                                   <FileText size={16} className="text-blue-500" />
                                   {currentDoc?.title || '문서 선택'}
                                   <ChevronDown size={16} className={`transition-transform ${isDocDropdownOpen ? 'rotate-180' : ''}`} />
