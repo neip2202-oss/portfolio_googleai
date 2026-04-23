@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle, ChevronDown, Maximize2 } from 'lucide-react';
+import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle, ChevronDown, Maximize2, GripVertical, Trash2 } from 'lucide-react';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const getExternalEmbedUrl = (url: string) => {
     if (!url) return url;
@@ -44,6 +47,20 @@ const iconsMapping: Record<string, any> = { ArrowDown, Mail, Phone, ChevronRight
 // -------------------------------------------------------------
 // 컴포넌트 외부 분리
 // -------------------------------------------------------------
+const SortableDocItem = ({ doc, index, isActive, onSelect, onTitleChange, onRemove, isAdmin }: any) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: doc.id });
+  const style = { transform: CSS.Transform.toString(transform), transition };
+  return (
+    <div ref={setNodeRef} style={style} className={`flex items-center gap-2 p-2 rounded-lg ${isActive ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50 border-transparent'} border transition-colors mb-1`}>
+      {isAdmin && <div {...attributes} {...listeners} className="text-gray-300 hover:text-gray-500 cursor-grab px-1"><GripVertical size={16}/></div>}
+      <div className="flex-1 cursor-pointer" onClick={onSelect}>
+        <EditableText isAdmin={isAdmin} value={doc.title} onChange={onTitleChange} className="text-sm font-bold w-full text-gray-700" />
+      </div>
+      {isAdmin && <button onClick={onRemove} className="text-gray-400 hover:text-red-500 p-1"><Trash2 size={14}/></button>}
+    </div>
+  );
+};
+
 const EditableText: React.FC<any> = ({ value, onChange, as = 'input', className = '', placeholder = '', isAdmin }) => {
   if (!isAdmin) return <span className={className}>{value}</span>;
   
@@ -136,6 +153,7 @@ export default function App() {
   const [docSlideIndex, setDocSlideIndex] = useState(0);
   const [currentDocIndex, setCurrentDocIndex] = useState(0);
   const [isDocDropdownOpen, setIsDocDropdownOpen] = useState(false);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const [homePlayFilter, setHomePlayFilter] = useState('PC'); 
   const [historyPageFilter, setHistoryPageFilter] = useState('All'); 
   const [isVisible, setIsVisible] = useState(false);
@@ -1147,6 +1165,15 @@ export default function App() {
                     const currentDoc = projectDocs[currentDocIndex] || null;
                     const currentSlides = currentDoc?.slides || [];
 
+                    const handleDragEnd = (event: any) => {
+                      const { active, over } = event;
+                      if (active && over && active.id !== over.id) {
+                        const oldIndex = projectDocs.findIndex((d: any) => d.id === active.id);
+                        const newIndex = projectDocs.findIndex((d: any) => d.id === over.id);
+                        updateMedia('documents', arrayMove(projectDocs, oldIndex, newIndex));
+                      }
+                    };
+
                     return (
                     <div className="w-full h-full flex flex-col bg-gray-50 relative animate-in fade-in duration-300 rounded-2xl overflow-hidden">
                         {/* 상단 툴바 */}
@@ -1162,19 +1189,29 @@ export default function App() {
                             )}
                             {isDocDropdownOpen && (
                               <div className="absolute top-full left-0 mt-2 w-72 bg-white border border-gray-200 rounded-2xl shadow-xl p-3 z-50 max-h-64 overflow-y-auto">
-                                <div className="space-y-1">
-                                  {projectDocs.map((doc: any, idx: number) => (
-                                    <div key={doc.id} className={`flex items-center gap-2 p-2 rounded-lg ${idx === currentDocIndex ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50 border-transparent'} border transition-colors cursor-pointer`}>
-                                      <div className="flex-1" onClick={() => { setCurrentDocIndex(idx); setDocSlideIndex(0); setIsDocDropdownOpen(false); }}>
-                                        <EditableText isAdmin={isAdmin} value={doc.title} onChange={(v: string) => {
-                                           const newDocs = [...projectDocs];
-                                           newDocs[idx].title = v;
-                                           updateMedia('documents', newDocs);
-                                        }} className="text-sm font-bold w-full text-gray-700" />
-                                      </div>
+                                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                                  <SortableContext items={projectDocs.map((d: any) => d.id)} strategy={verticalListSortingStrategy}>
+                                    <div className="space-y-1">
+                                      {projectDocs.map((doc: any, idx: number) => (
+                                        <SortableDocItem 
+                                          key={doc.id} doc={doc} index={idx} isAdmin={isAdmin} isActive={idx === currentDocIndex}
+                                          onSelect={() => { setCurrentDocIndex(idx); setDocSlideIndex(0); setIsDocDropdownOpen(false); }}
+                                          onTitleChange={(v: string) => {
+                                             const newDocs = [...projectDocs];
+                                             newDocs[idx].title = v;
+                                             updateMedia('documents', newDocs);
+                                          }}
+                                          onRemove={(e: any) => {
+                                             e.stopPropagation();
+                                             const newDocs = projectDocs.filter((_: any, i: number) => i !== idx);
+                                             updateMedia('documents', newDocs);
+                                             if (currentDocIndex >= newDocs.length) setCurrentDocIndex(Math.max(0, newDocs.length - 1));
+                                          }}
+                                        />
+                                      ))}
                                     </div>
-                                  ))}
-                                </div>
+                                  </SortableContext>
+                                </DndContext>
                                 {isAdmin && (
                                   <button onClick={() => {
                                      updateMedia('documents', [...projectDocs, { id: `doc-${Date.now()}`, title: '새 기획 문서', slides: [''] }]);
