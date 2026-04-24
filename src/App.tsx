@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle, ChevronDown, Maximize2, GripVertical, Trash2, X, Link as LinkIcon, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle, ChevronDown, Maximize2, Minimize2, GripVertical, Trash2, X, Link as LinkIcon, RefreshCw } from 'lucide-react';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -361,6 +361,34 @@ export default function App() {
        alert('새롭게 업데이트할 아이콘이 없거나 이미 모두 최적화되어 있습니다.');
     }
     setIsOptimizing(false);
+  };
+
+  // --- Fullscreen State ---
+  const viewerContainerRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(!!(document.fullscreenElement || (document as any).webkitFullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    document.addEventListener('webkitfullscreenchange', handleFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFsChange);
+      document.removeEventListener('webkitfullscreenchange', handleFsChange);
+    };
+  }, []);
+
+  const toggleFullscreen = () => {
+    const el = viewerContainerRef.current;
+    if (!el) return;
+    if (!isFullscreen) {
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if ((el as any).webkitRequestFullscreen) (el as any).webkitRequestFullscreen();
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if ((document as any).webkitExitFullscreen) (document as any).webkitExitFullscreen();
+    }
   };
 
   // --- Step 3: 플로팅 사이드 패널 상태 및 함수 ---
@@ -1323,7 +1351,7 @@ export default function App() {
                     };
 
                     return (
-                    <div className="w-full flex flex-col bg-gray-50 relative animate-in fade-in duration-300">
+                    <div ref={viewerContainerRef} className={`w-full flex flex-col bg-gray-50 relative animate-in fade-in duration-300 ${isFullscreen ? 'bg-white h-[100dvh]' : ''}`}>
                         {/* 상단 툴바 (헤더 영역으로 분리) */}
                         <div className="w-full bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-40">
                           {/* 드롭다운 UI */}
@@ -1373,10 +1401,20 @@ export default function App() {
                               </div>
                             )}
                           </div>
+
+                          {/* 전체 보기 버튼 (우측) */}
+                          <button 
+                             onClick={toggleFullscreen} 
+                             className={`flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition-all group ${isFullscreen ? 'fixed top-4 right-4 z-[9999] shadow-lg' : ''}`}
+                             title={isFullscreen ? '축소하기' : '전체 화면으로 보기'}
+                          >
+                             {isFullscreen ? <Minimize2 size={16} className="text-emerald-600 transition-colors" /> : <Maximize2 size={16} className="text-gray-500 group-hover:text-emerald-600 transition-colors" />}
+                             <span className="hidden sm:inline">{isFullscreen ? '축소하기' : '전체 보기'}</span>
+                          </button>
                         </div>
 
                         {/* 메인 뷰어 */}
-                        <div className="aspect-[16/9] w-full flex flex-col items-center justify-center relative bg-white" onClick={() => setIsDocDropdownOpen(false)}>
+                        <div className={`${isFullscreen ? 'h-[calc(100vh-60px)]' : 'aspect-[16/9]'} w-full flex flex-col items-center justify-center relative bg-white`} onClick={() => setIsDocDropdownOpen(false)}>
                            {(() => {
                               const currentSlide = currentSlides[0];
                               if (currentSlide) {
@@ -1427,6 +1465,14 @@ export default function App() {
               </div>
 
               <div className="grid grid-cols-3 gap-4">
+                 <style>{`
+                    .animate-pulse-ring { animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+                    @keyframes pulse-ring {
+                       0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+                       70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+                       100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+                    }
+                 `}</style>
                  <button onClick={() => setActiveMedia('thumbnail')} className={`p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 ${activeMedia === 'thumbnail' ? 'border-gray-900 bg-gray-900 text-white shadow-lg' : 'border-gray-200 bg-white hover:border-gray-400 text-gray-500 hover:text-gray-800'}`}>
                     <ImageIcon size={24} />
                     <span className="font-bold text-sm">대표 이미지</span>
@@ -1435,7 +1481,7 @@ export default function App() {
                     <PlayCircle size={24} />
                     <span className="font-bold text-sm">플레이 영상</span>
                  </button>
-                 <button onClick={() => { setActiveMedia('document'); setDocSlideIndex(0); setCurrentDocIndex(0); }} className={`relative p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 ${activeMedia === 'document' ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-lg' : 'border-gray-200 bg-white hover:border-blue-300 text-gray-500 hover:text-blue-600'}`}>
+                 <button onClick={() => { setActiveMedia('document'); setDocSlideIndex(0); setCurrentDocIndex(0); }} className={`relative p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 ${activeMedia === 'document' ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-lg' : 'border-blue-200 bg-white hover:border-blue-300 text-blue-600 animate-pulse-ring'}`}>
                     <div className="relative">
                        <FileText size={24} />
                        {((selectedProject?.media?.documents?.length || 0) > 0 || (selectedProject?.media?.slides?.length > 0 && !selectedProject?.media?.documents)) && (
@@ -1445,6 +1491,13 @@ export default function App() {
                        )}
                     </div>
                     <span className="font-bold text-sm">작업 문서</span>
+
+                    {/* Tooltip pointing to document */}
+                    {activeMedia !== 'document' && (
+                       <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-lg shadow-xl whitespace-nowrap animate-bounce pointer-events-none before:content-[''] before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-[6px] before:border-transparent before:border-t-blue-600 z-10">
+                          문서를 확인해보세요!
+                       </div>
+                    )}
                  </button>
               </div>
             </div>
