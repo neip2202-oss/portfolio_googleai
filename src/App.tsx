@@ -1040,33 +1040,14 @@ export default function App() {
                 </div>
              )}
 
-            {/* Anchor Navigation */}
-            {coverLetterData.length > 0 && (
-              <div className="sticky top-20 z-40 bg-white/80 backdrop-blur-md py-3 px-4 rounded-2xl border border-gray-200 shadow-sm mb-8 flex gap-2 overflow-x-auto no-scrollbar">
-                 {coverLetterData.map((letter: any, i: number) => (
-                    <button 
-                       key={`nav-${letter.id}`} 
-                       onClick={() => {
-                          const el = document.getElementById(`cover-letter-${letter.id}`);
-                          if (el) {
-                             const y = el.getBoundingClientRect().top + window.scrollY - 140; // Offset for sticky header
-                             window.scrollTo({ top: y, behavior: 'smooth' });
-                          }
-                       }} 
-                       className="px-4 py-2 rounded-full bg-gray-50 border border-gray-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 text-gray-600 text-sm font-bold whitespace-nowrap transition-all shadow-sm"
-                    >
-                       {i + 1}. {letter.title.split('\n')[0]}
-                    </button>
-                 ))}
-              </div>
-            )}
+            {/* Anchor Navigation Moved to right floating panel */}
 
             {coverLetterData.map((letter: any, index: number) => (
                <div id={`cover-letter-${letter.id}`} key={letter.id} className="p-8 md:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm relative group/cover scroll-mt-32">
                   {isAdmin && <button onClick={() => { const n=[...coverLetterData]; n.splice(index, 1); setCoverLetterData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-30 opacity-0 group-hover/cover:opacity-100">✕</button>}
                   {isAdmin ? (
                      <div className="space-y-4">
-                        <EditableText isAdmin={isAdmin} value={letter.title} onChange={(v: string) => { const n = [...coverLetterData]; n[index].title = v; setCoverLetterData(n); }} className="text-xl font-extrabold block" />
+                        <EditableText isAdmin={isAdmin} as="textarea" value={letter.title} onChange={(v: string) => { const n = [...coverLetterData]; n[index].title = v; setCoverLetterData(n); }} className="text-xl font-extrabold block w-full p-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none resize-y min-h-[80px]" />
                         <EditableText isAdmin={isAdmin} as="textarea" value={letter.content} onChange={(v: string) => { const n = [...coverLetterData]; n[index].content = v; setCoverLetterData(n); }} className="text-sm font-mono bg-gray-900 text-gray-200 p-4 rounded-xl min-h-[150px] w-full block" />
                      </div>
                   ) : (
@@ -1774,6 +1755,28 @@ export default function App() {
                      {anchor.label}
                   </span>
                </a>
+            ))}
+         </div>
+      )}
+
+      {/* 자기소개서 고정 앵커 네비게이션 */}
+      {currentTab === 'resume' && resumeSubTab === 'cover-letter' && coverLetterData.length > 0 && (
+         <div className="print:hidden fixed right-6 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-2 p-3 bg-white/70 backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-[2rem] z-40">
+            {coverLetterData.map((letter: any, i: number) => (
+               <div key={`nav-${letter.id}`} onClick={() => {
+                  const el = document.getElementById(`cover-letter-${letter.id}`);
+                  if (el) {
+                     const y = el.getBoundingClientRect().top + window.scrollY - 140;
+                     window.scrollTo({ top: y, behavior: 'smooth' });
+                  }
+               }} className="block relative group cursor-pointer">
+                  <div className="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-900 text-gray-400 hover:text-white transition-colors shadow-sm border border-gray-100 font-black text-sm">
+                     {i + 1}
+                  </div>
+                  <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 px-4 py-2 bg-gray-900 backdrop-blur text-xs font-bold text-white rounded-xl shadow-xl opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:left-full before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-transparent before:border-l-gray-900 max-w-[300px] overflow-hidden text-ellipsis">
+                     {letter.title.split('\n')[0].length > 30 ? letter.title.split('\n')[0].substring(0, 30) + '...' : letter.title.split('\n')[0]}
+                  </span>
+               </div>
             ))}
          </div>
       )}
