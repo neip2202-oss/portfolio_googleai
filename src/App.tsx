@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle, ChevronDown, Maximize2, GripVertical, Trash2, X, Link as LinkIcon } from 'lucide-react';
+import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle, ChevronDown, Maximize2, GripVertical, Trash2, X, Link as LinkIcon, RefreshCw } from 'lucide-react';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -42,6 +42,7 @@ const TAG_COLORS = [
 ];
 import { useContent } from './hooks/useContent';
 import { supabaseFetch, hasContent } from './utils/supabase';
+import { fetchGameIconFromNaver } from './utils/gameIcon';
 
 const iconsMapping: Record<string, any> = { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle };
 
@@ -303,23 +304,8 @@ export default function App() {
     return 'default';
   });
 
-  // --- 기존 자소서 데이터 마이그레이션 로직 ---
-  useEffect(() => {
-    supabaseFetch(`site_content?key=eq.coverLetterData&select=value`)
-      .then((rows) => {
-        if (rows && rows.length > 0 && hasContent(rows[0].value)) {
-          const oldData = rows[0].value;
-          setCoverLettersMap(prev => {
-            // 만약 새로 바뀐 coverLettersMap의 default가 초기 기본값 상태라면 구버전 데이터로 덮어쓰기
-            if (prev['default'] && prev['default'].length === 1 && prev['default'][0].id === 1) {
-              return { ...prev, 'default': oldData };
-            }
-            return prev;
-          });
-        }
-      })
-      .catch(() => {});
-  }, []);
+  // --- 구버전 데이터 복구 로직 (완료되어 삭제) ---
+  // 계속해서 최신 데이터를 과거 데이터로 덮어쓰는 버그 원인이 되어 제거했습니다.
 
   
   // 현재 렌더링/수정할 자소서 데이터 파생
@@ -334,6 +320,47 @@ export default function App() {
       ...prev,
       [selectedCompany]: newData
     }));
+  };
+
+  const [isOptimizing, setIsOptimizing] = useState(false);
+
+  const handleOptimizeIcons = async () => {
+    if (!isAdmin || isOptimizing) return;
+    setIsOptimizing(true);
+    
+    const newData = [...playHistoryData];
+    let updatedCount = 0;
+
+    const updatePromises = newData.map(async (game, i) => {
+       if (!game.image && game.title && game.title !== '신규 게임') {
+          // Temporarily bypassing the cache so that broken 'not_found' marks are re-fetched properly.
+          // if (game.iconUrl === 'not_found') return;
+          
+          const fetchedUrl = await fetchGameIconFromNaver(game.title);
+          
+          if (fetchedUrl) {
+             if (game.iconUrl !== fetchedUrl) {
+                newData[i] = { ...game, iconUrl: fetchedUrl };
+                updatedCount++;
+             }
+          } else {
+             if (game.iconUrl !== 'not_found') {
+                newData[i] = { ...game, iconUrl: 'not_found' };
+                updatedCount++;
+             }
+          }
+       }
+    });
+
+    await Promise.all(updatePromises);
+    
+    if (updatedCount > 0) {
+       setPlayHistoryData(newData);
+       alert(`아이콘 최적화가 완료되었습니다! (성공 및 정리된 항목: ${updatedCount}개)`);
+    } else {
+       alert('새롭게 업데이트할 아이콘이 없거나 이미 모두 최적화되어 있습니다.');
+    }
+    setIsOptimizing(false);
   };
 
   // --- Step 3: 플로팅 사이드 패널 상태 및 함수 ---
@@ -1480,16 +1507,32 @@ export default function App() {
              </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 mb-8 justify-center md:justify-start border-b border-gray-200 pb-8">
-             {['All', 'PC', 'Mobile', 'Console'].map(platform => (
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-8 border-b border-gray-200 pb-8">
+             <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+               {['All', 'PC', 'Mobile', 'Console'].map(platform => (
+                  <button 
+                    key={platform}
+                    onClick={() => setHistoryPageFilter(platform)}
+                    className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-sm ${historyPageFilter === platform ? 'bg-blue-500 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-400 hover:bg-gray-50'}`}
+                  >
+                    {platform}
+                  </button>
+               ))}
+             </div>
+             {isAdmin && (
                 <button 
-                  key={platform}
-                  onClick={() => setHistoryPageFilter(platform)}
-                  className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-sm ${historyPageFilter === platform ? 'bg-blue-500 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-400 hover:bg-gray-50'}`}
+                  onClick={handleOptimizeIcons}
+                  disabled={isOptimizing}
+                  className={`px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-colors border flex items-center gap-2 ${
+                    isOptimizing 
+                      ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
+                      : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white border-emerald-200'
+                  }`}
                 >
-                  {platform}
+                  <RefreshCw size={16} className={isOptimizing ? "animate-spin" : ""} /> 
+                  {isOptimizing ? '최적화 진행 중...' : '아이콘 자동 최적화'}
                 </button>
-             ))}
+             )}
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -1513,8 +1556,12 @@ export default function App() {
                         )}
                      </div>
                  ) : (
-                     <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-500 mb-5 group-hover:bg-blue-50 group-hover:text-blue-500 group-hover:border-blue-200 transition-colors mx-auto relative group/img shrink-0">
-                        {game.platform === 'PC' ? <Monitor size={32}/> : game.platform === 'Mobile' ? <Smartphone size={32}/> : <Gamepad2 size={32}/>}
+                     <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-500 mb-5 group-hover:bg-blue-50 group-hover:text-blue-500 group-hover:border-blue-200 transition-colors mx-auto relative group/img shrink-0 overflow-hidden">
+                        {game.iconUrl && game.iconUrl !== 'not_found' ? (
+                           <img src={game.iconUrl} className="w-full h-full object-cover" alt={game.title} />
+                        ) : (
+                           game.platform === 'PC' ? <Monitor size={32}/> : game.platform === 'Mobile' ? <Smartphone size={32}/> : <Gamepad2 size={32}/>
+                        )}
                         {isAdmin && (
                            <label className="absolute inset-0 bg-black/50 text-white rounded-2xl flex flex-col items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity cursor-pointer z-10 w-full h-full">
                               <span className="text-[10px] font-bold">이미지 등록</span>
