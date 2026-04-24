@@ -1040,8 +1040,29 @@ export default function App() {
                 </div>
              )}
 
+            {/* Anchor Navigation */}
+            {coverLetterData.length > 0 && (
+              <div className="sticky top-20 z-40 bg-white/80 backdrop-blur-md py-3 px-4 rounded-2xl border border-gray-200 shadow-sm mb-8 flex gap-2 overflow-x-auto no-scrollbar">
+                 {coverLetterData.map((letter: any, i: number) => (
+                    <button 
+                       key={`nav-${letter.id}`} 
+                       onClick={() => {
+                          const el = document.getElementById(`cover-letter-${letter.id}`);
+                          if (el) {
+                             const y = el.getBoundingClientRect().top + window.scrollY - 140; // Offset for sticky header
+                             window.scrollTo({ top: y, behavior: 'smooth' });
+                          }
+                       }} 
+                       className="px-4 py-2 rounded-full bg-gray-50 border border-gray-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 text-gray-600 text-sm font-bold whitespace-nowrap transition-all shadow-sm"
+                    >
+                       {i + 1}. {letter.title.split('\n')[0]}
+                    </button>
+                 ))}
+              </div>
+            )}
+
             {coverLetterData.map((letter: any, index: number) => (
-               <div key={letter.id} className="p-8 md:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm relative group/cover">
+               <div id={`cover-letter-${letter.id}`} key={letter.id} className="p-8 md:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm relative group/cover scroll-mt-32">
                   {isAdmin && <button onClick={() => { const n=[...coverLetterData]; n.splice(index, 1); setCoverLetterData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-30 opacity-0 group-hover/cover:opacity-100">✕</button>}
                   {isAdmin ? (
                      <div className="space-y-4">
@@ -1052,11 +1073,11 @@ export default function App() {
                      <div className="flex flex-col md:grid md:grid-cols-12 gap-8 md:gap-12 lg:gap-16">
                         {/* 좌측: 문항 번호와 제목 (약 30%) */}
                         <div className="md:col-span-4 lg:col-span-3">
-                           <h3 className="text-xl font-black text-gray-900 flex flex-col gap-4 sticky top-24">
+                           <h3 className="text-xl font-black text-gray-900 flex flex-col gap-4 sticky top-36">
                               <span className="w-10 h-10 rounded-2xl bg-gray-900 text-white flex items-center justify-center text-lg font-black shadow-lg font-accent">
                                  {index + 1}
                               </span>
-                              <span className="leading-tight tracking-tighter break-keep">
+                              <span className="leading-tight tracking-tighter break-keep whitespace-pre-wrap">
                                  {letter.title}
                               </span>
                            </h3>
