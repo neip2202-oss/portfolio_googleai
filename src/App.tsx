@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle, ChevronDown, Maximize2, GripVertical, Trash2 } from 'lucide-react';
+import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle, ChevronDown, Maximize2, GripVertical, Trash2, X, Link as LinkIcon } from 'lucide-react';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -285,9 +285,60 @@ export default function App() {
     { id: 1, year: '2022.06 - 2023.04', title: 'OOO 게임 기획 부트캠프', badge: '우수 수료', desc: '8개월간 6개의 팀 프로젝트 기획 및 스팀 런칭 완수. Jira를 활용한 애자일 스프린트 리드.' },
   ]);
 
-  const [coverLetterData, setCoverLetterData] = useContent<any>('coverLetterData', [
-    { id: 1, title: '지원 동기 및 기획자로서의 목표', content: '**"선택에 이유를 묻는 단단한 근거가 서비스 성패를 좌우한다."**\n\n단순히 재밌어 보이는 아이디어를 넘어, 논리적 구조로 엮어내고 실제 지표로 증명하는 기획자가 되고자 합니다.' },
-  ]);
+  // 기업별 맞춤형 자기소개서 데이터 구조 (Key: 기업 ID, Value: 자소서 배열)
+  const [coverLettersMap, setCoverLettersMap] = useContent<Record<string, any[]>>('coverLettersMap', {
+    'default': [
+      { id: 1, title: '지원 동기 및 기획자로서의 목표', content: '**"선택에 이유를 묻는 단단한 근거가 서비스 성패를 좌우한다."**\n\n단순히 재밌어 보이는 아이디어를 넘어, 논리적 구조로 엮어내고 실제 지표로 증명하는 기획자가 되고자 합니다.' }
+    ]
+  });
+  
+  // 현재 선택된 기업 ID (기본값: default)
+  const [selectedCompany, setSelectedCompany] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const company = params.get('company');
+      return company || 'default';
+    }
+    return 'default';
+  });
+  
+  // 현재 렌더링/수정할 자소서 데이터 파생
+  const coverLetterData = coverLettersMap[selectedCompany] || coverLettersMap['default'] || [];
+  
+  // 자소서 업데이트 헬퍼 함수
+  const setCoverLetterData = (newData: any[]) => {
+    setCoverLettersMap(prev => ({
+      ...prev,
+      [selectedCompany]: newData
+    }));
+  };
+
+  // --- Step 3: 플로팅 사이드 패널 상태 및 함수 ---
+  const [isCompanyPanelOpen, setIsCompanyPanelOpen] = useState(false);
+
+  const handleAddCompany = () => {
+    const newCompany = prompt('추가할 기업의 ID(영문)를 입력하세요. (예: nexon, netmarble)');
+    if (newCompany && newCompany.trim() !== '') {
+       const key = newCompany.trim().toLowerCase();
+       if (!coverLettersMap[key]) {
+         setCoverLettersMap(prev => ({
+           ...prev,
+           [key]: [
+             { id: Date.now(), title: `${key.toUpperCase()} 지원 동기`, content: '내용을 입력하세요.' }
+           ]
+         }));
+       }
+       setSelectedCompany(key);
+    }
+  };
+
+  const copyCompanyUrl = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('company', selectedCompany);
+    navigator.clipboard.writeText(url.toString());
+    alert('URL이 복사되었습니다: ' + url.toString());
+  };
+
 
   const [workTools, setWorkTools] = useContent<any>('workTools', [
     { id: 1, name: 'Excel', tooltip: '데이터 모델링 및 수치 밸런싱', iconName: 'Database' },
@@ -1635,6 +1686,69 @@ export default function App() {
             ))}
          </div>
       )}
+
+      {/* 관리자 모드: 우측 기업별 자소서 관리 플로팅 패널 */}
+      {isAdminMode && currentTab === 'resume' && (
+        <>
+          {/* 패널 토글 버튼 */}
+          <button
+            onClick={() => setIsCompanyPanelOpen(!isCompanyPanelOpen)}
+            className="fixed right-6 top-24 z-50 bg-emerald-600 text-white p-3 rounded-full shadow-2xl hover:bg-emerald-700 transition-colors flex items-center justify-center print:hidden group"
+            title="기업별 맞춤 자소서 관리"
+          >
+            <Briefcase size={24} className="group-hover:scale-110 transition-transform" />
+            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm border-2 border-white">
+              {Object.keys(coverLettersMap || {}).length}
+            </span>
+          </button>
+
+          {/* 패널 */}
+          <div className={`fixed top-0 right-0 h-full w-80 bg-white/90 backdrop-blur-xl shadow-[-10px_0_30px_rgba(0,0,0,0.1)] z-[60] transform transition-transform duration-300 ease-in-out border-l border-white/40 ${isCompanyPanelOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col print:hidden`}>
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="font-extrabold text-lg text-gray-900 flex items-center gap-2 tracking-tight">
+                <Briefcase size={20} className="text-emerald-600"/> 기업 맞춤형 자소서
+              </h3>
+              <button onClick={() => setIsCompanyPanelOpen(false)} className="text-gray-400 hover:text-gray-900 transition-colors w-8 h-8 flex items-center justify-center bg-gray-50 rounded-full hover:bg-gray-200">
+                <X size={16} />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 px-2">등록된 기업 목록</div>
+              {Object.keys(coverLettersMap || {}).map(companyKey => (
+                <div 
+                  key={companyKey} 
+                  onClick={() => setSelectedCompany(companyKey)}
+                  className={`p-3.5 rounded-2xl cursor-pointer border-2 transition-all flex justify-between items-center ${selectedCompany === companyKey ? 'border-emerald-500 bg-emerald-50 shadow-sm' : 'border-transparent hover:bg-gray-50'}`}
+                >
+                  <span className={`font-bold ${selectedCompany === companyKey ? 'text-emerald-700' : 'text-gray-600'}`}>
+                     {companyKey === 'default' ? '기본 (Default)' : companyKey.toUpperCase()}
+                  </span>
+                  {selectedCompany === companyKey && <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm"></div>}
+                </div>
+              ))}
+            </div>
+
+            <div className="p-5 border-t border-gray-100 bg-white/50 space-y-3">
+              <button onClick={handleAddCompany} className="w-full py-3.5 bg-gray-900 text-white rounded-xl font-bold shadow-md hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
+                <Plus size={16} /> 신규 기업 추가
+              </button>
+              <button onClick={copyCompanyUrl} className="w-full py-3.5 bg-white text-gray-700 border-2 border-gray-200 rounded-xl font-bold hover:border-emerald-500 hover:text-emerald-600 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                <LinkIcon size={16} /> 전용 URL 복사하기
+              </button>
+            </div>
+          </div>
+          
+          {/* 오버레이 (모바일용) */}
+          {isCompanyPanelOpen && (
+            <div 
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 md:hidden transition-opacity" 
+              onClick={() => setIsCompanyPanelOpen(false)}
+            />
+          )}
+        </>
+      )}
+
         </div>
   );
 }
