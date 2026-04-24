@@ -103,13 +103,14 @@ const MarkdownRenderer: React.FC<any> = ({ content }) => {
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-emerald-600 font-bold hover:underline">$1</a>');
     html = html.replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold text-gray-900 mt-8 mb-3 border-b border-gray-100 pb-2">$1</h3>');
     html = html.replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-emerald-500 pl-4 py-2 my-4 bg-emerald-50/30 text-emerald-800 font-medium rounded-r-lg">$1</blockquote>');
-    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong class="text-black font-black">$1</strong>');
-    html = html.replace(/==(.*?)==/gim, '<mark class="bg-emerald-100 text-emerald-900 px-1 rounded font-bold">$1</mark>');
+    html = html.replace(/\(bc\)(.*?)\([\\/]bc\)/gim, '<strong class="text-emerald-600 font-bold">$1</strong>');
+    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong class="text-[#222222] font-bold">$1</strong>');
+    html = html.replace(/==(.*?)==/gim, '<mark class="bg-transparent bg-[linear-gradient(transparent_60%,#a7f3d0_60%)] text-[#222222] font-bold px-1">$1</mark>');
     html = html.replace(/^- (.*$)/gim, '<li class="ml-5 list-disc marker:text-emerald-500 mb-1">$1</li>');
     html = html.replace(/\n/g, '<br/>');
     return { __html: html };
   };
-  return <div className="markdown-body text-gray-800 font-medium leading-relaxed text-base md:text-[17px] tracking-tight" dangerouslySetInnerHTML={createMarkup()} />;
+  return <div className="markdown-body text-[#333333] font-medium leading-relaxed text-[16px] md:text-[17px] tracking-tight" style={{ fontFamily: 'Pretendard, sans-serif' }} dangerouslySetInnerHTML={createMarkup()} />;
 };
 
 const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (base64: string) => void) => {
