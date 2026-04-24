@@ -1761,7 +1761,7 @@ export default function App() {
 
       {/* 자기소개서 고정 앵커 네비게이션 */}
       {currentTab === 'resume' && resumeSubTab === 'cover-letter' && coverLetterData.length > 0 && (
-         <div className="print:hidden fixed right-6 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-2 p-3 bg-white/70 backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-[2rem] z-40">
+         <div className="print:hidden fixed right-6 top-1/2 -translate-y-1/2 hidden md:flex flex-col items-center gap-4 p-2 z-40">
             {coverLetterData.map((letter: any, i: number) => (
                <div key={`nav-${letter.id}`} onClick={() => {
                   const el = document.getElementById(`cover-letter-${letter.id}`);
@@ -1769,12 +1769,10 @@ export default function App() {
                      const y = el.getBoundingClientRect().top + window.scrollY - 140;
                      window.scrollTo({ top: y, behavior: 'smooth' });
                   }
-               }} className="block relative group cursor-pointer">
-                  <div className="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-900 text-gray-400 hover:text-white transition-colors shadow-sm border border-gray-100 font-black text-sm">
-                     {i + 1}
-                  </div>
-                  <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 px-4 py-2 bg-gray-900 backdrop-blur text-xs font-bold text-white rounded-xl shadow-xl opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:left-full before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-transparent before:border-l-gray-900 max-w-[300px] overflow-hidden text-ellipsis">
-                     {letter.title.split('\n')[0].length > 30 ? letter.title.split('\n')[0].substring(0, 30) + '...' : letter.title.split('\n')[0]}
+               }} className="block relative group cursor-pointer p-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-gray-400/60 group-hover:bg-emerald-500 group-hover:scale-[1.8] group-hover:shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all duration-300"></div>
+                  <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900/90 backdrop-blur-sm text-xs font-bold text-white rounded-lg shadow-xl opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300 whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:left-full before:top-1/2 before:-translate-y-1/2 before:border-[5px] before:border-transparent before:border-l-gray-900/90 max-w-[250px] overflow-hidden text-ellipsis">
+                     {letter.title.split('\n')[0].length > 25 ? letter.title.split('\n')[0].substring(0, 25) + '...' : letter.title.split('\n')[0]}
                   </span>
                </div>
             ))}
