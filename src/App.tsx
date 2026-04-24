@@ -298,7 +298,7 @@ export default function App() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const company = params.get('company');
-      return company || 'default';
+      return company ? company.toLowerCase() : 'default';
     }
     return 'default';
   });
@@ -323,7 +323,10 @@ export default function App() {
 
   
   // 현재 렌더링/수정할 자소서 데이터 파생
-  const coverLetterData = coverLettersMap[selectedCompany] || coverLettersMap['default'] || [];
+  const coverLetterData = coverLettersMap[selectedCompany] || 
+    (selectedCompany !== 'default' 
+      ? [{ id: Date.now(), title: `${selectedCompany.toUpperCase()} 지원 동기`, content: '내용을 입력하세요.' }] 
+      : coverLettersMap['default'] || []);
   
   // 자소서 업데이트 헬퍼 함수
   const setCoverLetterData = (newData: any[]) => {
