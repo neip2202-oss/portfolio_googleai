@@ -20,6 +20,10 @@ const getExternalEmbedUrl = (url: string) => {
     const docsMatch = url.match(/docs\.google\.com\/presentation\/d\/([^/?]+)/);
     if (docsMatch && docsMatch[1]) return `https://docs.google.com/presentation/d/${docsMatch[1]}/embed?start=false&loop=false`;
 
+    // Google Sheets
+    const sheetsMatch = url.match(/docs\.google\.com\/spreadsheets\/d\/([^/?]+)/);
+    if (sheetsMatch && sheetsMatch[1]) return `https://docs.google.com/spreadsheets/d/${sheetsMatch[1]}/preview`;
+
     return url;
 };
 
@@ -28,7 +32,8 @@ const isNativeEmbeddedDoc = (url: string) => {
     return url.startsWith('data:application/pdf') || 
            url.toLowerCase().endsWith('.pdf') || 
            url.includes('drive.google.com') || 
-           url.includes('docs.google.com/presentation');
+           url.includes('docs.google.com/presentation') ||
+           url.includes('docs.google.com/spreadsheets');
 };
 
 const TAG_COLORS = [
@@ -1351,7 +1356,7 @@ export default function App() {
                     };
 
                     return (
-                    <div ref={viewerContainerRef} className={`w-full flex flex-col bg-gray-50 relative animate-in fade-in duration-300 ${isFullscreen ? 'bg-white h-[100dvh]' : ''}`}>
+                    <div ref={viewerContainerRef} className={`w-full flex flex-col bg-gray-50 relative animate-in fade-in duration-300 ${isFullscreen ? 'bg-white h-[100dvh] overflow-hidden' : ''}`}>
                         {/* 상단 툴바 (헤더 영역으로 분리) */}
                         <div className="w-full bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-40">
                           {/* 드롭다운 UI */}
@@ -1414,7 +1419,7 @@ export default function App() {
                         </div>
 
                         {/* 메인 뷰어 */}
-                        <div className={`${isFullscreen ? 'h-[calc(100vh-60px)]' : 'aspect-[16/9]'} w-full flex flex-col items-center justify-center relative bg-white`} onClick={() => setIsDocDropdownOpen(false)}>
+                        <div className={`${isFullscreen ? 'flex-1 min-h-0 h-auto' : 'aspect-[16/9]'} w-full flex flex-col items-center justify-center relative bg-white overflow-hidden`} onClick={() => setIsDocDropdownOpen(false)}>
                            {(() => {
                               const currentSlide = currentSlides[0];
                               if (currentSlide) {
