@@ -41,6 +41,7 @@ const TAG_COLORS = [
   { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200', dot: 'bg-gray-500' },
 ];
 import { useContent } from './hooks/useContent';
+import { supabaseFetch, hasContent } from './utils/supabase';
 
 const iconsMapping: Record<string, any> = { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle };
 
@@ -301,6 +302,25 @@ export default function App() {
     }
     return 'default';
   });
+
+  // --- 기존 자소서 데이터 마이그레이션 로직 ---
+  useEffect(() => {
+    supabaseFetch(`site_content?key=eq.coverLetterData&select=value`)
+      .then((rows) => {
+        if (rows && rows.length > 0 && hasContent(rows[0].value)) {
+          const oldData = rows[0].value;
+          setCoverLettersMap(prev => {
+            // 만약 새로 바뀐 coverLettersMap의 default가 초기 기본값 상태라면 구버전 데이터로 덮어쓰기
+            if (prev['default'] && prev['default'].length === 1 && prev['default'][0].id === 1) {
+              return { ...prev, 'default': oldData };
+            }
+            return prev;
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   
   // 현재 렌더링/수정할 자소서 데이터 파생
   const coverLetterData = coverLettersMap[selectedCompany] || coverLettersMap['default'] || [];
