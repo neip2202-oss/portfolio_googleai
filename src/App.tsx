@@ -68,8 +68,20 @@ const SortableDocItem = ({ doc, index, isActive, onSelect, onTitleChange, onRemo
   );
 };
 
-const EditableText: React.FC<any> = ({ value, onChange, as = 'input', className = '', placeholder = '', isAdmin, onFocus }) => {
-  if (!isAdmin) return <span className={className}>{value}</span>;
+const EditableText: React.FC<any> = ({ value, onChange, as = 'input', className = '', placeholder = '', isAdmin, onFocus, useMarkdown = false }) => {
+  if (!isAdmin) {
+    if (useMarkdown && typeof value === 'string') {
+      let html = value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      html = html.replace(/\(bc\)(.*?)\([\\/]bc\)/gim, '<strong class="text-emerald-600 font-bold">$1</strong>');
+      html = html.replace(/\*\*(.*?)\*\*/gim, '<strong class="text-[#222222] font-bold">$1</strong>');
+      html = html.replace(/==(.*?)==/gim, '<mark class="bg-transparent bg-[linear-gradient(transparent_60%,#a7f3d0_60%)] text-[#222222] font-bold px-1">$1</mark>');
+      if (as === 'textarea') {
+        html = html.replace(/\n/g, '<br/>');
+      }
+      return <span className={className} dangerouslySetInnerHTML={{ __html: html }} />;
+    }
+    return <span className={className}>{value}</span>;
+  }
   
   const adminClasses = `w-full bg-emerald-50/30 border border-dashed border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded px-2 py-1 my-1 text-black font-normal transition-all ${className}`;
   
@@ -957,7 +969,7 @@ export default function App() {
                                 </div>
                              </div>
                              <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
-                                <EditableText isAdmin={isAdmin} as="textarea" value={act.desc} onChange={(v: string) => { const n = [...activitiesLeftData]; n[idx].desc = v; setActivitiesLeftData(n); }} placeholder="상세 내용" />
+                                <EditableText isAdmin={isAdmin} as="textarea" useMarkdown={true} value={act.desc} onChange={(v: string) => { const n = [...activitiesLeftData]; n[idx].desc = v; setActivitiesLeftData(n); }} placeholder="상세 내용" />
                              </div>
                           </div>
                        ))}
@@ -1055,7 +1067,7 @@ export default function App() {
                                 </div>
                              </div>
                              <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                                <EditableText isAdmin={isAdmin} as="textarea" value={act.desc} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].desc = v; setActivitiesRightData(n); }} className="text-gray-600 text-sm leading-relaxed w-full" placeholder="상세 내용" />
+                                <EditableText isAdmin={isAdmin} as="textarea" useMarkdown={true} value={act.desc} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].desc = v; setActivitiesRightData(n); }} className="text-gray-600 text-sm leading-relaxed w-full" placeholder="상세 내용" />
                              </div>
                           </div>
                        ))}
