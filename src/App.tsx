@@ -195,7 +195,16 @@ const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (bas
 
 export default function App() {
   // 글로벌 상태 관리
-  const [currentTab, setCurrentTab] = useState('about');
+  const [currentTab, setCurrentTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (tab && ['about', 'resume', 'portfolio', 'play-history', 'project-detail'].includes(tab)) {
+        return tab;
+      }
+    }
+    return 'about';
+  });
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [resumeSubTab, setResumeSubTab] = useState('cv'); 
   const [portfolioTab, setPortfolioTab] = useState('main'); 
