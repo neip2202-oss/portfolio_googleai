@@ -1707,7 +1707,7 @@ export default function App() {
                               <span className="text-[10px] font-bold text-gray-500 border border-gray-200 px-2.5 py-1 rounded bg-white shadow-sm">{game.genre}</span>
                            </div>
                            <span className="flex items-center justify-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 w-full shadow-sm">
-                             <Clock size={12}/> 누적 {game.hours}
+                             <Clock size={12}/> {game.hours}
                            </span>
                        </div>
                     </div>
