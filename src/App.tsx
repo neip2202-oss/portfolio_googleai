@@ -343,6 +343,39 @@ export default function App() {
     }));
   };
 
+  const [activeAboutSection, setActiveAboutSection] = useState('hero');
+  const [activeResumeSection, setActiveResumeSection] = useState('');
+
+  useEffect(() => {
+    if (currentTab !== 'about') return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) setActiveAboutSection(entry.target.id);
+      });
+    }, { rootMargin: '-30% 0px -70% 0px' });
+
+    ['hero', 'process', 'archive', 'portfolio'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [currentTab]);
+
+  useEffect(() => {
+    if (currentTab !== 'resume' || resumeSubTab !== 'cover-letter') return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) setActiveResumeSection(entry.target.id.replace('cover-letter-', ''));
+      });
+    }, { rootMargin: '-20% 0px -80% 0px' });
+
+    coverLetterData.forEach((letter: any) => {
+      const el = document.getElementById(`cover-letter-${letter.id}`);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [currentTab, resumeSubTab, coverLetterData]);
+
   const [isOptimizing, setIsOptimizing] = useState(false);
 
   const handleOptimizeIcons = async () => {
@@ -1822,8 +1855,8 @@ export default function App() {
                { id: 'portfolio', label: 'Portfolio' }
             ].map(anchor => (
                <a key={anchor.id} href={`#${anchor.id}`} className="block relative group cursor-pointer p-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-gray-400/60 group-hover:bg-emerald-500 group-hover:scale-[1.8] group-hover:shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all duration-300"></div>
-                  <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900/90 backdrop-blur-sm text-xs font-bold text-white rounded-lg shadow-xl opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300 uppercase tracking-widest whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:left-full before:top-1/2 before:-translate-y-1/2 before:border-[5px] before:border-transparent before:border-l-gray-900/90">
+                  <div className={`w-2.5 rounded-full transition-all duration-300 ${activeAboutSection === anchor.id ? 'bg-blue-600 h-6 shadow-[0_0_8px_rgba(37,99,235,0.5)]' : 'bg-gray-400/60 h-2.5 group-hover:bg-blue-500 group-hover:scale-[1.8] group-hover:shadow-[0_0_8px_rgba(59,130,246,0.5)]'}`}></div>
+                  <span className={`absolute right-full mr-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900/90 backdrop-blur-sm text-xs font-bold text-white rounded-lg shadow-xl transition-all duration-300 uppercase tracking-widest whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:left-full before:top-1/2 before:-translate-y-1/2 before:border-[5px] before:border-transparent before:border-l-gray-900/90 ${activeAboutSection === anchor.id ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'}`}>
                      {anchor.label}
                   </span>
                </a>
@@ -1842,8 +1875,8 @@ export default function App() {
                      window.scrollTo({ top: y, behavior: 'smooth' });
                   }
                }} className="block relative group cursor-pointer p-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-gray-400/60 group-hover:bg-emerald-500 group-hover:scale-[1.8] group-hover:shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all duration-300"></div>
-                  <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900/90 backdrop-blur-sm text-xs font-bold text-white rounded-lg shadow-xl opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300 whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:left-full before:top-1/2 before:-translate-y-1/2 before:border-[5px] before:border-transparent before:border-l-gray-900/90 max-w-[250px] overflow-hidden text-ellipsis">
+                  <div className={`w-2.5 rounded-full transition-all duration-300 ${activeResumeSection === String(letter.id) ? 'bg-blue-600 h-6 shadow-[0_0_8px_rgba(37,99,235,0.5)]' : 'bg-gray-400/60 h-2.5 group-hover:bg-blue-500 group-hover:scale-[1.8] group-hover:shadow-[0_0_8px_rgba(59,130,246,0.5)]'}`}></div>
+                  <span className={`absolute right-full mr-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900/90 backdrop-blur-sm text-xs font-bold text-white rounded-lg shadow-xl transition-all duration-300 whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:left-full before:top-1/2 before:-translate-y-1/2 before:border-[5px] before:border-transparent before:border-l-gray-900/90 max-w-[250px] overflow-hidden text-ellipsis ${activeResumeSection === String(letter.id) ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'}`}>
                      {letter.title.split('\n')[0].length > 25 ? letter.title.split('\n')[0].substring(0, 25) + '...' : letter.title.split('\n')[0]}
                   </span>
                </div>
