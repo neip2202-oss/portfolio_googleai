@@ -109,7 +109,11 @@ const MarkdownRenderer: React.FC<any> = ({ content }) => {
     html = html.replace(/!\[([^\]]+)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="w-full rounded-2xl my-6 border border-gray-200 shadow-sm" />');
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-emerald-600 font-bold hover:underline">$1</a>');
     html = html.replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold text-gray-900 mt-8 mb-3 border-b border-gray-100 pb-2">$1</h3>');
-    html = html.replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-emerald-500 pl-4 py-2 my-4 bg-emerald-50/30 text-emerald-800 font-medium rounded-r-lg">$1</blockquote>');
+    // 연속된 인용문(>)을 하나의 블록으로 묶어서 처리
+    html = html.replace(/(?:^> .*$\n?)+/gim, (match) => {
+        const content = match.replace(/^> ?/gim, '').trim().replace(/\n/g, '<br/>');
+        return `<blockquote class="border-l-4 border-emerald-500 pl-4 py-3 my-4 bg-emerald-50/30 text-emerald-800 font-medium rounded-r-lg leading-relaxed">${content}</blockquote>`;
+    });
     html = html.replace(/\(bc\)(.*?)\([\\/]bc\)/gim, '<strong class="text-emerald-600 font-bold">$1</strong>');
     html = html.replace(/\*\*(.*?)\*\*/gim, '<strong class="text-[#222222] font-bold">$1</strong>');
     html = html.replace(/==(.*?)==/gim, '<mark class="bg-transparent bg-[linear-gradient(transparent_60%,#a7f3d0_60%)] text-[#222222] font-bold px-1">$1</mark>');
