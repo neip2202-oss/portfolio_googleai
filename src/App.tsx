@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, Star, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle, ChevronDown, Maximize2, Minimize2, GripVertical, Trash2, X, Link as LinkIcon, RefreshCw } from 'lucide-react';
+import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, Star, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle, ChevronDown, Maximize2, Minimize2, GripVertical, Trash2, X, Link as LinkIcon, RefreshCw, Building2, Copy } from 'lucide-react';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -226,6 +226,32 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [adminPwd, setAdminPwd] = useState('');
   const [toast, setToast] = useState({ show: false, message: '', type: 'error' });
+  // 현재 선택된 기업 ID (기본값: default)
+  const [selectedCompany, setSelectedCompany] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const company = params.get('company');
+      return company ? company.toLowerCase() : 'default';
+    }
+    return 'default';
+  });
+
+  // 생성된 기업 리스트 관리
+  const [companyList, setCompanyList] = useContent<string[]>('companyList', ['default']);
+
+  // 기업 전환 함수 (새로고침 없이 URL 및 상태 동기화)
+  const handleSwitchCompany = (companyId: string) => {
+    setSelectedCompany(companyId);
+    const url = new URL(window.location.href);
+    if (companyId === 'default') {
+      url.searchParams.delete('company');
+    } else {
+      url.searchParams.set('company', companyId);
+    }
+    window.history.pushState({}, '', url.toString());
+    showToast(`편집 모드가 [${companyId.toUpperCase()}] 기업 전용으로 전환되었습니다.`, 'success');
+  };
+
 
   const showToast = (message: string, type = 'error') => {
     setToast({ show: true, message, type });
@@ -273,7 +299,7 @@ export default function App() {
     stat2: '6', stat2Label: '프로젝트 달성',
     stat3: '3', stat3Label: '게임 출시 (Steam)',
     stat4: '5', stat4Label: 'PD 및 팀장 역임'
-  });
+  }, selectedCompany);
 
   const [workProcessData, setWorkProcessData] = useContent<any>('workProcessData', [
     { id: 1, step: '01', iconName: 'Search', title: '문제를 정의합니다', desc: '겉으로 드러난 요청이 아닌, 본질적인 문제를 재정의합니다.', color: 'text-blue-500' },
@@ -282,7 +308,7 @@ export default function App() {
     { id: 4, step: '04', iconName: 'Zap', title: '빠르게 검증합니다', desc: '프로토타입과 테스트를 통해 빠르게 판단하고 개선합니다.', color: 'text-orange-500' },
     { id: 5, step: '05', iconName: 'Bot', title: 'AI로 확장합니다', desc: 'AI를 활용해 반복 작업을 줄이고, 기획의 속도와 깊이를 높입니다.', color: 'text-purple-500' },
     { id: 6, step: '06', iconName: 'Rocket', title: '실행으로 완성합니다', desc: '기획에 그치지 않고, 실제 결과까지 만들어냅니다.', color: 'text-red-500' }
-  ]);
+  ], selectedCompany);
 
   const defaultMarkdown = `### 1. 문제 인식 및 목표\n해당 기획/작업을 진행하게 된 배경, 문제점 또는 목표를 기입합니다.\n\n### 2. 접근 방식 및 해결 구조\n어떤 논리적 구조를 통해 문제를 해결했는지 보여줍니다.\n\n### 3. 최종 성과\n- 성공적인 시스템 도입\n- 정량적 수치 기입`;
 
@@ -290,67 +316,38 @@ export default function App() {
     { id: 1, genre: '캐주얼 액션 레이싱', title: 'Super Bumpers', role: ['PD', 'PM', '차량(성장) 기획', '인게임 규칙', 'UI/UX', 'QA'], desc: '속도=공격이라는 단순한 규칙 위에, 차량과 성장을 더해 계속 플레이하게 만드는 구조를 고민했습니다. 구글 스토어와 스팀 출시의 전 과정을 경험했습니다.', outcome: '난이도 밸런싱 최적화로 초기 이탈률 15% 방어', isFeatured: true, imgColor: 'bg-blue-200', links: ['Google Play', 'Steam'], markdown: defaultMarkdown, media: { thumbnail: '', video: '', slides: ['', '', '', '', ''] } },
     { id: 2, genre: '로그라이크 타워 디펜스', title: 'R.T.D (Random Tile Defense)', role: ['PM', '퀘스트 기획', '아이템 기획', '사운드 기획', '맵 제작'], desc: '메이플스토리 월드에서 제작한 로그라이크 타워 디펜스 게임. 랜덤 타일 배치와 전략적 유닛 운용을 기획했습니다.', outcome: '팀 내 리드 역할 수행 및 스팀 런칭 달성', isFeatured: true, imgColor: 'bg-stone-200', links: ['MapleStory World'], markdown: defaultMarkdown, media: { thumbnail: '', video: '', slides: ['', '', '', '', ''] } },
     { id: 3, genre: '턴제 RPG', title: 'Project Zero', role: ['시스템 기획'], desc: 'FGT 참여 및 피드백 기반 전투 시스템 개선', isFeatured: false, imgColor: 'bg-gray-100', links: [], markdown: defaultMarkdown, media: { thumbnail: '', video: '', slides: ['', '', '', '', ''] } },
-  ]);
+  ], selectedCompany);
 
   const [otherWorksData, setOtherWorksData] = useContent<any>('otherWorksData', [
     { id: 101, category: 'AI & Tool', title: 'Excel 밸런싱 시뮬레이터', desc: 'VBA를 활용하여 기획자가 수치만 입력하면 예상 데미지 기댓값을 자동으로 산출해주는 시뮬레이터 제작.', iconName: 'Database', markdown: defaultMarkdown, media: { thumbnail: '', video: '', slides: ['', '', '', '', ''] } },
     { id: 102, category: '역기획서', title: '원신 전투 시스템 역기획', desc: '원소 반응 시스템의 데미지 공식을 역산하고 구조화한 상세 역기획 문서 및 개선 방향 제안.', iconName: 'Search', markdown: defaultMarkdown, media: { thumbnail: '', video: '', slides: ['', '', '', '', ''] } },
-  ]);
+  ], selectedCompany);
 
   const [playHistoryData, setPlayHistoryData] = useContent<any>('playHistoryData', [
     { id: 1, platform: 'PC', title: '발더스 게이트 3', genre: 'CRPG', hours: '300+' },
     { id: 2, platform: 'PC', title: 'Path of Exile', genre: 'ARPG', hours: '800+' },
     { id: 3, platform: 'Mobile', title: '원신 (Genshin Impact)', genre: '오픈월드 ARPG', hours: '1,200+' },
     { id: 4, platform: 'Console', title: '젤다의 전설: 왕국의 눈물', genre: '오픈월드 액션 어드벤처', hours: '200+' },
-  ]);
+  ], selectedCompany);
 
   const [timelineLeftData, setTimelineLeftData] = useContent<any>('timelineLeftData', [
     { id: 1, type: 'career', year: '2020.03 - 2022.02', title: 'OOO 상사 (영업 기획팀)', subtitle: '데이터 기반 기획 업무', desc: '매출 동향 분석 및 파트너사 커뮤니케이션을 통해 기획적 사고와 문제 해결 능력을 배양했습니다.' },
     { id: 2, type: 'education', year: '2015.03 - 2019.02', title: 'OOO 대학교', subtitle: 'OOO 전공', desc: '학사 졸업 (학점: 0.0 / 4.5)' },
-  ]);
+  ], selectedCompany);
   
   const [activitiesLeftData, setActivitiesLeftData] = useContent<any>('activitiesLeftData', [
     { id: 1, year: '2021.05 - 2021.12', title: 'OOO 대학생 서포터즈', badge: '우수 활동자', desc: '마케팅 기획 및 홍보 콘텐츠 제작 우수 활동자 선정' },
-  ]);
+  ], selectedCompany);
 
   const [activitiesRightData, setActivitiesRightData] = useContent<any>('activitiesRightData', [
     { id: 1, year: '2022.06 - 2023.04', title: 'OOO 게임 기획 부트캠프', badge: '우수 수료', desc: '8개월간 6개의 팀 프로젝트 기획 및 스팀 런칭 완수. Jira를 활용한 애자일 스프린트 리드.' },
-  ]);
-
-  // 기업별 맞춤형 자기소개서 데이터 구조 (Key: 기업 ID, Value: 자소서 배열)
-  const [coverLettersMap, setCoverLettersMap] = useContent<Record<string, any[]>>('coverLettersMap', {
-    'default': [
-      { id: 1, title: '지원 동기 및 기획자로서의 목표', content: '**"선택에 이유를 묻는 단단한 근거가 서비스 성패를 좌우한다."**\n\n단순히 재밌어 보이는 아이디어를 넘어, 논리적 구조로 엮어내고 실제 지표로 증명하는 기획자가 되고자 합니다.' }
-    ]
-  });
-  
-  // 현재 선택된 기업 ID (기본값: default)
-  const [selectedCompany, setSelectedCompany] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const company = params.get('company');
-      return company ? company.toLowerCase() : 'default';
-    }
-    return 'default';
-  });
-
-  // --- 구버전 데이터 복구 로직 (완료되어 삭제) ---
-  // 계속해서 최신 데이터를 과거 데이터로 덮어쓰는 버그 원인이 되어 제거했습니다.
+  ], selectedCompany);
 
   
-  // 현재 렌더링/수정할 자소서 데이터 파생
-  const coverLetterData = coverLettersMap[selectedCompany] || 
-    (selectedCompany !== 'default' 
-      ? [{ id: Date.now(), title: `${selectedCompany.toUpperCase()} 지원 동기`, content: '내용을 입력하세요.' }] 
-      : coverLettersMap['default'] || []);
-  
-  // 자소서 업데이트 헬퍼 함수
-  const setCoverLetterData = (newData: any[]) => {
-    setCoverLettersMap(prev => ({
-      ...prev,
-      [selectedCompany]: newData
-    }));
-  };
+  const [coverLetterData, setCoverLetterData] = useContent<any[]>('coverLetterData', [
+    { id: 1, title: '지원 동기 및 기획자로서의 목표', content: '**"선택에 이유를 묻는 단단한 근거가 서비스 성패를 좌우한다."**\n\n단순히 재밌어 보이는 아이디어를 넘어, 논리적 구조로 엮어내고 실제 지표로 증명하는 기획자가 되고자 합니다.' }
+  ], selectedCompany);
+
 
   const [activeAboutSection, setActiveAboutSection] = useState('hero');
   const [activeResumeSection, setActiveResumeSection] = useState('');
@@ -454,31 +451,7 @@ export default function App() {
     }
   };
 
-  // --- Step 3: 플로팅 사이드 패널 상태 및 함수 ---
-  const [isCompanyPanelOpen, setIsCompanyPanelOpen] = useState(false);
-
-  const handleAddCompany = () => {
-    const newCompany = prompt('추가할 기업의 ID(영문)를 입력하세요. (예: nexon, netmarble)');
-    if (newCompany && newCompany.trim() !== '') {
-       const key = newCompany.trim().toLowerCase();
-       if (!coverLettersMap[key]) {
-         setCoverLettersMap(prev => ({
-           ...prev,
-           [key]: [
-             { id: Date.now(), title: `${key.toUpperCase()} 지원 동기`, content: '내용을 입력하세요.' }
-           ]
-         }));
-       }
-       setSelectedCompany(key);
-    }
-  };
-
-  const copyCompanyUrl = () => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('company', selectedCompany);
-    navigator.clipboard.writeText(url.toString());
-    alert('URL이 복사되었습니다: ' + url.toString());
-  };
+  
 
 
   const [workTools, setWorkTools] = useContent<any>('workTools', [
@@ -1241,11 +1214,102 @@ export default function App() {
           </div>
         )}
 
-      </div>
-    </div>
-  );
+      
+      {/* 플로팅 관리자 패널 (전역 기업 관리) */}
+      {isAdmin && (
+        <div className="fixed bottom-24 right-6 z-[100] flex flex-col items-end gap-3 group/admin-panel">
+          {/* 기업 선택 사이드 패널 */}
+          <div className="bg-white/90 backdrop-blur-xl border border-emerald-200 rounded-3xl shadow-2xl p-5 mb-2 w-72 origin-bottom-right transition-all duration-300 scale-0 group-hover/admin-panel:scale-100 opacity-0 group-hover/admin-panel:opacity-100">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+              <h4 className="text-sm font-black text-gray-900 flex items-center gap-2">
+                <Building2 size={16} className="text-emerald-600"/> 기업별 편집 모드
+              </h4>
+              <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">LIVE</span>
+            </div>
 
-  const renderPortfolio = () => (
+            <div className="space-y-1.5 max-h-[300px] overflow-y-auto mb-4 pr-1 custom-scrollbar">
+              {companyList.map((companyId) => (
+                <div key={companyId} className="flex items-center gap-2 group/item">
+                  <button
+                    onClick={() => handleSwitchCompany(companyId)}
+                    className={`flex-1 flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                      selectedCompany === companyId 
+                        ? 'bg-emerald-600 text-white shadow-md ring-4 ring-emerald-100' 
+                        : 'bg-gray-50 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
+                    }`}
+                  >
+                    {companyId.toUpperCase()}
+                    {selectedCompany === companyId && <CheckCircle size={12}/>}
+                  </button>
+                  {companyId !== 'default' && (
+                    <button 
+                      onClick={() => {
+                        const n = companyList.filter(c => c !== companyId);
+                        setCompanyList(n);
+                        if (selectedCompany === companyId) handleSwitchCompany('default');
+                      }}
+                      className="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-all opacity-0 group-hover/item:opacity-100"
+                    >
+                      <Trash2 size={12}/>
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-2 pt-3 border-t border-gray-100">
+              <button 
+                onClick={() => {
+                  const newId = window.prompt('새로운 기업 ID를 영문으로 입력하세요 (예: nexon, kakao):');
+                  if (newId) {
+                    const lower = newId.toLowerCase().trim();
+                    if (!companyList.includes(lower)) {
+                      setCompanyList([...companyList, lower]);
+                      handleSwitchCompany(lower);
+                    } else {
+                      handleSwitchCompany(lower);
+                    }
+                  }
+                }}
+                className="w-full py-2.5 bg-gray-900 text-white rounded-xl text-xs font-bold hover:bg-black transition-all flex items-center justify-center gap-2 shadow-lg"
+              >
+                <Plus size={14}/> 새 기업 추가
+              </button>
+
+              <button 
+                onClick={() => {
+                  const url = window.location.href;
+                  navigator.clipboard.writeText(url);
+                  showToast('현재 기업 전용 링크가 복사되었습니다.', 'success');
+                }}
+                className="w-full py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-xs font-bold hover:border-emerald-400 hover:text-emerald-600 transition-all flex items-center justify-center gap-2"
+              >
+                <Copy size={14}/> 전역 URL 복사
+              </button>
+            </div>
+          </div>
+
+          {/* 메인 플로팅 버튼 */}
+          <div className="flex items-center gap-3">
+            <div className="bg-gray-900 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-black tracking-wider flex items-center gap-2 border border-gray-800 animate-in slide-in-from-right-4">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              {selectedCompany.toUpperCase()} MODE
+            </div>
+            <button className="w-14 h-14 bg-emerald-600 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-emerald-700 hover:rotate-12 transition-all duration-300 ring-4 ring-white">
+              <Building2 size={24}/>
+            </button>
+          </div>
+        </div>
+      )}
+
+
+      </div>
+
+      </div>
+
+      );
+
+      const renderPortfolio = () => (
     <div className={`pt-24 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'} bg-white min-h-screen`}>
       <div className="max-w-6xl mx-auto px-6 mb-32">
         <div className="mb-10 mt-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
@@ -2250,7 +2314,7 @@ export default function App() {
       {/* 자기소개서 고정 앵커 네비게이션 */}
       {currentTab === 'resume' && resumeSubTab === 'cover-letter' && coverLetterData.length > 0 && (
          <div className="print:hidden fixed right-6 top-1/2 -translate-y-1/2 hidden md:flex flex-col items-center gap-4 p-2 z-40">
-            {coverLetterData.map((letter: any, i: number) => (
+            {coverLetterData.map((letter, i) => (
                <div key={`nav-${letter.id}`} onClick={() => {
                   const el = document.getElementById(`cover-letter-${letter.id}`);
                   if (el) {
@@ -2267,68 +2331,92 @@ export default function App() {
          </div>
       )}
 
-      {/* 관리자 모드: 우측 기업별 자소서 관리 플로팅 패널 */}
-      {isAdminMode && currentTab === 'resume' && (
-        <>
-          {/* 패널 토글 버튼 */}
-          <button
-            onClick={() => setIsCompanyPanelOpen(!isCompanyPanelOpen)}
-            className="fixed right-6 top-24 z-50 bg-emerald-600 text-white p-3 rounded-full shadow-2xl hover:bg-emerald-700 transition-colors flex items-center justify-center print:hidden group"
-            title="기업별 맞춤 자소서 관리"
-          >
-            <Briefcase size={24} className="group-hover:scale-110 transition-transform" />
-            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm border-2 border-white">
-              {Object.keys(coverLettersMap || {}).length}
-            </span>
-          </button>
-
-          {/* 패널 */}
-          <div className={`fixed top-0 right-0 h-full w-80 bg-white/90 backdrop-blur-xl shadow-[-10px_0_30px_rgba(0,0,0,0.1)] z-[60] transform transition-transform duration-300 ease-in-out border-l border-white/40 ${isCompanyPanelOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col print:hidden`}>
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-extrabold text-lg text-gray-900 flex items-center gap-2 tracking-tight">
-                <Briefcase size={20} className="text-emerald-600"/> 기업 맞춤형 자소서
-              </h3>
-              <button onClick={() => setIsCompanyPanelOpen(false)} className="text-gray-400 hover:text-gray-900 transition-colors w-8 h-8 flex items-center justify-center bg-gray-50 rounded-full hover:bg-gray-200">
-                <X size={16} />
-              </button>
+      {/* 플로팅 관리자 패널 (전역 기업 관리) */}
+      {isAdmin && (
+        <div className="fixed bottom-24 right-6 z-[100] flex flex-col items-end gap-3 group/admin-panel">
+          {/* 기업 선택 사이드 패널 */}
+          <div className="bg-white/90 backdrop-blur-xl border border-emerald-200 rounded-3xl shadow-2xl p-5 mb-2 w-72 origin-bottom-right transition-all duration-300 scale-0 group-hover/admin-panel:scale-100 opacity-0 group-hover/admin-panel:opacity-100">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+              <h4 className="text-sm font-black text-gray-900 flex items-center gap-2">
+                <Building2 size={16} className="text-emerald-600"/> 기업별 편집 모드
+              </h4>
+              <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">LIVE</span>
             </div>
-            
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 px-2">등록된 기업 목록</div>
-              {Object.keys(coverLettersMap || {}).map(companyKey => (
-                <div 
-                  key={companyKey} 
-                  onClick={() => setSelectedCompany(companyKey)}
-                  className={`p-3.5 rounded-2xl cursor-pointer border-2 transition-all flex justify-between items-center ${selectedCompany === companyKey ? 'border-emerald-500 bg-emerald-50 shadow-sm' : 'border-transparent hover:bg-gray-50'}`}
-                >
-                  <span className={`font-bold ${selectedCompany === companyKey ? 'text-emerald-700' : 'text-gray-600'}`}>
-                     {companyKey === 'default' ? '기본 (Default)' : companyKey.toUpperCase()}
-                  </span>
-                  {selectedCompany === companyKey && <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm"></div>}
+
+            <div className="space-y-1.5 max-h-[300px] overflow-y-auto mb-4 pr-1 custom-scrollbar">
+              {companyList.map((companyId) => (
+                <div key={companyId} className="flex items-center gap-2 group/item">
+                  <button
+                    onClick={() => handleSwitchCompany(companyId)}
+                    className={`flex-1 flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                      selectedCompany === companyId 
+                        ? 'bg-emerald-600 text-white shadow-md ring-4 ring-emerald-100' 
+                        : 'bg-gray-50 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
+                    }`}
+                  >
+                    {companyId.toUpperCase()}
+                    {selectedCompany === companyId && <CheckCircle size={12}/>}
+                  </button>
+                  {companyId !== 'default' && (
+                    <button 
+                      onClick={() => {
+                        const n = companyList.filter(c => c !== companyId);
+                        setCompanyList(n);
+                        if (selectedCompany === companyId) handleSwitchCompany('default');
+                      }}
+                      className="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-all opacity-0 group-hover/item:opacity-100"
+                    >
+                      <Trash2 size={12}/>
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
 
-            <div className="p-5 border-t border-gray-100 bg-white/50 space-y-3">
-              <button onClick={handleAddCompany} className="w-full py-3.5 bg-gray-900 text-white rounded-xl font-bold shadow-md hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
-                <Plus size={16} /> 신규 기업 추가
+            <div className="flex flex-col gap-2 pt-3 border-t border-gray-100">
+              <button 
+                onClick={() => {
+                  const newId = window.prompt('새로운 기업 ID를 영문으로 입력하세요 (예: nexon, kakao):');
+                  if (newId) {
+                    const lower = newId.toLowerCase().trim();
+                    if (!companyList.includes(lower)) {
+                      setCompanyList([...companyList, lower]);
+                      handleSwitchCompany(lower);
+                    } else {
+                      handleSwitchCompany(lower);
+                    }
+                  }
+                }}
+                className="w-full py-2.5 bg-gray-900 text-white rounded-xl text-xs font-bold hover:bg-black transition-all flex items-center justify-center gap-2 shadow-lg"
+              >
+                <Plus size={14}/> 새 기업 추가
               </button>
-              <button onClick={copyCompanyUrl} className="w-full py-3.5 bg-white text-gray-700 border-2 border-gray-200 rounded-xl font-bold hover:border-emerald-500 hover:text-emerald-600 transition-colors flex items-center justify-center gap-2 shadow-sm">
-                <LinkIcon size={16} /> 전용 URL 복사하기
+
+              <button 
+                onClick={() => {
+                  const url = window.location.href;
+                  navigator.clipboard.writeText(url);
+                  showToast('현재 기업 전용 링크가 복사되었습니다.', 'success');
+                }}
+                className="w-full py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-xs font-bold hover:border-emerald-400 hover:text-emerald-600 transition-all flex items-center justify-center gap-2"
+              >
+                <Copy size={14}/> 전역 URL 복사
               </button>
             </div>
           </div>
-          
-          {/* 오버레이 (모바일용) */}
-          {isCompanyPanelOpen && (
-            <div 
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 md:hidden transition-opacity" 
-              onClick={() => setIsCompanyPanelOpen(false)}
-            />
-          )}
-        </>
-      )}
 
+          {/* 메인 플로팅 버튼 */}
+          <div className="flex items-center gap-3">
+            <div className="bg-gray-900 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-black tracking-wider flex items-center gap-2 border border-gray-800 animate-in slide-in-from-right-4">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              {selectedCompany.toUpperCase()} MODE
+            </div>
+            <button className="w-14 h-14 bg-emerald-600 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-emerald-700 hover:rotate-12 transition-all duration-300 ring-4 ring-white">
+              <Building2 size={24}/>
+            </button>
+          </div>
         </div>
+      )}
+    </div>
   );
 }

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Document Viewer Prototype (Google Sheets Update)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Pulse Animation for the Document Button */
+        .animate-pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+
+        /* Fullscreen styles */
+        :fullscreen {
+            background-color: white;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        :-webkit-full-screen {
+            background-color: white;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        :fullscreen .doc-content, :-webkit-full-screen .doc-content {
+            flex: 1;
+            min-height: 0; /* Prevents flex item from expanding beyond parent */
+            height: auto !important;
+        }
+
+        /* Iframe optimization wrapper */
+        .iframe-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent double scrollbars */
+        }
+        .iframe-wrapper iframe {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            border: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8 flex justify-center items-start min-h-screen">
+
+<div class="max-w-4xl w-full bg-white rounded-3xl shadow-xl overflow-hidden p-6 md:p-8 border border-gray-100">
+    
+    <h2 class="text-2xl md:text-3xl font-black mb-2 text-gray-900">슈퍼범퍼즈(Super Bumpers) - 구글 시트 테스트</h2>
+    <p class="text-gray-500 mb-8 text-sm md:text-base">구글 스프레드시트 최적화 뷰어 프로토타입입니다.</p>
+
+    <!-- Viewer Area -->
+    <div id="viewer-container" class="rounded-2xl border border-gray-200 bg-gray-50 overflow-hidden mb-6 transition-all duration-300">
+        
+        <!-- Thumbnail View -->
+        <div id="view-thumbnail" class="aspect-[16/9] w-full flex items-center justify-center bg-gray-200 relative hidden">
+            <div class="flex flex-col items-center">
+                <i data-lucide="image" class="w-16 h-16 text-gray-400 mb-2"></i>
+                <span class="text-gray-500 font-bold tracking-widest">Main Thumbnail</span>
+            </div>
+        </div>
+
+        <!-- Document View -->
+        <div id="view-document" class="w-full flex flex-col bg-gray-50 relative">
+            <!-- Header Toolbar -->
+            <div class="w-full bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-40">
+                <!-- 드롭다운 영역 (좌측) -->
+                <button class="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-100 transition-all">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-500"></i>
+                    구글 시트 테스트
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </button>
+
+                <!-- 전체 보기 버튼 (우측) -->
+                <button id="btn-fullscreen" class="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition-all group" title="전체 화면으로 보기">
+                    <i data-lucide="maximize-2" class="w-4 h-4 text-gray-500 group-hover:text-emerald-600 transition-colors"></i>
+                    <span class="hidden sm:inline">전체 보기</span>
+                </button>
+            </div>
+            
+            <!-- Document Content -->
+            <div class="doc-content aspect-[16/9] w-full flex items-center justify-center bg-white relative">
+                <!-- Iframe Wrapper for Sheets -->
+                <div class="iframe-wrapper flex flex-col items-center justify-center bg-gray-50">
+                    <div class="p-6 bg-white border border-emerald-200 rounded-2xl shadow-sm mb-4 w-11/12 max-w-lg text-center" id="input-overlay">
+                        <i data-lucide="table" class="w-12 h-12 text-emerald-500 mx-auto mb-3"></i>
+                        <h3 class="font-bold text-lg text-gray-800 mb-2">구글 스프레드시트 링크 입력</h3>
+                        <p class="text-xs text-gray-500 mb-4 break-words">아래에 구글 시트 공유 링크(/edit 또는 /pubhtml)를 넣으면 자동으로 /preview로 변환되어 iframe에 렌더링됩니다.</p>
+                        <input type="text" id="sheet-url" placeholder="https://docs.google.com/spreadsheets/d/.../edit" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-emerald-500 outline-none mb-3" />
+                        <button onclick="loadSheet()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 rounded transition-colors">시트 불러오기</button>
+                    </div>
+                    <iframe id="sheet-iframe" src="" class="hidden" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Media Buttons -->
+    <div class="grid grid-cols-3 gap-2 md:gap-4">
+        <button onclick="setActive('thumbnail')" id="btn-tab-thumbnail" class="p-3 md:p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 border-gray-200 bg-white hover:border-gray-400 text-gray-500 hover:text-gray-800">
+            <i data-lucide="image" class="w-5 h-5 md:w-6 md:h-6"></i>
+            <span class="font-bold text-xs md:text-sm">대표 이미지</span>
+        </button>
+        <button onclick="setActive('gameplay')" id="btn-tab-gameplay" class="p-3 md:p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 border-gray-200 bg-white hover:border-emerald-300 text-gray-500 hover:text-emerald-600">
+            <i data-lucide="play-circle" class="w-5 h-5 md:w-6 md:h-6"></i>
+            <span class="font-bold text-xs md:text-sm whitespace-nowrap">플레이 영상</span>
+        </button>
+        
+        <button onclick="setActive('document')" id="btn-tab-document" class="relative p-3 md:p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 border-blue-500 bg-blue-50 text-blue-700 shadow-lg">
+            <div class="relative">
+                <i data-lucide="file-text" class="w-5 h-5 md:w-6 md:h-6 text-blue-500"></i>
+            </div>
+            <span class="font-bold text-xs md:text-sm whitespace-nowrap">작업 문서</span>
+        </button>
+    </div>
+
+</div>
+
+<script>
+    lucide.createIcons();
+
+    // Google Sheets URL Conversion Logic
+    function getConvertedUrl(url) {
+        if (!url) return url;
+        
+        // 1. Google Sheets 로직
+        const sheetsMatch = url.match(/docs\.google\.com\/spreadsheets\/d\/([^/?]+)/);
+        if (sheetsMatch && sheetsMatch[1]) {
+            return `https://docs.google.com/spreadsheets/d/${sheetsMatch[1]}/preview`;
+        }
+
+        return url;
+    }
+
+    function loadSheet() {
+        const rawUrl = document.getElementById('sheet-url').value;
+        if (!rawUrl) return alert('URL을 입력해주세요!');
+
+        const convertedUrl = getConvertedUrl(rawUrl);
+        
+        console.log('Original:', rawUrl);
+        console.log('Converted:', convertedUrl);
+
+        document.getElementById('input-overlay').classList.add('hidden');
+        
+        const iframe = document.getElementById('sheet-iframe');
+        iframe.src = convertedUrl;
+        iframe.classList.remove('hidden');
+    }
+
+    function setActive(tab) {
+        // Reset buttons
+        document.getElementById('btn-tab-thumbnail').className = "p-3 md:p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 border-gray-200 bg-white hover:border-gray-400 text-gray-500 hover:text-gray-800";
+        document.getElementById('btn-tab-gameplay').className = "p-3 md:p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 border-gray-200 bg-white hover:border-emerald-300 text-gray-500 hover:text-emerald-600";
+        document.getElementById('btn-tab-document').className = "relative p-3 md:p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 border-gray-200 bg-white hover:border-blue-300 text-gray-500 hover:text-blue-600";
+
+        // Hide all views
+        document.getElementById('view-thumbnail').classList.add('hidden');
+        document.getElementById('view-document').classList.add('hidden');
+
+        // Set active
+        if (tab === 'thumbnail') {
+            document.getElementById('btn-tab-thumbnail').className = "p-3 md:p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 border-gray-900 bg-gray-900 text-white shadow-lg";
+            document.getElementById('view-thumbnail').classList.remove('hidden');
+        } else if (tab === 'document') {
+            document.getElementById('btn-tab-document').className = "relative p-3 md:p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 border-blue-500 bg-blue-50 text-blue-700 shadow-lg";
+            document.getElementById('view-document').classList.remove('hidden');
+        }
+    }
+
+    // Fullscreen Logic
+    const viewerContainer = document.getElementById('view-document');
+    const btnFullscreen = document.getElementById('btn-fullscreen');
+    
+    btnFullscreen.addEventListener('click', () => {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            if (viewerContainer.requestFullscreen) {
+                viewerContainer.requestFullscreen();
+            } else if (viewerContainer.webkitRequestFullscreen) { /* Safari */
+                viewerContainer.webkitRequestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+        }
+    });
+
+    // Update UI on fullscreen change
+    const handleFullscreenChange = () => {
+        const text = btnFullscreen.querySelector('span');
+        
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+            viewerContainer.classList.add('bg-white'); 
+            btnFullscreen.innerHTML = '<i data-lucide="minimize-2" class="w-4 h-4 text-gray-500 group-hover:text-emerald-600 transition-colors"></i><span class="hidden sm:inline">축소하기</span>';
+            btnFullscreen.classList.add('fixed', 'top-4', 'right-4', 'z-50', 'shadow-lg');
+        } else {
+            btnFullscreen.innerHTML = '<i data-lucide="maximize-2" class="w-4 h-4 text-gray-500 group-hover:text-emerald-600 transition-colors"></i><span class="hidden sm:inline">전체 보기</span>';
+            btnFullscreen.classList.remove('fixed', 'top-4', 'right-4', 'z-50', 'shadow-lg');
+        }
+        lucide.createIcons();
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+</script>
+</body>
+</html>
