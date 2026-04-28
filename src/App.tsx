@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle, ChevronDown, Maximize2, Minimize2, GripVertical, Trash2, X, Link as LinkIcon, RefreshCw } from 'lucide-react';
+import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, Star, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle, ChevronDown, Maximize2, Minimize2, GripVertical, Trash2, X, Link as LinkIcon, RefreshCw } from 'lucide-react';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -779,14 +779,76 @@ export default function App() {
                      <div className="flex flex-wrap items-center gap-3 mt-auto pt-5 border-t border-gray-100">
                         {project.links.map((link: string) => {
                            let LinkIcon = ExternalLink;
-                           if (link.includes('Google Play')) LinkIcon = Play;
-                           if (link.includes('Steam')) LinkIcon = Monitor;
-                           if (link.includes('MapleStory')) LinkIcon = Globe;
-                           return (
-                             <span key={link} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-xl shadow-sm hover:border-blue-400 hover:text-blue-600 transition-colors">
-                                <LinkIcon size={14} className={link.includes('Steam') ? 'text-gray-900' : link.includes('Play') ? 'text-green-500' : 'text-blue-500'} /> {link}
-                             </span>
-                           )
+                           let badgeColor = "bg-indigo-50 border-indigo-100 text-indigo-600 shadow-sm";
+                           let iconColor = "text-indigo-500";
+                           
+                           const lowerLink = link.toLowerCase();
+                           if (lowerLink.includes('google play') || lowerLink.includes('android')) {
+                              LinkIcon = Play;
+                              badgeColor = "bg-emerald-50 border-emerald-100 text-emerald-700 shadow-[0_4px_15px_-3px_rgba(16,185,129,0.2)]";
+                              iconColor = "text-emerald-500";
+                           } else if (lowerLink.includes('steam') || lowerLink.includes('pc')) {
+                              LinkIcon = Monitor;
+                              badgeColor = "bg-blue-50 border-blue-100 text-blue-700 shadow-[0_4px_15px_-3px_rgba(59,130,246,0.2)]";
+                              iconColor = "text-blue-500";
+                           } else if (lowerLink.includes('maplestory') || lowerLink.includes('world')) {
+                              LinkIcon = Globe;
+                              badgeColor = "bg-sky-50 border-sky-100 text-sky-700 shadow-[0_4px_15px_-3px_rgba(14,165,233,0.2)]";
+                              iconColor = "text-sky-500";
+                           }
+
+                           const customIcon = project.customLinkIcons?.[link];
+
+                            const url = project.tagLinks?.[link];
+                            return (
+                              <div key={link} className="relative group/link">
+                                 <a 
+                                   href={url || '#'} 
+                                   target={url ? "_blank" : undefined} 
+                                   rel={url ? "noopener noreferrer" : undefined}
+                                   onClick={(e) => { if (!url) e.preventDefault(); }}
+                                   className={`flex items-center gap-2 px-4 py-2 border ${badgeColor} text-xs font-black rounded-2xl transition-all hover:scale-105 active:scale-95 ${!url ? 'cursor-default' : 'cursor-pointer'}`}
+                                 >
+                                    {customIcon ? (
+                                       <img src={customIcon} className="w-5 h-5 object-contain" alt="icon" />
+                                    ) : (
+                                       <LinkIcon size={16} className={iconColor} />
+                                    )}
+                                    {link}
+                                 </a>
+                                 
+                                 {isAdmin && (
+                                    <div className="absolute -top-2 -right-2 flex gap-1 opacity-0 group-hover/link:opacity-100 transition-all z-20">
+                                       <label className="w-7 h-7 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 hover:scale-110">
+                                          <Plus size={14} />
+                                          <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => {
+                                             const newProj = { ...project };
+                                             if (!newProj.customLinkIcons) newProj.customLinkIcons = {};
+                                             newProj.customLinkIcons[link] = b64;
+                                             const newProjects = projectsData.map((p) => p.id === project.id ? newProj : p);
+                                             setProjectsData(newProjects);
+                                          })} className="hidden" />
+                                       </label>
+                                       <button 
+                                         onClick={() => {
+                                            const newUrl = window.prompt(`[${link}] 연결할 외부 링크 URL을 입력해주세요:`, url || '');
+                                            if (newUrl !== null) {
+                                               const newProj = { ...project };
+                                               if (!newProj.tagLinks) newProj.tagLinks = {};
+                                               newProj.tagLinks[link] = newUrl;
+                                               const newProjects = projectsData.map((p) => p.id === project.id ? newProj : p);
+                                               setProjectsData(newProjects);
+                                            }
+                                         }}
+                                         className="w-7 h-7 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all hover:scale-110"
+                                         title="링크 설정"
+                                       >
+                                          <ExternalLink size={12} />
+                                       </button>
+                                    </div>
+                                 )}
+                              </div>
+                            )
                         })}
                      </div>
                   )}
@@ -1180,7 +1242,6 @@ export default function App() {
         )}
 
       </div>
-      <div className="mt-20"><GlobalFooterCTA /></div>
     </div>
   );
 
@@ -1202,7 +1263,7 @@ export default function App() {
         {portfolioTab === 'main' && (
            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
              {projectsData.map((project: any) => (
-               <div key={project.id} onClick={() => handleProjectClick(project)} className="cursor-pointer group flex flex-col bg-white border border-gray-200 hover:border-emerald-300 transition-all hover:shadow-xl overflow-hidden rounded-3xl">
+                <div key={project.id} onClick={() => handleProjectClick(project)} className="cursor-pointer group flex flex-col bg-white border border-gray-200 hover:border-emerald-300 transition-all hover:shadow-xl overflow-hidden rounded-3xl">
                  <div className={`aspect-[4/3] ${project.imgColor} relative overflow-hidden`}>
                     {project.media?.thumbnail ? (
                        <img src={project.media.thumbnail} alt={project.title} className="w-full h-full object-cover" />
@@ -1233,17 +1294,79 @@ export default function App() {
                      <p className="text-gray-500 text-sm mb-4 line-clamp-2 leading-relaxed">{project.desc}</p>
                      
                      {project.links && project.links.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-2 mt-auto pt-4 border-t border-gray-100">
+                        <div className="flex flex-wrap items-center gap-2 mt-auto pt-5 border-t border-gray-100">
                            {project.links.map((link: string) => {
                               let LinkIcon = ExternalLink;
-                              if (link.includes('Google Play')) LinkIcon = Play;
-                              if (link.includes('Steam')) LinkIcon = Monitor;
-                              if (link.includes('MapleStory')) LinkIcon = Globe;
-                              return (
-                                <span key={link} className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-gray-200 text-gray-600 text-[10px] font-bold rounded-lg shadow-sm">
-                                   <LinkIcon size={12} className={link.includes('Steam') ? 'text-gray-800' : link.includes('Play') ? 'text-green-500' : 'text-blue-500'} /> {link}
-                                </span>
-                              )
+                              let badgeColor = "bg-indigo-50 border-indigo-100 text-indigo-600 shadow-sm";
+                              let iconColor = "text-indigo-500";
+                              
+                              const lowerLink = link.toLowerCase();
+                              if (lowerLink.includes('google play') || lowerLink.includes('android')) {
+                                 LinkIcon = Play;
+                                 badgeColor = "bg-emerald-50 border-emerald-100 text-emerald-700 shadow-[0_2px_10px_-3px_rgba(16,185,129,0.2)]";
+                                 iconColor = "text-emerald-500";
+                              } else if (lowerLink.includes('steam') || lowerLink.includes('pc')) {
+                                 LinkIcon = Monitor;
+                                 badgeColor = "bg-blue-50 border-blue-100 text-blue-700 shadow-[0_2px_10px_-3px_rgba(59,130,246,0.2)]";
+                                 iconColor = "text-blue-500";
+                              } else if (lowerLink.includes('maplestory') || lowerLink.includes('world')) {
+                                 LinkIcon = Globe;
+                                 badgeColor = "bg-sky-50 border-sky-100 text-sky-700 shadow-[0_2px_10px_-3px_rgba(14,165,233,0.2)]";
+                                 iconColor = "text-sky-500";
+                              }
+
+                              const customIcon = project.customLinkIcons?.[link];
+
+                               const url = project.tagLinks?.[link];
+                               return (
+                                 <div key={link} className="relative group/link">
+                                    <a 
+                                      href={url || '#'} 
+                                      target={url ? "_blank" : undefined} 
+                                      rel={url ? "noopener noreferrer" : undefined}
+                                      onClick={(e) => { if (!url) e.preventDefault(); }}
+                                      className={`flex items-center gap-2 px-3 py-1.5 border ${badgeColor} text-[10px] font-black rounded-xl transition-all hover:scale-105 active:scale-95 ${!url ? 'cursor-default' : 'cursor-pointer'}`}
+                                    >
+                                       {customIcon ? (
+                                          <img src={customIcon} className="w-4 h-4 object-contain" alt="icon" />
+                                       ) : (
+                                          <LinkIcon size={14} className={iconColor} />
+                                       )}
+                                       {link}
+                                    </a>
+                                    
+                                    {isAdmin && (
+                                       <div className="absolute -top-2 -right-2 flex gap-1 opacity-0 group-hover/link:opacity-100 transition-all z-20">
+                                          <label className="w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 hover:scale-110">
+                                             <Plus size={12} />
+                                             <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => {
+                                                const newProj = { ...project };
+                                                if (!newProj.customLinkIcons) newProj.customLinkIcons = {};
+                                                newProj.customLinkIcons[link] = b64;
+                                                const newProjects = projectsData.map((p) => p.id === project.id ? newProj : p);
+                                                setProjectsData(newProjects);
+                                             })} className="hidden" />
+                                          </label>
+                                          <button 
+                                            onClick={() => {
+                                               const newUrl = window.prompt(`[${link}] 연결할 외부 링크 URL을 입력해주세요:`, url || '');
+                                               if (newUrl !== null) {
+                                                  const newProj = { ...project };
+                                                  if (!newProj.tagLinks) newProj.tagLinks = {};
+                                                  newProj.tagLinks[link] = newUrl;
+                                                  const newProjects = projectsData.map((p) => p.id === project.id ? newProj : p);
+                                                  setProjectsData(newProjects);
+                                               }
+                                            }}
+                                            className="w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all hover:scale-110"
+                                            title="링크 설정"
+                                          >
+                                             <ExternalLink size={10} />
+                                          </button>
+                                       </div>
+                                    )}
+                                 </div>
+                               )
                            })}
                         </div>
                      )}
@@ -1341,24 +1464,179 @@ export default function App() {
 
           <div className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-gray-200 shadow-sm">
             <div className="mb-10">
-              {isAdmin ? (
-                 <div className="space-y-4 bg-gray-50 p-6 rounded-2xl border border-dashed border-emerald-400">
-                    <div className="text-emerald-700 font-bold text-sm">💡 기본 정보 수정</div>
-                     <EditableText isAdmin={isAdmin} value={portfolioTab === 'main' ? (Array.isArray(selectedProject?.role) ? selectedProject?.role.join(', ') : selectedProject?.role) : selectedProject?.category} onChange={(v: string) => updateCurrentProject(portfolioTab === 'main' ? 'role' : 'category', portfolioTab === 'main' ? v.split(',').map((s:string)=>s.trim()) : v)} className="font-bold text-sm block" placeholder="역할 또는 카테고리" />
-                     {portfolioTab === 'main' && (
-                        <>
-                           <EditableText isAdmin={isAdmin} value={selectedProject?.genre} onChange={(v: string) => updateCurrentProject('genre', v)} className="text-sm font-bold text-emerald-600 block mt-2" placeholder="게임 장르 (예: 캐주얼 액션 레이싱)" />
-                           <EditableText isAdmin={isAdmin} value={selectedProject?.links ? selectedProject.links.join(', ') : ''} onChange={(v: string) => updateCurrentProject('links', v.split(',').map((s:string)=>s.trim()).filter(Boolean))} className="text-xs font-bold text-blue-500 block w-full" placeholder="외부 링크 (콤마로 구분. 예: Steam, Google Play)" />
-                        </>
-                     )}
-                     <EditableText isAdmin={isAdmin} value={selectedProject?.title} onChange={(v: string) => updateCurrentProject('title', v)} className="text-4xl font-extrabold block w-full mt-4" placeholder="프로젝트 제목" />
-                     <EditableText isAdmin={isAdmin} as="textarea" value={selectedProject?.desc} onChange={(v: string) => updateCurrentProject('desc', v)} className="text-sm w-full block" placeholder="요약 설명" />
-                 </div>
+               {isAdmin ? (
+                  <div className="space-y-4 bg-gray-50 p-6 rounded-2xl border border-dashed border-emerald-400">
+                     <div className="flex items-center justify-between mb-2">
+                        <div className="text-emerald-700 font-bold text-sm flex items-center gap-2">💡 기본 정보 수정</div>
+                        <button 
+                           onClick={() => updateCurrentProject('isFeatured', !selectedProject?.isFeatured)}
+                           className={`flex items-center gap-2 px-3 py-1.5 rounded-xl font-bold text-xs transition-all border ${selectedProject?.isFeatured ? 'bg-amber-50 text-amber-600 border-amber-200 shadow-sm' : 'bg-white text-gray-400 border-gray-200 hover:border-amber-300 hover:text-amber-500'}`}
+                        >
+                           <Star size={14} fill={selectedProject?.isFeatured ? "currentColor" : "none"} />
+                           {selectedProject?.isFeatured ? '추천 프로젝트 등록됨' : '추천 프로젝트 등록'}
+                        </button>
+                     </div>
+                      <EditableText isAdmin={isAdmin} value={portfolioTab === 'main' ? (Array.isArray(selectedProject?.role) ? selectedProject?.role.join(', ') : selectedProject?.role) : selectedProject?.category} onChange={(v) => updateCurrentProject(portfolioTab === 'main' ? 'role' : 'category', portfolioTab === 'main' ? v.split(',').map((s)=>s.trim()) : v)} className="font-bold text-sm block" placeholder="역할 또는 카테고리" />
+                      {portfolioTab === 'main' && (
+                         <>
+                            <EditableText isAdmin={isAdmin} value={selectedProject?.genre} onChange={(v) => updateCurrentProject('genre', v)} className="text-sm font-bold text-emerald-600 block mt-2" placeholder="게임 장르" />
+                            <EditableText isAdmin={isAdmin} value={selectedProject?.links ? selectedProject.links.join(', ') : ''} onChange={(v) => updateCurrentProject('links', v.split(',').map((s)=>s.trim()).filter(Boolean))} className="text-xs font-bold text-blue-500 block w-full" placeholder="외부 링크 (콤마 구분)" />
+                         </>
+                      )}
+                      <EditableText isAdmin={isAdmin} value={selectedProject?.title} onChange={(v) => updateCurrentProject('title', v)} className="text-4xl font-extrabold block w-full mt-4" placeholder="프로젝트 제목" />
+                      <EditableText isAdmin={isAdmin} as="textarea" value={selectedProject?.desc} onChange={(v) => updateCurrentProject('desc', v)} className="text-sm w-full block" placeholder="요약 설명" />
+                      
+                      {selectedProject?.links && selectedProject.links.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-3 mt-6 border-t border-emerald-100 pt-6">
+                           {selectedProject.links.map((link) => {
+                              const lowerLink = link.toLowerCase();
+                              let badgeColor = "bg-indigo-50 border-indigo-100 text-indigo-600 shadow-sm";
+                              let iconColor = "text-indigo-500";
+                              
+                              if (lowerLink.includes('google play') || lowerLink.includes('android')) {
+                                  badgeColor = "bg-emerald-50 border-emerald-100 text-emerald-700 shadow-[0_4px_15px_-3px_rgba(16,185,129,0.2)]";
+                                  iconColor = "text-emerald-500";
+                              } else if (lowerLink.includes('steam') || lowerLink.includes('pc')) {
+                                  badgeColor = "bg-blue-50 border-blue-100 text-blue-700 shadow-[0_4px_15px_-3px_rgba(59,130,246,0.2)]";
+                                  iconColor = "text-blue-500";
+                              } else if (lowerLink.includes('maplestory') || lowerLink.includes('world')) {
+                                  badgeColor = "bg-sky-50 border-sky-100 text-sky-700 shadow-[0_4px_15px_-3px_rgba(14,165,233,0.2)]";
+                                  iconColor = "text-sky-500";
+                              }
+
+                              const customIcon = selectedProject.customLinkIcons?.[link];
+
+                               const url = selectedProject.tagLinks?.[link];
+                               return (
+                                 <div key={link} className="relative group/detail-link">
+                                    <a 
+                                      href={url || '#'} 
+                                      target={url ? "_blank" : undefined} 
+                                      rel={url ? "noopener noreferrer" : undefined}
+                                      onClick={(e) => { if (!url) e.preventDefault(); }}
+                                      className={`flex items-center gap-2 px-4 py-2 border ${badgeColor} text-xs font-black rounded-2xl transition-all hover:scale-105 active:scale-95 ${!url ? 'cursor-default' : 'cursor-pointer'}`}
+                                    >
+                                       {customIcon ? (
+                                          <img src={customIcon} className="w-5 h-5 object-contain" alt="icon" />
+                                       ) : (
+                                          <span className={iconColor}>🔗</span>
+                                       )}
+                                       {link}
+                                    </a>
+                                    
+                                    {isAdmin && (
+                                       <div className="absolute -top-2 -right-2 flex gap-1 transition-all z-20">
+                                          <label className="w-7 h-7 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 hover:scale-110">
+                                             <span className="text-xs font-bold">+</span>
+                                             <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => {
+                                                const newCustomIcons = { ...(selectedProject.customLinkIcons || {}) };
+                                                newCustomIcons[link] = b64;
+                                                updateCurrentProject('customLinkIcons', newCustomIcons);
+                                             })} className="hidden" />
+                                          </label>
+                                          <button 
+                                            onClick={() => {
+                                               const newUrl = window.prompt(`[${link}] 연결할 외부 링크 URL을 입력해주세요:`, url || '');
+                                               if (newUrl !== null) {
+                                                  const newTagLinks = { ...(selectedProject.tagLinks || {}) };
+                                                  newTagLinks[link] = newUrl;
+                                                  updateCurrentProject('tagLinks', newTagLinks);
+                                               }
+                                            }}
+                                            className="w-7 h-7 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all hover:scale-110"
+                                            title="링크 설정"
+                                          >
+                                             <ExternalLink size={12} />
+                                          </button>
+                                       </div>
+                                    )}
+                                 </div>
+                               )
+                           })}
+                        </div>
+                      )}
+                  </div>
+
               ) : (
                  <>
                     <span className="inline-block px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-sm font-bold mb-4">{portfolioTab === 'main' ? (Array.isArray(selectedProject?.role) ? selectedProject?.role.join(', ') : selectedProject?.role) : selectedProject?.category}</span>
                     <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">{selectedProject?.title}</h1>
-                    <p className="text-xl text-gray-500">{selectedProject?.desc}</p>
+                     <p className="text-xl text-gray-500">{selectedProject?.desc}</p>
+                     
+                     {selectedProject?.links && selectedProject.links.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-3 mt-8">
+                           {selectedProject.links.map((link) => {
+                              let LinkIcon = ExternalLink;
+                              let badgeColor = "bg-indigo-50 border-indigo-100 text-indigo-600 shadow-sm";
+                              let iconColor = "text-indigo-500";
+                              
+                              const lowerLink = link.toLowerCase();
+                              if (lowerLink.includes('google play') || lowerLink.includes('android')) {
+                                  LinkIcon = Play;
+                                  badgeColor = "bg-emerald-50 border-emerald-100 text-emerald-700 shadow-[0_4px_15px_-3px_rgba(16,185,129,0.2)]";
+                                  iconColor = "text-emerald-500";
+                              } else if (lowerLink.includes('steam') || lowerLink.includes('pc')) {
+                                  LinkIcon = Monitor;
+                                  badgeColor = "bg-blue-50 border-blue-100 text-blue-700 shadow-[0_4px_15px_-3px_rgba(59,130,246,0.2)]";
+                                  iconColor = "text-blue-500";
+                              } else if (lowerLink.includes('maplestory') || lowerLink.includes('world')) {
+                                  LinkIcon = Globe;
+                                  badgeColor = "bg-sky-50 border-sky-100 text-sky-700 shadow-[0_4px_15px_-3px_rgba(14,165,233,0.2)]";
+                                  iconColor = "text-sky-500";
+                              }
+
+                              const customIcon = selectedProject.customLinkIcons?.[link];
+                              const url = selectedProject.tagLinks?.[link];
+
+                              return (
+                                <div key={link} className="relative group/detail-link">
+                                   <a 
+                                     href={url || '#'} 
+                                     target={url ? "_blank" : undefined} 
+                                     rel={url ? "noopener noreferrer" : undefined}
+                                     onClick={(e) => { if (!url) e.preventDefault(); }}
+                                     className={`flex items-center gap-2 px-4 py-2 border ${badgeColor} text-xs font-black rounded-2xl transition-all hover:scale-105 active:scale-95 ${!url ? 'cursor-default' : 'cursor-pointer'}`}
+                                   >
+                                      {customIcon ? (
+                                         <img src={customIcon} className="w-5 h-5 object-contain" alt="icon" />
+                                      ) : (
+                                         <LinkIcon size={16} className={iconColor} />
+                                      )}
+                                      {link}
+                                   </a>
+                                   
+                                   {isAdmin && (
+                                      <div className="absolute -top-2 -right-2 flex gap-1 transition-all z-20">
+                                         <label className="w-7 h-7 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 hover:scale-110">
+                                            <Plus size={14} />
+                                            <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => {
+                                               const newCustomIcons = { ...(selectedProject.customLinkIcons || {}) };
+                                               newCustomIcons[link] = b64;
+                                               updateCurrentProject('customLinkIcons', newCustomIcons);
+                                            })} className="hidden" />
+                                         </label>
+                                         <button 
+                                           onClick={() => {
+                                              const newUrl = window.prompt(`[${link}] 연결할 외부 링크 URL을 입력해주세요:`, url || '');
+                                              if (newUrl !== null) {
+                                                 const newTagLinks = { ...(selectedProject.tagLinks || {}) };
+                                                 newTagLinks[link] = newUrl;
+                                                 updateCurrentProject('tagLinks', newTagLinks);
+                                              }
+                                           }}
+                                           className="w-7 h-7 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all hover:scale-110"
+                                           title="링크 설정"
+                                         >
+                                            <ExternalLink size={12} />
+                                         </button>
+                                      </div>
+                                   )}
+                                </div>
+                              )
+                           })}
+                        </div>
+                     )}
+
                  </>
               )}
             </div>
@@ -1674,6 +1952,7 @@ export default function App() {
                         className="min-h-[400px] font-mono text-sm bg-gray-900 text-gray-200 p-6 rounded-2xl w-full block border-none shadow-inner" 
                      />
                   </div>
+
                ) : (
                   <MarkdownRenderer content={selectedProject?.markdown} />
                )}
