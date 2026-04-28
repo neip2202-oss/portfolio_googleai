@@ -1525,44 +1525,114 @@ export default function App() {
                     </div>
                     );
                  })()}
-              </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                 <style>{`
-                    .animate-pulse-ring { animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-                    @keyframes pulse-ring {
-                       0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-                       70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-                       100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-                    }
-                 `}</style>
-                 <button onClick={() => setActiveMedia('thumbnail')} className={`p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 ${activeMedia === 'thumbnail' ? 'border-gray-900 bg-gray-900 text-white shadow-lg' : 'border-gray-200 bg-white hover:border-gray-400 text-gray-500 hover:text-gray-800'}`}>
-                    <ImageIcon size={24} />
-                    <span className="font-bold text-sm">대표 이미지</span>
-                 </button>
-                 <button onClick={() => setActiveMedia('gameplay')} className={`p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 ${activeMedia === 'gameplay' ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-lg' : 'border-gray-200 bg-white hover:border-emerald-300 text-gray-500 hover:text-emerald-600'}`}>
-                    <PlayCircle size={24} />
-                    <span className="font-bold text-sm">플레이 영상</span>
-                 </button>
-                 <button onClick={() => { setActiveMedia('document'); setDocSlideIndex(0); setCurrentDocIndex(0); }} className={`relative p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 ${activeMedia === 'document' ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-lg' : 'border-blue-200 bg-white hover:border-blue-300 text-blue-600 animate-pulse-ring'}`}>
-                    <div className="relative">
-                       <FileText size={24} />
-                       {((selectedProject?.media?.documents?.length || 0) > 0 || (selectedProject?.media?.slides?.length > 0 && !selectedProject?.media?.documents)) && (
-                          <span className="absolute -top-2 -right-3 bg-white border border-blue-100 text-blue-600 text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm">
-                             {selectedProject?.media?.documents ? selectedProject.media.documents.length : 1}
-                          </span>
+                 {activeMedia === 'external' && (
+                    <div className="aspect-[16/9] w-full flex flex-col items-center justify-center animate-in fade-in duration-300 relative group/external">
+                       {selectedProject?.media?.externalImage ? (
+                          <>
+                             <img src={selectedProject.media.externalImage} alt="external link" className="w-full h-full object-cover" />
+                             {!isAdmin && selectedProject?.media?.externalLink && (
+                                <div 
+                                   onClick={() => window.open(selectedProject.media.externalLink, '_blank')}
+                                   className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover/external:opacity-100 transition-opacity cursor-pointer z-10"
+                                >
+                                   <div className="bg-purple-600 text-white px-6 py-3 rounded-full font-bold text-lg shadow-2xl flex items-center gap-2 hover:scale-105 transition-transform">
+                                      <ExternalLink size={20} />
+                                      체험해보기
+                                   </div>
+                                </div>
+                             )}
+                          </>
+                       ) : (
+                          <>
+                             <ExternalLink size={64} className="text-gray-300 mb-4" />
+                             <span className="text-gray-400 font-bold tracking-widest uppercase text-sm">External Link Representative Image</span>
+                          </>
+                       )}
+                       
+                       {isAdmin && (
+                          <div className="absolute top-4 right-4 z-30 w-full max-w-xs bg-white/95 backdrop-blur p-4 rounded-2xl shadow-xl border border-gray-200" onClick={e => e.stopPropagation()}>
+                             <div className="text-xs font-bold text-purple-600 mb-2">🔗 외부 연결 링크 (URL)</div>
+                             <input type="text" placeholder="https://..." value={selectedProject?.media?.externalLink || ''} onChange={e => updateMedia('externalLink', e.target.value)} className="w-full bg-white border border-gray-200 rounded px-3 py-2 text-xs outline-none focus:border-purple-500 mb-4 transition-colors" />
+
+                             <div className="text-xs font-bold text-purple-600 mb-2 border-t border-purple-100 pt-3">🖼️ 대표 이미지 URL</div>
+                             <input type="text" placeholder="https://..." value={selectedProject?.media?.externalImage || ''} onChange={e => updateMedia('externalImage', e.target.value)} className="w-full bg-white border border-gray-200 rounded px-3 py-2 text-xs outline-none focus:border-purple-500 mb-3 transition-colors" />
+                             
+                             <div className="text-xs font-bold text-purple-600 mb-2 border-t border-purple-100 pt-3">📁 로컬 이미지 업로드</div>
+                             <label className="w-full py-2 bg-purple-50 text-purple-700 text-xs font-bold rounded flex items-center justify-center gap-1.5 cursor-pointer hover:bg-purple-100 transition-colors border border-purple-200">
+                                <ImageIcon size={14} /> 찾아보기...
+                                <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => updateMedia('externalImage', b64))} className="hidden" />
+                             </label>
+                          </div>
                        )}
                     </div>
-                    <span className="font-bold text-sm">작업 문서</span>
-
-                    {/* Tooltip pointing to document */}
-                    {activeMedia !== 'document' && (
-                       <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-lg shadow-xl whitespace-nowrap animate-bounce pointer-events-none before:content-[''] before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-[6px] before:border-transparent before:border-t-blue-600 z-10">
-                          문서를 확인해보세요!
-                       </div>
-                    )}
-                 </button>
+                 )}
               </div>
+
+              {(() => {
+                 const hasThumbnail = !!selectedProject?.media?.thumbnail;
+                 const hasGameplay = !!selectedProject?.media?.video;
+                 const hasDocument = ((selectedProject?.media?.documents?.length || 0) > 0 || (selectedProject?.media?.slides?.length > 0 && !selectedProject?.media?.documents));
+                 const hasExternal = !!selectedProject?.media?.externalImage || !!selectedProject?.media?.externalLink;
+
+                 const showThumbnail = isAdmin || hasThumbnail;
+                 const showGameplay = isAdmin || hasGameplay;
+                 const showDocument = isAdmin || hasDocument;
+                 const showExternal = isAdmin || hasExternal;
+
+                 const visibleCount = [showThumbnail, showGameplay, showDocument, showExternal].filter(Boolean).length;
+                 const gridColsClass = visibleCount === 1 ? 'grid-cols-1' : visibleCount === 2 ? 'grid-cols-2' : visibleCount === 3 ? 'grid-cols-3' : 'grid-cols-2 md:grid-cols-4';
+
+                 return (
+                 <div className={`grid ${gridColsClass} gap-4`}>
+                    <style>{`
+                       .animate-pulse-ring { animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+                       @keyframes pulse-ring {
+                          0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+                          70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+                          100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+                       }
+                    `}</style>
+                    {showThumbnail && (
+                       <button onClick={() => setActiveMedia('thumbnail')} className={`p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 ${activeMedia === 'thumbnail' ? 'border-gray-900 bg-gray-900 text-white shadow-lg' : 'border-gray-200 bg-white hover:border-gray-400 text-gray-500 hover:text-gray-800'}`}>
+                          <ImageIcon size={24} />
+                          <span className="font-bold text-sm">대표 이미지</span>
+                       </button>
+                    )}
+                    {showGameplay && (
+                       <button onClick={() => setActiveMedia('gameplay')} className={`p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 ${activeMedia === 'gameplay' ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-lg' : 'border-gray-200 bg-white hover:border-emerald-300 text-gray-500 hover:text-emerald-600'}`}>
+                          <PlayCircle size={24} />
+                          <span className="font-bold text-sm">플레이 영상</span>
+                       </button>
+                    )}
+                    {showDocument && (
+                       <button onClick={() => { setActiveMedia('document'); setDocSlideIndex(0); setCurrentDocIndex(0); }} className={`relative p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 ${activeMedia === 'document' ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-lg' : 'border-blue-200 bg-white hover:border-blue-300 text-blue-600 animate-pulse-ring'}`}>
+                          <div className="relative">
+                             <FileText size={24} />
+                             {hasDocument && (
+                                <span className="absolute -top-2 -right-3 bg-white border border-blue-100 text-blue-600 text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm">
+                                   {selectedProject?.media?.documents ? selectedProject.media.documents.length : 1}
+                                </span>
+                             )}
+                          </div>
+                          <span className="font-bold text-sm">작업 문서</span>
+
+                          {activeMedia !== 'document' && (
+                             <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-lg shadow-xl whitespace-nowrap animate-bounce pointer-events-none before:content-[''] before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-[6px] before:border-transparent before:border-t-blue-600 z-10">
+                                문서를 확인해보세요!
+                             </div>
+                          )}
+                       </button>
+                    )}
+                    {showExternal && (
+                       <button onClick={() => setActiveMedia('external')} className={`p-4 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 ${activeMedia === 'external' ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-lg' : 'border-purple-200 bg-white hover:border-purple-300 text-purple-600 hover:text-purple-700'}`}>
+                          <ExternalLink size={24} />
+                          <span className="font-bold text-sm">외부 링크</span>
+                       </button>
+                    )}
+                 </div>
+                 );
+              })()}
             </div>
 
             <div className="mt-12 border-t border-gray-100 pt-10">
