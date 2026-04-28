@@ -1217,7 +1217,19 @@ export default function App() {
                  <div className="p-8 flex flex-col flex-1">
                      <div className="mb-2 text-xs font-bold text-emerald-600">{project.genre}</div>
                      <h3 className="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-emerald-600 transition-colors line-clamp-1">{project.title}</h3>
-                     <span className="inline-block self-start px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold mb-4">{Array.isArray(project.role) ? project.role[0] : project.role} 외</span>
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                         {Array.isArray(project.role) ? project.role.map((r: string) => (
+                            <span key={r} className="px-3 py-1 bg-gray-50 border border-gray-200 text-gray-600 rounded-full text-[10px] font-semibold antialiased">
+                               
+                               {r}
+                            </span>
+                         )) : (
+                            <span className="px-3 py-1 bg-gray-50 border border-gray-200 text-gray-600 rounded-full text-[10px] font-semibold antialiased">
+                               
+                               {project.role}
+                            </span>
+                         )}
+                      </div>
                      <p className="text-gray-500 text-sm mb-4 line-clamp-2 leading-relaxed">{project.desc}</p>
                      
                      {project.links && project.links.length > 0 && (
@@ -1599,10 +1611,10 @@ export default function App() {
                  return (
                  <div className={`grid ${gridColsClass} gap-4`}>
                     <style>{`
-                       .animate-pulse-ring { animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+                       .animate-pulse-ring { animation: pulse-ring 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
                        @keyframes pulse-ring {
-                          0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-                          70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+                          0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6); }
+                          70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
                           100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
                        }
                     `}</style>
@@ -1631,7 +1643,7 @@ export default function App() {
                           <span className="font-bold text-sm">작업 문서</span>
 
                           {activeMedia !== 'document' && (
-                             <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-lg shadow-xl whitespace-nowrap animate-bounce pointer-events-none before:content-[''] before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-[6px] before:border-transparent before:border-t-blue-600 z-10">
+                             <div className="absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-[0_10px_25px_-5px_rgba(37,99,235,0.4)] whitespace-nowrap animate-bounce pointer-events-none before:content-[''] before:absolute before:bottom-full before:left-1/2 before:-translate-x-1/2 before:border-[6px] before:border-transparent before:border-b-blue-600 z-10">
                                 문서를 확인해보세요!
                              </div>
                           )}
