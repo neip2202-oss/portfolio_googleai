@@ -540,7 +540,14 @@ export default function App() {
 
   const handleProjectClick = (project: any) => {
     setSelectedProject(project);
-    setActiveMedia('thumbnail');
+    
+    let defaultMedia = 'thumbnail';
+    if (project?.media?.thumbnail) defaultMedia = 'thumbnail';
+    else if (project?.media?.externalLink || project?.media?.externalImage) defaultMedia = 'external';
+    else if ((project?.media?.documents?.length || 0) > 0 || (project?.media?.slides?.length > 0 && !project?.media?.documents)) defaultMedia = 'document';
+    else if (project?.media?.video) defaultMedia = 'gameplay';
+    
+    setActiveMedia(defaultMedia);
     setDocSlideIndex(0);
     handleNavClick('project-detail');
   };
@@ -553,7 +560,13 @@ export default function App() {
       outcome: '해당 작업물을 통한 기획 전문성 및 생산성 증대 도출',
       links: []
     });
-    setActiveMedia('document');
+    let defaultMedia = 'thumbnail';
+    if (work?.media?.thumbnail) defaultMedia = 'thumbnail';
+    else if (work?.media?.externalLink || work?.media?.externalImage) defaultMedia = 'external';
+    else if ((work?.media?.documents?.length || 0) > 0 || (work?.media?.slides?.length > 0 && !work?.media?.documents)) defaultMedia = 'document';
+    else if (work?.media?.video) defaultMedia = 'gameplay';
+
+    setActiveMedia(defaultMedia);
     setDocSlideIndex(0);
     handleNavClick('project-detail');
   };
@@ -1534,9 +1547,9 @@ export default function App() {
                              {!isAdmin && selectedProject?.media?.externalLink && (
                                 <div 
                                    onClick={() => window.open(selectedProject.media.externalLink, '_blank')}
-                                   className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover/external:opacity-100 transition-opacity cursor-pointer z-10"
+                                   className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center cursor-pointer z-10"
                                 >
-                                   <div className="bg-purple-600 text-white px-6 py-3 rounded-full font-bold text-lg shadow-2xl flex items-center gap-2 hover:scale-105 transition-transform">
+                                   <div className="bg-white text-gray-900 group-hover/external:bg-purple-600 group-hover/external:text-white px-6 py-3 rounded-full font-bold text-lg shadow-2xl flex items-center gap-2 hover:scale-105 transition-all duration-300">
                                       <ExternalLink size={20} />
                                       체험해보기
                                    </div>
