@@ -968,9 +968,11 @@ export default function App() {
                    
                    <div className="relative pl-6">
                       <div className="absolute left-[7px] top-0 bottom-0 w-px bg-gray-200"></div>
-                      <div className="space-y-10">
+                      <div className="">
                          {timelineLeftData.map((item: any, idx: number) => (
-                            <div key={item.id} className="relative group/time break-inside-avoid print:break-inside-avoid">
+                            <div key={item.id} className="break-inside-avoid print:break-inside-avoid">
+                               <div className={`${idx === 0 ? 'hidden print:block' : 'block'} h-10 print:h-[30px] bg-transparent print:bg-[#FAFAFA] w-full`}></div>
+                               <div className="relative group/time">
                                {isAdmin && <button onClick={() => { const n = [...timelineLeftData]; n.splice(idx, 1); setTimelineLeftData(n); }} className="absolute -top-2 -left-[6px] w-6 h-6 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-xs shadow transition-colors z-20 opacity-0 group-hover/time:opacity-100">✕</button>}
                                {item.iconImg ? (
                                   <img src={item.iconImg} alt="icon" className="absolute left-[-28px] top-1 w-6 h-6 rounded-full border border-gray-200 bg-white object-cover z-10 shadow-sm" />
@@ -988,6 +990,7 @@ export default function App() {
                                  <EditableText isAdmin={isAdmin} value={item.title} onChange={(v: string) => { const n = [...timelineLeftData]; n[idx].title = v; setTimelineLeftData(n); }} className="text-lg font-extrabold text-gray-900 mb-1 block font-accent" />
                                  <EditableText isAdmin={isAdmin} value={item.subtitle} onChange={(v: string) => { const n = [...timelineLeftData]; n[idx].subtitle = v; setTimelineLeftData(n); }} className="text-xs font-bold text-gray-500 mb-2 block" />
                                  <EditableText isAdmin={isAdmin} as="textarea" value={item.desc} onChange={(v: string) => { const n = [...timelineLeftData]; n[idx].desc = v; setTimelineLeftData(n); }} className="text-gray-600 text-sm leading-relaxed block" />
+                               </div>
                                </div>
                             </div>
                          ))}
@@ -1010,9 +1013,11 @@ export default function App() {
                        </label>
                      )}
                    </h2>
-                   <div className="space-y-6">
+                   <div className="">
                        {activitiesLeftData.map((act: any, idx: number) => (
-                          <div key={act.id} className="p-6 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative group/act break-inside-avoid print:break-inside-avoid">
+                          <div key={act.id} className="break-inside-avoid print:break-inside-avoid">
+                             <div className={`${idx === 0 ? 'hidden print:block' : 'block'} h-6 print:h-[30px] bg-transparent print:bg-[#FAFAFA] w-full`}></div>
+                             <div className="p-6 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative group/act">
                              {isAdmin && <button onClick={() => { const n=[...activitiesLeftData]; n.splice(idx, 1); setActivitiesLeftData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-20 opacity-0 group-hover/act:opacity-100">✕</button>}
                              <div className="flex flex-col mb-4 gap-2">
                                 <div className="w-full">
@@ -1061,6 +1066,7 @@ export default function App() {
                              <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
                                 <EditableText isAdmin={isAdmin} as="textarea" useMarkdown={true} value={act.desc} onChange={(v: string) => { const n = [...activitiesLeftData]; n[idx].desc = v; setActivitiesLeftData(n); }} placeholder="상세 내용" />
                              </div>
+                             </div>
                           </div>
                        ))}
                        {isAdmin && (
@@ -1081,12 +1087,15 @@ export default function App() {
                        </label>
                      )}
                    </h2>
-                   <div className="space-y-3">
+                   <div className="">
                       {certifications.map((cert: any, idx: number) => (
-                         <div key={cert.id} className="p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center shadow-sm relative group/cert break-inside-avoid print:break-inside-avoid">
+                         <div key={cert.id} className="break-inside-avoid print:break-inside-avoid">
+                            <div className={`${idx === 0 ? 'hidden print:block' : 'block'} h-3 print:h-[30px] bg-transparent print:bg-[#FAFAFA] w-full`}></div>
+                            <div className="p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center shadow-sm relative group/cert">
                             {isAdmin && <button onClick={() => { const n=[...certifications]; n.splice(idx, 1); setCertifications(n); }} className="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-xs shadow transition-colors z-20 opacity-0 group-hover/cert:opacity-100">✕</button>}
                             <EditableText isAdmin={isAdmin} value={cert.title} onChange={(v: string) => { const n=[...certifications]; n[idx].title=v; setCertifications(n); }} className="font-bold text-gray-900 text-sm w-1/2" />
                             <EditableText isAdmin={isAdmin} value={cert.date} onChange={(v: string) => { const n=[...certifications]; n[idx].date=v; setCertifications(n); }} className="text-xs text-gray-400 font-bold bg-gray-50 px-2 py-1 rounded text-right" />
+                            </div>
                          </div>
                       ))}
                       {isAdmin && (
@@ -1106,9 +1115,11 @@ export default function App() {
                        </label>
                      )}
                    </h2>
-                   <div className="space-y-6">
+                   <div className="">
                        {activitiesRightData.map((act: any, idx: number) => (
-                          <div key={act.id} className="p-6 md:p-8 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative group/act break-inside-avoid print:break-inside-avoid">
+                          <div key={act.id} className="break-inside-avoid print:break-inside-avoid">
+                             <div className={`${idx === 0 ? 'hidden print:block' : 'block'} h-6 print:h-[30px] bg-transparent print:bg-[#FAFAFA] w-full`}></div>
+                             <div className="p-6 md:p-8 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative group/act">
                              {isAdmin && <button onClick={() => { const n=[...activitiesRightData]; n.splice(idx, 1); setActivitiesRightData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-20 opacity-0 group-hover/act:opacity-100">✕</button>}
                              <div className="flex flex-col mb-4 gap-2">
                                 <div className="w-full">
@@ -1159,6 +1170,7 @@ export default function App() {
                              <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
                                 <EditableText isAdmin={isAdmin} as="textarea" useMarkdown={true} value={act.desc} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].desc = v; setActivitiesRightData(n); }} className="text-gray-600 text-sm leading-relaxed w-full" placeholder="상세 내용" />
                              </div>
+                             </div>
                           </div>
                        ))}
                        {isAdmin && (
@@ -1171,9 +1183,9 @@ export default function App() {
         )}
 
         {resumeSubTab === 'cover-letter' && (
-          <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="animate-in fade-in duration-300">
              {isAdmin && (
-                <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200 text-emerald-800 text-sm font-bold flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="mb-8 bg-emerald-50 p-4 rounded-xl border border-emerald-200 text-emerald-800 text-sm font-bold flex flex-col sm:flex-row items-center justify-between gap-4">
                    <span className="flex items-center gap-2"><PenTool size={16}/> 에디터 모드 활성화 됨 (Markdown 문법 적용 가능)</span>
                    <button onClick={() => setCoverLetterData([...coverLetterData, {id: Date.now(), title: '신규 항목', content: '내용을 입력하세요.'}])} className="bg-emerald-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-emerald-700 transition-colors whitespace-nowrap">+ 항목 추가</button>
                 </div>
@@ -1182,7 +1194,9 @@ export default function App() {
             {/* Anchor Navigation Moved to right floating panel */}
 
             {coverLetterData.map((letter: any, index: number) => (
-               <div id={`cover-letter-${letter.id}`} key={letter.id} className="p-8 md:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm relative group/cover scroll-mt-32 break-inside-avoid print:break-inside-avoid">
+               <div id={`cover-letter-${letter.id}`} key={letter.id} className="break-inside-avoid print:break-inside-avoid">
+                  <div className={`${index === 0 ? 'hidden print:block' : 'block'} h-8 print:h-[40px] bg-transparent print:bg-[#FAFAFA] w-full`}></div>
+                  <div className="p-8 md:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm relative group/cover scroll-mt-32">
                   {isAdmin && <button onClick={() => { const n=[...coverLetterData]; n.splice(index, 1); setCoverLetterData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-30 opacity-0 group-hover/cover:opacity-100">✕</button>}
                   {isAdmin ? (
                      <div className="space-y-4">
@@ -1209,6 +1223,7 @@ export default function App() {
                         </div>
                      </div>
                   )}
+                  </div>
                </div>
             ))}
           </div>
