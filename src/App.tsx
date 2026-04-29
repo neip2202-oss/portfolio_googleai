@@ -952,9 +952,9 @@ export default function App() {
 
         {resumeSubTab === 'cv' && (
           <div className="animate-in fade-in duration-300">
-             <div className="grid md:grid-cols-12 gap-10 md:gap-16">
+             <div className="grid md:grid-cols-12 print:block print:flow-root gap-10 md:gap-16">
                 
-                <div className="md:col-span-5">
+                <div className="md:col-span-5 print:float-left print:w-[43%]">
                    <h2 className="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-2 border-b border-gray-200 pb-4 relative group/section">
                      {sectionIcons.timeline ? <img src={sectionIcons.timeline} className="w-7 h-7 object-contain" alt="icon" /> : <Briefcase className="text-emerald-500 w-7 h-7"/>}
                      경력 및 학력
@@ -1095,7 +1095,7 @@ export default function App() {
                    </div>
                 </div>
 
-                <div className="md:col-span-7">
+                <div className="md:col-span-7 print:float-right print:w-[53%]">
                    <h2 className="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-2 border-b border-gray-200 pb-4 relative group/section">
                      {sectionIcons.activities ? <img src={sectionIcons.activities} className="w-7 h-7 object-contain" alt="icon" /> : <Target className="text-blue-500 w-7 h-7"/>}
                      프로젝트
@@ -1182,7 +1182,7 @@ export default function App() {
             {/* Anchor Navigation Moved to right floating panel */}
 
             {coverLetterData.map((letter: any, index: number) => (
-               <div id={`cover-letter-${letter.id}`} key={letter.id} className="p-8 md:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm relative group/cover scroll-mt-32">
+               <div id={`cover-letter-${letter.id}`} key={letter.id} className="p-8 md:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm relative group/cover scroll-mt-32 break-inside-avoid print:break-inside-avoid">
                   {isAdmin && <button onClick={() => { const n=[...coverLetterData]; n.splice(index, 1); setCoverLetterData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-30 opacity-0 group-hover/cover:opacity-100">✕</button>}
                   {isAdmin ? (
                      <div className="space-y-4">
@@ -2248,9 +2248,20 @@ export default function App() {
 
       {/* 플로팅 관리자 패널 (전역 기업 관리) */}
       {isAdmin && (
-        <div className="fixed bottom-48 right-6 z-[100] flex flex-col items-end gap-3 group/admin-panel">
+        <div className="fixed top-24 right-6 z-[100] flex flex-col items-end gap-3 group/admin-panel">
+          {/* 메인 플로팅 버튼 */}
+          <div className="flex items-center gap-3">
+            <div className="bg-gray-900 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-black tracking-wider flex items-center gap-2 border border-gray-800 animate-in slide-in-from-right-4">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              {selectedCompany.toUpperCase()} MODE
+            </div>
+            <button className="w-14 h-14 bg-emerald-600 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-emerald-700 hover:rotate-12 transition-all duration-300 ring-4 ring-white">
+              <Building2 size={24}/>
+            </button>
+          </div>
+
           {/* 기업 선택 사이드 패널 */}
-          <div className="bg-white/90 backdrop-blur-xl border border-emerald-200 rounded-3xl shadow-2xl p-5 mb-2 w-72 origin-bottom-right transition-all duration-300 scale-0 group-hover/admin-panel:scale-100 opacity-0 group-hover/admin-panel:opacity-100">
+          <div className="bg-white/90 backdrop-blur-xl border border-emerald-200 rounded-3xl shadow-2xl p-5 mt-2 w-72 origin-top-right transition-all duration-300 scale-0 group-hover/admin-panel:scale-100 opacity-0 group-hover/admin-panel:opacity-100">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
               <h4 className="text-sm font-black text-gray-900 flex items-center gap-2">
                 <Building2 size={16} className="text-emerald-600"/> 기업별 편집 모드
@@ -2318,17 +2329,6 @@ export default function App() {
                 <Copy size={14}/> 전역 URL 복사
               </button>
             </div>
-          </div>
-
-          {/* 메인 플로팅 버튼 */}
-          <div className="flex items-center gap-3">
-            <div className="bg-gray-900 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-black tracking-wider flex items-center gap-2 border border-gray-800 animate-in slide-in-from-right-4">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              {selectedCompany.toUpperCase()} MODE
-            </div>
-            <button className="w-14 h-14 bg-emerald-600 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-emerald-700 hover:rotate-12 transition-all duration-300 ring-4 ring-white">
-              <Building2 size={24}/>
-            </button>
           </div>
         </div>
       )}
