@@ -2333,9 +2333,9 @@ export default function App() {
 
       {/* 플로팅 관리자 패널 (전역 기업 관리) */}
       {isAdmin && (
-        <div className="fixed bottom-24 right-6 z-[100] flex flex-col items-end gap-3 group/admin-panel">
+        <div className="fixed bottom-24 left-6 z-[100] flex flex-col items-start gap-3 group/admin-panel">
           {/* 기업 선택 사이드 패널 */}
-          <div className="bg-white/90 backdrop-blur-xl border border-emerald-200 rounded-3xl shadow-2xl p-5 mb-2 w-72 origin-bottom-right transition-all duration-300 scale-0 group-hover/admin-panel:scale-100 opacity-0 group-hover/admin-panel:opacity-100">
+          <div className="bg-white/90 backdrop-blur-xl border border-emerald-200 rounded-3xl shadow-2xl p-5 mb-2 w-72 origin-bottom-left transition-all duration-300 scale-0 group-hover/admin-panel:scale-100 opacity-0 group-hover/admin-panel:opacity-100">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
               <h4 className="text-sm font-black text-gray-900 flex items-center gap-2">
                 <Building2 size={16} className="text-emerald-600"/> 기업별 편집 모드
@@ -2407,13 +2407,13 @@ export default function App() {
 
           {/* 메인 플로팅 버튼 */}
           <div className="flex items-center gap-3">
-            <div className="bg-gray-900 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-black tracking-wider flex items-center gap-2 border border-gray-800 animate-in slide-in-from-right-4">
+            <button className="w-14 h-14 bg-emerald-600 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-emerald-700 hover:-rotate-12 transition-all duration-300 ring-4 ring-white">
+              <Building2 size={24}/>
+            </button>
+            <div className="bg-gray-900 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-black tracking-wider flex items-center gap-2 border border-gray-800 animate-in slide-in-from-left-4">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               {selectedCompany.toUpperCase()} MODE
             </div>
-            <button className="w-14 h-14 bg-emerald-600 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-emerald-700 hover:rotate-12 transition-all duration-300 ring-4 ring-white">
-              <Building2 size={24}/>
-            </button>
           </div>
         </div>
       )}
