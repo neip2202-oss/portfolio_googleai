@@ -323,6 +323,8 @@ export default function App() {
     { id: 102, category: '역기획서', title: '원신 전투 시스템 역기획', desc: '원소 반응 시스템의 데미지 공식을 역산하고 구조화한 상세 역기획 문서 및 개선 방향 제안.', iconName: 'Search', markdown: defaultMarkdown, media: { thumbnail: '', video: '', slides: ['', '', '', '', ''] } },
   ], selectedCompany);
 
+  const [planData, setPlanData] = useContent<any>('planData', [], selectedCompany);
+
   const [playHistoryData, setPlayHistoryData] = useContent<any>('playHistoryData', [
     { id: 1, platform: 'PC', title: '발더스 게이트 3', genre: 'CRPG', hours: '300+' },
     { id: 2, platform: 'PC', title: 'Path of Exile', genre: 'ARPG', hours: '800+' },
@@ -1264,13 +1266,14 @@ export default function App() {
         <div className="mb-10 mt-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
             <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight mb-4">포트폴리오</h1>
-            <p className="text-gray-500">게임 기획부터 런칭까지의 메인 프로젝트와 AI/툴링을 활용한 기타 작업물 아카이브입니다.</p>
+            <p className="text-gray-500">게임 기획부터 런칭까지의 메인 프로젝트와 기획서, AI 툴링 작업물 아카이브입니다.</p>
           </div>
         </div>
 
-        <div className="flex gap-2 mb-10 border-b border-gray-200 pb-6">
-           <button onClick={() => setPortfolioTab('main')} className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm ${portfolioTab === 'main' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-700'}`}>메인 프로젝트</button>
-           <button onClick={() => setPortfolioTab('other')} className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm ${portfolioTab === 'other' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-700'}`}>기타 작업물 (AI & 툴링)</button>
+        <div className="flex flex-wrap gap-2 mb-10 border-b border-gray-200 pb-6">
+           <button onClick={() => setPortfolioTab('main')} className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm whitespace-nowrap ${portfolioTab === 'main' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-700'}`}>메인 프로젝트</button>
+           <button onClick={() => setPortfolioTab('plan')} className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm whitespace-nowrap ${portfolioTab === 'plan' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-700'}`}>기획서</button>
+           <button onClick={() => setPortfolioTab('other')} className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm whitespace-nowrap ${portfolioTab === 'other' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-700'}`}>AI & 툴링</button>
         </div>
         
         {portfolioTab === 'main' && (
@@ -1436,6 +1439,39 @@ export default function App() {
            </div>
         )}
 
+        {portfolioTab === 'plan' && (
+           <div className="grid md:grid-cols-3 gap-6 animate-in fade-in duration-300">
+              {planData.map((work: any) => {
+                 const IconComp = iconsMapping[work.iconName] || FileText;
+                 return (
+                 <div key={work.id} onClick={() => handleOtherWorkClick(work)} className="p-8 rounded-3xl bg-[#FAFAFA] border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all group flex flex-col cursor-pointer">
+                    <div className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center text-blue-500 mb-6 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                       <IconComp size={26} />
+                    </div>
+                    <span className="text-xs font-bold text-blue-600 mb-2">{work.category}</span>
+                    <h3 className="text-xl font-extrabold text-gray-900 mb-3">{work.title}</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-6 flex-1 line-clamp-3">{work.desc}</p>
+                    <div className="mt-auto flex items-center gap-1.5 text-sm font-bold text-gray-400 group-hover:text-blue-600 transition-colors">
+                       상세 보기 <ArrowRight size={14} />
+                    </div>
+                 </div>
+              )})}
+
+              {isAdmin && (
+                <div onClick={() => {
+                    const newWork = { id: Date.now(), category: '기획서', title: '새로운 기획서', desc: '상세 내용을 작성하세요.', iconName: 'FileText', markdown: defaultMarkdown, media: { thumbnail:'', video:'', slides:[''] } };
+                    setPlanData([...planData, newWork]);
+                    handleOtherWorkClick(newWork);
+                  }}
+                  className="p-8 rounded-3xl bg-gray-50 border-2 border-dashed border-emerald-300 text-emerald-600 hover:bg-emerald-50 transition-all flex flex-col items-center justify-center cursor-pointer min-h-[250px]"
+                >
+                   <Plus size={40} className="mb-4 opacity-70" />
+                   <span className="font-bold">신규 기획서 추가</span>
+                </div>
+             )}
+           </div>
+        )}
+
       </div>
       <GlobalFooterCTA />
     </div>
@@ -1447,8 +1483,10 @@ export default function App() {
        setSelectedProject(updated);
        if (portfolioTab === 'main') {
           setProjectsData(projectsData.map((p: any) => p.id === updated.id ? updated : p));
-       } else {
+       } else if (portfolioTab === 'other') {
           setOtherWorksData(otherWorksData.map((w: any) => w.id === updated.id ? updated : w));
+       } else if (portfolioTab === 'plan') {
+          setPlanData(planData.map((p: any) => p.id === updated.id ? updated : p));
        }
     };
 
@@ -1468,7 +1506,8 @@ export default function App() {
                  <button onClick={() => {
                     if (window.confirm('정말 이 작업물을 삭제하시겠습니까? 관련한 모든 데이터가 완전히 지워집니다.')) {
                        if (portfolioTab === 'main') setProjectsData(projectsData.filter((p:any) => p.id !== selectedProject.id));
-                       else setOtherWorksData(otherWorksData.filter((p:any) => p.id !== selectedProject.id));
+                       else if (portfolioTab === 'other') setOtherWorksData(otherWorksData.filter((p:any) => p.id !== selectedProject.id));
+                       else if (portfolioTab === 'plan') setPlanData(planData.filter((p:any) => p.id !== selectedProject.id));
                        handleNavClick('portfolio');
                     }
                  }} className="px-4 py-2 bg-red-50 text-red-600 font-bold text-sm rounded-lg hover:bg-red-500 hover:text-white transition-colors shadow-sm">이 데이터 영구 삭제</button>
