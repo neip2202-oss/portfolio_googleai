@@ -1215,92 +1215,6 @@ export default function App() {
         )}
 
       
-      {/* 플로팅 관리자 패널 (전역 기업 관리) */}
-      {isAdmin && (
-        <div className="fixed bottom-24 right-6 z-[100] flex flex-col items-end gap-3 group/admin-panel">
-          {/* 기업 선택 사이드 패널 */}
-          <div className="bg-white/90 backdrop-blur-xl border border-emerald-200 rounded-3xl shadow-2xl p-5 mb-2 w-72 origin-bottom-right transition-all duration-300 scale-0 group-hover/admin-panel:scale-100 opacity-0 group-hover/admin-panel:opacity-100">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
-              <h4 className="text-sm font-black text-gray-900 flex items-center gap-2">
-                <Building2 size={16} className="text-emerald-600"/> 기업별 편집 모드
-              </h4>
-              <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">LIVE</span>
-            </div>
-
-            <div className="space-y-1.5 max-h-[300px] overflow-y-auto mb-4 pr-1 custom-scrollbar">
-              {companyList.map((companyId) => (
-                <div key={companyId} className="flex items-center gap-2 group/item">
-                  <button
-                    onClick={() => handleSwitchCompany(companyId)}
-                    className={`flex-1 flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                      selectedCompany === companyId 
-                        ? 'bg-emerald-600 text-white shadow-md ring-4 ring-emerald-100' 
-                        : 'bg-gray-50 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
-                    }`}
-                  >
-                    {companyId.toUpperCase()}
-                    {selectedCompany === companyId && <CheckCircle size={12}/>}
-                  </button>
-                  {companyId !== 'default' && (
-                    <button 
-                      onClick={() => {
-                        const n = companyList.filter(c => c !== companyId);
-                        setCompanyList(n);
-                        if (selectedCompany === companyId) handleSwitchCompany('default');
-                      }}
-                      className="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-all opacity-0 group-hover/item:opacity-100"
-                    >
-                      <Trash2 size={12}/>
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-col gap-2 pt-3 border-t border-gray-100">
-              <button 
-                onClick={() => {
-                  const newId = window.prompt('새로운 기업 ID를 영문으로 입력하세요 (예: nexon, kakao):');
-                  if (newId) {
-                    const lower = newId.toLowerCase().trim();
-                    if (!companyList.includes(lower)) {
-                      setCompanyList([...companyList, lower]);
-                      handleSwitchCompany(lower);
-                    } else {
-                      handleSwitchCompany(lower);
-                    }
-                  }
-                }}
-                className="w-full py-2.5 bg-gray-900 text-white rounded-xl text-xs font-bold hover:bg-black transition-all flex items-center justify-center gap-2 shadow-lg"
-              >
-                <Plus size={14}/> 새 기업 추가
-              </button>
-
-              <button 
-                onClick={() => {
-                  const url = window.location.href;
-                  navigator.clipboard.writeText(url);
-                  showToast('현재 기업 전용 링크가 복사되었습니다.', 'success');
-                }}
-                className="w-full py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-xs font-bold hover:border-emerald-400 hover:text-emerald-600 transition-all flex items-center justify-center gap-2"
-              >
-                <Copy size={14}/> 전역 URL 복사
-              </button>
-            </div>
-          </div>
-
-          {/* 메인 플로팅 버튼 */}
-          <div className="flex items-center gap-3">
-            <div className="bg-gray-900 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-black tracking-wider flex items-center gap-2 border border-gray-800 animate-in slide-in-from-right-4">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              {selectedCompany.toUpperCase()} MODE
-            </div>
-            <button className="w-14 h-14 bg-emerald-600 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-emerald-700 hover:rotate-12 transition-all duration-300 ring-4 ring-white">
-              <Building2 size={24}/>
-            </button>
-          </div>
-        </div>
-      )}
 
 
       </div>
@@ -2331,11 +2245,12 @@ export default function App() {
          </div>
       )}
 
+
       {/* 플로팅 관리자 패널 (전역 기업 관리) */}
       {isAdmin && (
-        <div className="fixed bottom-24 left-6 z-[100] flex flex-col items-start gap-3 group/admin-panel">
+        <div className="fixed bottom-48 right-6 z-[100] flex flex-col items-end gap-3 group/admin-panel">
           {/* 기업 선택 사이드 패널 */}
-          <div className="bg-white/90 backdrop-blur-xl border border-emerald-200 rounded-3xl shadow-2xl p-5 mb-2 w-72 origin-bottom-left transition-all duration-300 scale-0 group-hover/admin-panel:scale-100 opacity-0 group-hover/admin-panel:opacity-100">
+          <div className="bg-white/90 backdrop-blur-xl border border-emerald-200 rounded-3xl shadow-2xl p-5 mb-2 w-72 origin-bottom-right transition-all duration-300 scale-0 group-hover/admin-panel:scale-100 opacity-0 group-hover/admin-panel:opacity-100">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
               <h4 className="text-sm font-black text-gray-900 flex items-center gap-2">
                 <Building2 size={16} className="text-emerald-600"/> 기업별 편집 모드
@@ -2407,13 +2322,13 @@ export default function App() {
 
           {/* 메인 플로팅 버튼 */}
           <div className="flex items-center gap-3">
-            <button className="w-14 h-14 bg-emerald-600 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-emerald-700 hover:-rotate-12 transition-all duration-300 ring-4 ring-white">
-              <Building2 size={24}/>
-            </button>
-            <div className="bg-gray-900 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-black tracking-wider flex items-center gap-2 border border-gray-800 animate-in slide-in-from-left-4">
+            <div className="bg-gray-900 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-black tracking-wider flex items-center gap-2 border border-gray-800 animate-in slide-in-from-right-4">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               {selectedCompany.toUpperCase()} MODE
             </div>
+            <button className="w-14 h-14 bg-emerald-600 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-emerald-700 hover:rotate-12 transition-all duration-300 ring-4 ring-white">
+              <Building2 size={24}/>
+            </button>
           </div>
         </div>
       )}
