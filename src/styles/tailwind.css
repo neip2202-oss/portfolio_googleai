@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@media print {
+  /* 1. 브라우저 강제 흰색 마진 제거 */
+  @page {
+    margin: 0;
+  }
+
+  /* 2. 페이지 하단 공백 방지를 위한 최소 높이 보장 및 3. 배경색 강제 지정 */
+  html, body, #root {
+    min-height: 100vh !important;
+    background-color: #FAFAFA !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

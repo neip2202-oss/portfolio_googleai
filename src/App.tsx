@@ -955,24 +955,26 @@ export default function App() {
              <div className="grid md:grid-cols-12 print:block print:flow-root gap-10 md:gap-16">
                 
                 <div className="md:col-span-5 print:float-left print:w-[43%]">
-                   <h2 className="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-2 border-b border-gray-200 pb-4 relative group/section">
-                     {sectionIcons.timeline ? <img src={sectionIcons.timeline} className="w-7 h-7 object-contain" alt="icon" /> : <Briefcase className="text-emerald-500 w-7 h-7"/>}
-                     경력 및 학력
-                     {isAdmin && (
-                       <label className="absolute -top-4 -left-4 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-pointer bg-white border border-gray-200 shadow-lg p-1 rounded z-20 text-[10px] text-blue-500 font-bold">
-                         + 아이콘 첨부
-                         <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => setSectionIcons({...sectionIcons, timeline: b64}))} className="hidden" />
-                       </label>
-                     )}
-                   </h2>
+                   <div className="print:border-t-[30px] print:border-transparent print:-mt-[30px]">
+                     <h2 className="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-2 border-b border-gray-200 pb-4 relative group/section">
+                       {sectionIcons.timeline ? <img src={sectionIcons.timeline} className="w-7 h-7 object-contain" alt="icon" /> : <Briefcase className="text-emerald-500 w-7 h-7"/>}
+                       경력 및 학력
+                       {isAdmin && (
+                         <label className="absolute -top-4 -left-4 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-pointer bg-white border border-gray-200 shadow-lg p-1 rounded z-20 text-[10px] text-blue-500 font-bold">
+                           + 아이콘 첨부
+                           <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => setSectionIcons({...sectionIcons, timeline: b64}))} className="hidden" />
+                         </label>
+                       )}
+                     </h2>
+                   </div>
                    
                    <div className="relative pl-6">
                       <div className="absolute left-[7px] top-0 bottom-0 w-px bg-gray-200"></div>
-                      <div className="">
+                      <div className="space-y-10">
                          {timelineLeftData.map((item: any, idx: number) => (
                             <div key={item.id} className="break-inside-avoid print:break-inside-avoid">
-                               <div className={`${idx === 0 ? 'hidden print:block' : 'block'} h-10 print:h-[30px] bg-transparent print:bg-[#FAFAFA] w-full`}></div>
-                               <div className="relative group/time">
+                               <div className="print:border-t-[30px] print:border-[#FAFAFA] print:-mt-[30px] print:bg-clip-padding">
+                                  <div className="relative group/time">
                                {isAdmin && <button onClick={() => { const n = [...timelineLeftData]; n.splice(idx, 1); setTimelineLeftData(n); }} className="absolute -top-2 -left-[6px] w-6 h-6 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-xs shadow transition-colors z-20 opacity-0 group-hover/time:opacity-100">✕</button>}
                                {item.iconImg ? (
                                   <img src={item.iconImg} alt="icon" className="absolute left-[-28px] top-1 w-6 h-6 rounded-full border border-gray-200 bg-white object-cover z-10 shadow-sm" />
@@ -991,6 +993,7 @@ export default function App() {
                                  <EditableText isAdmin={isAdmin} value={item.subtitle} onChange={(v: string) => { const n = [...timelineLeftData]; n[idx].subtitle = v; setTimelineLeftData(n); }} className="text-xs font-bold text-gray-500 mb-2 block" />
                                  <EditableText isAdmin={isAdmin} as="textarea" value={item.desc} onChange={(v: string) => { const n = [...timelineLeftData]; n[idx].desc = v; setTimelineLeftData(n); }} className="text-gray-600 text-sm leading-relaxed block" />
                                </div>
+                                  </div>
                                </div>
                             </div>
                          ))}
@@ -1003,21 +1006,23 @@ export default function App() {
                    </div>
 
                    
-                   <h2 className="text-2xl font-extrabold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-200 pb-4 mt-16 relative group/section">
-                     {sectionIcons.activitiesLeft ? <img src={sectionIcons.activitiesLeft} className="w-7 h-7 object-contain" alt="icon" /> : <Target className="text-blue-500 w-7 h-7"/>}
-                     기타 활동
-                     {isAdmin && (
-                       <label className="absolute -top-4 -left-4 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-pointer bg-white border border-gray-200 shadow-lg p-1 rounded z-20 text-[10px] text-blue-500 font-bold">
-                         + 아이콘 첨부
-                         <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => setSectionIcons({...sectionIcons, activitiesLeft: b64}))} className="hidden" />
-                       </label>
-                     )}
-                   </h2>
-                   <div className="">
+                   <div className="print:border-t-[30px] print:border-transparent print:-mt-[30px]">
+                     <h2 className="text-2xl font-extrabold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-200 pb-4 mt-16 relative group/section">
+                       {sectionIcons.activitiesLeft ? <img src={sectionIcons.activitiesLeft} className="w-7 h-7 object-contain" alt="icon" /> : <Target className="text-blue-500 w-7 h-7"/>}
+                       기타 활동
+                       {isAdmin && (
+                         <label className="absolute -top-4 -left-4 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-pointer bg-white border border-gray-200 shadow-lg p-1 rounded z-20 text-[10px] text-blue-500 font-bold">
+                           + 아이콘 첨부
+                           <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => setSectionIcons({...sectionIcons, activitiesLeft: b64}))} className="hidden" />
+                         </label>
+                       )}
+                     </h2>
+                   </div>
+                   <div className="space-y-6">
                        {activitiesLeftData.map((act: any, idx: number) => (
                           <div key={act.id} className="break-inside-avoid print:break-inside-avoid">
-                             <div className={`${idx === 0 ? 'hidden print:block' : 'block'} h-6 print:h-[30px] bg-transparent print:bg-[#FAFAFA] w-full`}></div>
-                             <div className="p-6 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative group/act">
+                             <div className="print:border-t-[30px] print:border-[#FAFAFA] print:-mt-[30px] print:bg-clip-padding">
+                                <div className="p-6 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative group/act">
                              {isAdmin && <button onClick={() => { const n=[...activitiesLeftData]; n.splice(idx, 1); setActivitiesLeftData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-20 opacity-0 group-hover/act:opacity-100">✕</button>}
                              <div className="flex flex-col mb-4 gap-2">
                                 <div className="w-full">
@@ -1066,6 +1071,7 @@ export default function App() {
                              <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
                                 <EditableText isAdmin={isAdmin} as="textarea" useMarkdown={true} value={act.desc} onChange={(v: string) => { const n = [...activitiesLeftData]; n[idx].desc = v; setActivitiesLeftData(n); }} placeholder="상세 내용" />
                              </div>
+                                </div>
                              </div>
                           </div>
                        ))}
@@ -1077,24 +1083,27 @@ export default function App() {
                    </div>
 
 
-                   <h2 className="text-2xl font-extrabold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-200 pb-4 mt-16 relative group/section">
-                     {sectionIcons.certifications ? <img src={sectionIcons.certifications} className="w-7 h-7 object-contain" alt="icon" /> : <Award className="text-orange-500 w-7 h-7"/>}
-                     자격증
-                     {isAdmin && (
-                       <label className="absolute -top-4 -left-4 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-pointer bg-white border border-gray-200 shadow-lg p-1 rounded z-20 text-[10px] text-blue-500 font-bold">
-                         + 아이콘 첨부
-                         <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => setSectionIcons({...sectionIcons, certifications: b64}))} className="hidden" />
-                       </label>
-                     )}
-                   </h2>
-                   <div className="">
+                   <div className="print:border-t-[30px] print:border-transparent print:-mt-[30px]">
+                     <h2 className="text-2xl font-extrabold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-200 pb-4 mt-16 relative group/section">
+                       {sectionIcons.certifications ? <img src={sectionIcons.certifications} className="w-7 h-7 object-contain" alt="icon" /> : <Award className="text-orange-500 w-7 h-7"/>}
+                       자격증
+                       {isAdmin && (
+                         <label className="absolute -top-4 -left-4 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-pointer bg-white border border-gray-200 shadow-lg p-1 rounded z-20 text-[10px] text-blue-500 font-bold">
+                           + 아이콘 첨부
+                           <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => setSectionIcons({...sectionIcons, certifications: b64}))} className="hidden" />
+                         </label>
+                       )}
+                     </h2>
+                   </div>
+                   <div className="space-y-3">
                       {certifications.map((cert: any, idx: number) => (
                          <div key={cert.id} className="break-inside-avoid print:break-inside-avoid">
-                            <div className={`${idx === 0 ? 'hidden print:block' : 'block'} h-3 print:h-[30px] bg-transparent print:bg-[#FAFAFA] w-full`}></div>
-                            <div className="p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center shadow-sm relative group/cert">
+                            <div className="print:border-t-[30px] print:border-[#FAFAFA] print:-mt-[30px] print:bg-clip-padding">
+                               <div className="p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center shadow-sm relative group/cert">
                             {isAdmin && <button onClick={() => { const n=[...certifications]; n.splice(idx, 1); setCertifications(n); }} className="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-xs shadow transition-colors z-20 opacity-0 group-hover/cert:opacity-100">✕</button>}
                             <EditableText isAdmin={isAdmin} value={cert.title} onChange={(v: string) => { const n=[...certifications]; n[idx].title=v; setCertifications(n); }} className="font-bold text-gray-900 text-sm w-1/2" />
                             <EditableText isAdmin={isAdmin} value={cert.date} onChange={(v: string) => { const n=[...certifications]; n[idx].date=v; setCertifications(n); }} className="text-xs text-gray-400 font-bold bg-gray-50 px-2 py-1 rounded text-right" />
+                               </div>
                             </div>
                          </div>
                       ))}
@@ -1105,21 +1114,23 @@ export default function App() {
                 </div>
 
                 <div className="md:col-span-7 print:float-right print:w-[53%]">
-                   <h2 className="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-2 border-b border-gray-200 pb-4 relative group/section">
-                     {sectionIcons.activities ? <img src={sectionIcons.activities} className="w-7 h-7 object-contain" alt="icon" /> : <Target className="text-blue-500 w-7 h-7"/>}
-                     프로젝트
-                     {isAdmin && (
-                       <label className="absolute -top-4 -left-4 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-pointer bg-white border border-gray-200 shadow-lg p-1 rounded z-20 text-[10px] text-blue-500 font-bold">
-                         + 아이콘 첨부
-                         <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => setSectionIcons({...sectionIcons, activities: b64}))} className="hidden" />
-                       </label>
-                     )}
-                   </h2>
-                   <div className="">
+                   <div className="print:border-t-[30px] print:border-transparent print:-mt-[30px]">
+                     <h2 className="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-2 border-b border-gray-200 pb-4 relative group/section">
+                       {sectionIcons.activities ? <img src={sectionIcons.activities} className="w-7 h-7 object-contain" alt="icon" /> : <Target className="text-blue-500 w-7 h-7"/>}
+                       프로젝트
+                       {isAdmin && (
+                         <label className="absolute -top-4 -left-4 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-pointer bg-white border border-gray-200 shadow-lg p-1 rounded z-20 text-[10px] text-blue-500 font-bold">
+                           + 아이콘 첨부
+                           <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, (b64) => setSectionIcons({...sectionIcons, activities: b64}))} className="hidden" />
+                         </label>
+                       )}
+                     </h2>
+                   </div>
+                   <div className="space-y-6">
                        {activitiesRightData.map((act: any, idx: number) => (
                           <div key={act.id} className="break-inside-avoid print:break-inside-avoid">
-                             <div className={`${idx === 0 ? 'hidden print:block' : 'block'} h-6 print:h-[30px] bg-transparent print:bg-[#FAFAFA] w-full`}></div>
-                             <div className="p-6 md:p-8 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative group/act">
+                             <div className="print:border-t-[30px] print:border-[#FAFAFA] print:-mt-[30px] print:bg-clip-padding">
+                                <div className="p-6 md:p-8 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative group/act">
                              {isAdmin && <button onClick={() => { const n=[...activitiesRightData]; n.splice(idx, 1); setActivitiesRightData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-20 opacity-0 group-hover/act:opacity-100">✕</button>}
                              <div className="flex flex-col mb-4 gap-2">
                                 <div className="w-full">
@@ -1170,6 +1181,7 @@ export default function App() {
                              <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
                                 <EditableText isAdmin={isAdmin} as="textarea" useMarkdown={true} value={act.desc} onChange={(v: string) => { const n = [...activitiesRightData]; n[idx].desc = v; setActivitiesRightData(n); }} className="text-gray-600 text-sm leading-relaxed w-full" placeholder="상세 내용" />
                              </div>
+                                </div>
                              </div>
                           </div>
                        ))}
@@ -1183,9 +1195,9 @@ export default function App() {
         )}
 
         {resumeSubTab === 'cover-letter' && (
-          <div className="animate-in fade-in duration-300">
+          <div className="space-y-8 animate-in fade-in duration-300">
              {isAdmin && (
-                <div className="mb-8 bg-emerald-50 p-4 rounded-xl border border-emerald-200 text-emerald-800 text-sm font-bold flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200 text-emerald-800 text-sm font-bold flex flex-col sm:flex-row items-center justify-between gap-4">
                    <span className="flex items-center gap-2"><PenTool size={16}/> 에디터 모드 활성화 됨 (Markdown 문법 적용 가능)</span>
                    <button onClick={() => setCoverLetterData([...coverLetterData, {id: Date.now(), title: '신규 항목', content: '내용을 입력하세요.'}])} className="bg-emerald-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-emerald-700 transition-colors whitespace-nowrap">+ 항목 추가</button>
                 </div>
@@ -1195,34 +1207,35 @@ export default function App() {
 
             {coverLetterData.map((letter: any, index: number) => (
                <div id={`cover-letter-${letter.id}`} key={letter.id} className="break-inside-avoid print:break-inside-avoid">
-                  <div className={`${index === 0 ? 'hidden print:block' : 'block'} h-8 print:h-[40px] bg-transparent print:bg-[#FAFAFA] w-full`}></div>
-                  <div className="p-8 md:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm relative group/cover scroll-mt-32">
-                  {isAdmin && <button onClick={() => { const n=[...coverLetterData]; n.splice(index, 1); setCoverLetterData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-30 opacity-0 group-hover/cover:opacity-100">✕</button>}
-                  {isAdmin ? (
-                     <div className="space-y-4">
-                        <EditableText isAdmin={isAdmin} as="textarea" value={letter.title} onChange={(v: string) => { const n = [...coverLetterData]; n[index].title = v; setCoverLetterData(n); }} className="text-xl font-extrabold block w-full p-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none resize-y min-h-[80px]" />
-                        <EditableText isAdmin={isAdmin} as="textarea" value={letter.content} onChange={(v: string) => { const n = [...coverLetterData]; n[index].content = v; setCoverLetterData(n); }} className="text-sm font-mono bg-gray-900 text-gray-200 p-4 rounded-xl min-h-[150px] w-full block" />
-                     </div>
-                  ) : (
-                     <div className="flex flex-col md:grid md:grid-cols-12 gap-8 md:gap-12 lg:gap-16">
-                        {/* 좌측: 문항 번호와 제목 (약 30%) */}
-                        <div className="md:col-span-4 lg:col-span-3">
-                           <h3 className="text-xl font-black text-gray-900 flex flex-col gap-4 sticky top-36">
-                              <span className="w-10 h-10 rounded-2xl bg-gray-900 text-white flex items-center justify-center text-lg font-black shadow-lg font-accent">
-                                 {index + 1}
-                              </span>
-                              <span className="leading-tight tracking-tighter break-keep whitespace-pre-wrap">
-                                 {letter.title}
-                              </span>
-                           </h3>
+                  <div className="print:border-t-[30px] print:border-[#FAFAFA] print:-mt-[30px] print:bg-clip-padding">
+                     <div className="p-8 md:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm relative group/cover scroll-mt-32">
+                     {isAdmin && <button onClick={() => { const n=[...coverLetterData]; n.splice(index, 1); setCoverLetterData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-30 opacity-0 group-hover/cover:opacity-100">✕</button>}
+                     {isAdmin ? (
+                        <div className="space-y-4">
+                           <EditableText isAdmin={isAdmin} as="textarea" value={letter.title} onChange={(v: string) => { const n = [...coverLetterData]; n[index].title = v; setCoverLetterData(n); }} className="text-xl font-extrabold block w-full p-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none resize-y min-h-[80px]" />
+                           <EditableText isAdmin={isAdmin} as="textarea" value={letter.content} onChange={(v: string) => { const n = [...coverLetterData]; n[index].content = v; setCoverLetterData(n); }} className="text-sm font-mono bg-gray-900 text-gray-200 p-4 rounded-xl min-h-[150px] w-full block" />
                         </div>
-                        
-                        {/* 우측: 본문 내용 (약 70%) */}
-                        <div className="md:col-span-8 lg:col-span-9 border-l-0 md:border-l border-gray-100 md:pl-10 lg:pl-12">
-                           <MarkdownRenderer content={letter.content} />
+                     ) : (
+                        <div className="flex flex-col md:grid md:grid-cols-12 gap-8 md:gap-12 lg:gap-16">
+                           {/* 좌측: 문항 번호와 제목 (약 30%) */}
+                           <div className="md:col-span-4 lg:col-span-3">
+                              <h3 className="text-xl font-black text-gray-900 flex flex-col gap-4 sticky top-36">
+                                 <span className="w-10 h-10 rounded-2xl bg-gray-900 text-white flex items-center justify-center text-lg font-black shadow-lg font-accent">
+                                    {index + 1}
+                                 </span>
+                                 <span className="leading-tight tracking-tighter break-keep whitespace-pre-wrap">
+                                    {letter.title}
+                                 </span>
+                              </h3>
+                           </div>
+                           
+                           {/* 우측: 본문 내용 (약 70%) */}
+                           <div className="md:col-span-8 lg:col-span-9 border-l-0 md:border-l border-gray-100 md:pl-10 lg:pl-12">
+                              <MarkdownRenderer content={letter.content} />
+                           </div>
                         </div>
+                     )}
                      </div>
-                  )}
                   </div>
                </div>
             ))}
