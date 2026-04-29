@@ -814,7 +814,7 @@ export default function App() {
                                             if (newUrl !== null) {
                                                const newProj = { ...project };
                                                if (!newProj.tagLinks) newProj.tagLinks = {};
-                                               newProj.tagLinks[link] = newUrl;
+                                               newProj.tagLinks[link] = String(newUrl).trim();
                                                const newProjects = projectsData.map((p) => p.id === project.id ? newProj : p);
                                                setProjectsData(newProjects);
                                             }
@@ -1366,7 +1366,7 @@ export default function App() {
                                                if (newUrl !== null) {
                                                   const newProj = { ...project };
                                                   if (!newProj.tagLinks) newProj.tagLinks = {};
-                                                  newProj.tagLinks[link] = newUrl;
+                                                  newProj.tagLinks[link] = String(newUrl).trim();
                                                   const newProjects = projectsData.map((p) => p.id === project.id ? newProj : p);
                                                   setProjectsData(newProjects);
                                                }
@@ -1552,7 +1552,7 @@ export default function App() {
                                                const newUrl = window.prompt(`[${link}] 연결할 외부 링크 URL을 입력해주세요:`, url || '');
                                                if (newUrl !== null) {
                                                   const newTagLinks = { ...(selectedProject.tagLinks || {}) };
-                                                  newTagLinks[link] = newUrl;
+                                                  newTagLinks[link] = String(newUrl).trim();
                                                   updateCurrentProject('tagLinks', newTagLinks);
                                                }
                                             }}
@@ -1633,7 +1633,7 @@ export default function App() {
                                               const newUrl = window.prompt(`[${link}] 연결할 외부 링크 URL을 입력해주세요:`, url || '');
                                               if (newUrl !== null) {
                                                  const newTagLinks = { ...(selectedProject.tagLinks || {}) };
-                                                 newTagLinks[link] = newUrl;
+                                                 newTagLinks[link] = String(newUrl).trim();
                                                  updateCurrentProject('tagLinks', newTagLinks);
                                               }
                                            }}
