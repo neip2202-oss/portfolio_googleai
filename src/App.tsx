@@ -468,6 +468,10 @@ export default function App() {
   const [designTools, setDesignTools] = useContent<any>('designTools', [
     { id: 1, name: 'Figma', tooltip: 'UI/UX 와이어프레임 설계', iconName: 'PenTool' }
   ]);
+  const [aiTools, setAiTools] = useContent<any>('aiTools', [
+    { id: 1, name: 'ChatGPT', tooltip: '데이터 분석 및 기획 보조', iconName: 'BrainCircuit' },
+    { id: 2, name: 'Midjourney', tooltip: '시각화 및 레퍼런스 이미지 생성', iconName: 'ImageIcon' }
+  ]);
   const [certifications, setCertifications] = useContent<any>('certifications', [
     { id: 1, title: 'CS Leaders (관리사)', date: '2022.05' },
     { id: 2, title: '컴퓨터활용능력 1급', date: '2021.10' }
@@ -484,6 +488,8 @@ export default function App() {
     if(name.toLowerCase().includes('excel')) return Database;
     if(name.toLowerCase().includes('unity')) return Box;
     if(name.toLowerCase().includes('notion')) return PenTool;
+    if(name.toLowerCase().includes('chatgpt')) return BrainCircuit;
+    if(name.toLowerCase().includes('midjourney')) return ImageIcon;
     return iconsMapping[name] || LayoutTemplate;
   };
 
@@ -899,9 +905,10 @@ export default function App() {
                  { title: 'Work', data: workTools, set: setWorkTools },
                  { title: 'Collaboration', data: collabTools, set: setCollabTools },
                  { title: 'Engine', data: engineTools, set: setEngineTools },
-                 { title: 'Design', data: designTools, set: setDesignTools }
+                 { title: 'Design', data: designTools, set: setDesignTools },
+                 { title: 'AI', data: aiTools, set: setAiTools }
                ].map(category => (
-                 <div key={category.title} className="flex flex-col gap-4">
+                 <div key={category.title} className={`flex flex-col gap-4 ${category.title === 'AI' ? 'md:col-span-2' : ''}`}>
                     <span className="text-xs font-extrabold text-gray-400 uppercase tracking-widest font-accent">{category.title}</span>
                     <div className="flex flex-wrap gap-2 items-center">
                        {category.data.map((tool: any, idx: number) => {
