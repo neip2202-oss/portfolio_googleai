@@ -226,6 +226,35 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [adminPwd, setAdminPwd] = useState('');
   const [toast, setToast] = useState({ show: false, message: '', type: 'error' });
+  
+  // 상태 변수 복구
+  const [serverStatus, setServerStatus] = useState<'online'|'offline'>('online');
+  const [lastSynced, setLastSynced] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleNetStatus = (e: any) => setServerStatus(e.detail.isOffline ? 'offline' : 'online');
+    window.addEventListener('app-network-status', handleNetStatus);
+    return () => window.removeEventListener('app-network-status', handleNetStatus);
+  }, []);
+
+  useEffect(() => {
+    const handleSyncStatus = (e: any) => {
+      const ts = new Date(e.detail.syncedAt).getTime();
+      // @ts-ignore
+      if (!window.__globalMaxSync || ts > window.__globalMaxSync) {
+        // @ts-ignore
+        window.__globalMaxSync = ts;
+        const date = new Date(ts);
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const hh = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        setLastSynced(`${mm}-${dd} ${hh}:${min}`);
+      }
+    };
+    window.addEventListener('sync-status', handleSyncStatus);
+    return () => window.removeEventListener('sync-status', handleSyncStatus);
+  }, []);
   // 현재 선택된 기업 ID (기본값: default)
   const [selectedCompany, setSelectedCompany] = useState<string>(() => {
     if (typeof window !== 'undefined') {
@@ -569,6 +598,11 @@ export default function App() {
         </div>
         <div className="text-center mt-12 text-sm text-gray-400 font-medium">
           © {new Date().getFullYear()} 이솔잎 (Lee Solip). All rights reserved.
+          <div className="flex items-center justify-center gap-2 mt-2 text-xs opacity-70">
+            <span>v1.0.1</span>
+            <span>•</span>
+            <span>Last Synced: {lastSynced || 'Unknown'}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -2164,7 +2198,12 @@ export default function App() {
          </div>
       )}
 
-      <nav className="print:hidden fixed w-full top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 transition-all">
+      {isAdmin && serverStatus === 'offline' && (
+         <div className="fixed top-0 left-0 w-full bg-red-500 text-white text-[11px] font-bold py-1.5 text-center z-[100] shadow-md flex items-center justify-center gap-1.5">
+            ⚠️ 현재 서버가 불안정하여 변경사항이 실시간으로 저장되지 않을 수 있습니다.
+         </div>
+      )}
+      <nav className={`print:hidden fixed w-full ${isAdmin && serverStatus === 'offline' ? 'top-7' : 'top-0'} z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 transition-all`}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div 
             onClick={() => handleNavClick('about')} 
@@ -2185,7 +2224,15 @@ export default function App() {
                Contact
             </button>
 
-            <div className="w-px h-4 bg-gray-200 ml-2"></div>
+            <div className="w-px h-4 bg-gray-200 mx-2"></div>
+            {/* 서버 상태 배지 */}
+            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-bold transition-colors ${serverStatus === 'online' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200'}`}>
+               <span className="relative flex h-2 w-2">
+                 {serverStatus === 'online' && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
+                 <span className={`relative inline-flex rounded-full h-2 w-2 ${serverStatus === 'online' ? 'bg-emerald-500' : 'bg-yellow-500'}`}></span>
+               </span>
+               <span className="tracking-wide">{serverStatus === 'online' ? 'ONLINE' : 'OFFLINE'}</span>
+            </div>
             <button 
                onClick={handleAdminToggle} 
                className={`p-2 rounded-full transition-colors flex items-center gap-1 ${isAdmin ? 'bg-emerald-100 text-emerald-700 shadow-inner' : 'text-gray-300 hover:text-gray-600'}`}
