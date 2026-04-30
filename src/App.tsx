@@ -136,7 +136,7 @@ const MarkdownRenderer: React.FC<any> = ({ content }) => {
   return <div className="markdown-body text-[#333333] font-medium leading-relaxed text-[16px] md:text-[17px] tracking-tight" style={{ fontFamily: 'Pretendard, sans-serif' }} dangerouslySetInnerHTML={createMarkup()} />;
 };
 
-const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (base64: string) => void) => {
+const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (base64OrUrl: string) => void) => {
   const file = e.target.files?.[0];
   if (!file) return;
 
@@ -144,18 +144,12 @@ const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (bas
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => {
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
-        const MAX = 1920;
+        const MAX = 1200; // 1200px 제한 (1단계 최적화)
         
-        // 원본 이미지가 기준치 이하(1920px 이하, 2MB 이하)라면 캔버스(Canvas) 렌더링을 거치지 않고 원본 Base64를 그대로 반환하여 100% 화질 보존
-        if (img.width <= MAX && img.height <= MAX && file.size <= 2 * 1024 * 1024) {
-          callback(event.target?.result as string);
-          return;
-        }
-
         if (width > MAX || height > MAX) {
           if (width > height) {
             height = Math.round(height * (MAX / width));
@@ -165,6 +159,7 @@ const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (bas
             height = MAX;
           }
         }
+
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
@@ -172,11 +167,33 @@ const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (bas
           ctx.imageSmoothingEnabled = true;
           ctx.imageSmoothingQuality = 'high';
           ctx.drawImage(img, 0, 0, width, height);
+          
+          // 강제 WebP 60% 압축으로 Base64 크기 극단적 최소화
+          const base64 = canvas.toDataURL('image/webp', 0.60);
+          
+          try {
+            // Base64를 Blob으로 변환하여 버킷 전송 시도
+            const res = await fetch(base64);
+            const blob = await res.blob();
+            const filename = `img_${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+            
+            import('./utils/supabase').then(async ({ supabaseUploadFile }) => {
+                const url = await supabaseUploadFile(blob, filename);
+                if (url) {
+                    callback(url); 
+                } else {
+                    console.warn('[Storage] Upload returned null, falling back to base64');
+                    callback(base64); 
+                }
+            }).catch((err) => {
+                console.error('[Storage] Upload error details:', err);
+                
+                callback(base64);
+            });
+          } catch (e) {
+            callback(base64);
+          }
         }
-
-        const imgType = file.type === 'image/png' ? 'image/png' : (file.type === 'image/webp' ? 'image/webp' : 'image/jpeg');
-        // 프로필 고화질 유지를 위해 압축률(Quality)을 1.0으로 최대로 설정
-        callback(canvas.toDataURL(imgType, 1.0));
       };
       img.src = event.target?.result as string;
     };

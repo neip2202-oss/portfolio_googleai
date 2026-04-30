@@ -47,3 +47,30 @@ export const hasContent = (value: any): boolean => {
 };
 
 export const GEMINI_PROXY_URL = `${SUPABASE_URL}/functions/v1/gemini-proxy`;
+
+
+export const supabaseUploadFile = async (fileBlob: Blob, filename: string): Promise<string | null> => {
+  try {
+    const SUPABASE_URL = 'https://wjkgjjsdbftijusbjsie.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indqa2dqanNkYmZ0aWp1c2Jqc2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3OTU2MjQsImV4cCI6MjA5MTM3MTYyNH0.9uQVRZ-uDhjdJKD4LcaH3hQlmu6OKt-bOFkN_W0kvkU';
+    
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/portfolio_media/${filename}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': fileBlob.type,
+      },
+      body: fileBlob
+    });
+    if (!res.ok) {
+      console.warn('[Storage] Upload failed server response:', await res.text());
+      return null;
+    }
+    return `${SUPABASE_URL}/storage/v1/object/public/portfolio_media/${filename}`;
+  } catch (err: any) {
+    console.error('[Storage] Upload network/system error:', err);
+    
+    return null;
+  }
+};
