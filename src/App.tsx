@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowDown, Mail, Phone, ChevronRight, Download, ArrowLeft, Briefcase, GraduationCap, Award, MapPin, Calendar, Heart, Gamepad2, Clock, Monitor, Smartphone, ArrowRight, Search, Puzzle, FileText, Zap, Bot, Rocket, ExternalLink, PenTool, Database, LayoutTemplate, Target, BrainCircuit, Play, Globe, Home, Box, ChevronUp, Image as ImageIcon, Star, PlayCircle, ChevronLeft, Settings, Unlock, Plus, CheckCircle, ChevronDown, Maximize2, Minimize2, GripVertical, Trash2, X, Link as LinkIcon, RefreshCw, Building2, Copy } from 'lucide-react';
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import { KeyboardSensor, DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { rectSortingStrategy, sortableKeyboardCoordinates, SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 const getExternalEmbedUrl = (url: string) => {
@@ -210,6 +211,21 @@ const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (bas
   }
 };
 
+const SortableWrapper = ({ id, isAdmin, children }: any) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+  const style = { transform: CSS.Transform.toString(transform), transition };
+  return (
+    <div ref={setNodeRef} style={style} className="relative h-full">
+      {isAdmin && (
+         <div {...attributes} {...listeners} className="absolute top-4 left-4 z-50 cursor-grab active:cursor-grabbing bg-white/80 backdrop-blur-sm p-1.5 rounded-lg shadow-sm border border-gray-200 text-gray-400 hover:text-blue-500 hover:bg-white transition-colors">
+            <GripVertical size={18} />
+         </div>
+      )}
+      {children}
+    </div>
+  );
+};
+
 export default function App() {
   // 글로벌 상태 관리
   const [currentTab, setCurrentTab] = useState(() => {
@@ -229,9 +245,13 @@ export default function App() {
   const [docSlideIndex, setDocSlideIndex] = useState(0);
   const [currentDocIndex, setCurrentDocIndex] = useState(0);
   const [isDocDropdownOpen, setIsDocDropdownOpen] = useState(false);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
   const [homePlayFilter, setHomePlayFilter] = useState('PC'); 
-  const [historyPageFilter, setHistoryPageFilter] = useState('All'); 
+  const [historyPlatformFilter, setHistoryPlatformFilter] = useState('All');
+  const [historyGenreFilter, setHistoryGenreFilter] = useState('All'); 
   const [isVisible, setIsVisible] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
@@ -423,7 +443,7 @@ export default function App() {
 
   const [planData, setPlanData] = useContent<any>('planData', [], selectedCompany);
 
-  const [playHistoryData, setPlayHistoryData] = useContent<any>('playHistoryData', [
+  const [playHistoryData, setPlayHistoryData, setLocalPlayHistoryData] = useContent<any>('playHistoryData', [
     { id: 1, platform: 'PC', title: '발더스 게이트 3', genre: 'CRPG', hours: '300+' },
     { id: 2, platform: 'PC', title: 'Path of Exile', genre: 'ARPG', hours: '800+' },
     { id: 3, platform: 'Mobile', title: '원신 (Genshin Impact)', genre: '오픈월드 ARPG', hours: '1,200+' },
@@ -451,6 +471,39 @@ export default function App() {
 
   const [activeAboutSection, setActiveAboutSection] = useState('hero');
   const [activeResumeSection, setActiveResumeSection] = useState('');
+  const [hasUnsavedOrder, setHasUnsavedOrder] = useState(false);
+  
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = playHistoryData.findIndex((x:any) => x.id === active.id);
+      const newIndex = playHistoryData.findIndex((x:any) => x.id === over.id);
+      const newArray = arrayMove(playHistoryData, oldIndex, newIndex);
+      if (setLocalPlayHistoryData) setLocalPlayHistoryData(newArray);
+      setHasUnsavedOrder(true);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.hasMigratedPlayHistory && playHistoryData && playHistoryData.length > 0) {
+      let modified = false;
+      const migrated = playHistoryData.map((game: any) => {
+         let p = game.platform || 'PC';
+         if (!['PC', 'Mobile', 'Console'].includes(p)) {
+            modified = true;
+            const lower = p.toLowerCase();
+            if (lower.includes('스팀') || lower.includes('피씨') || lower.includes('pc')) p = 'PC';
+            else if (lower.includes('모바일') || lower.includes('안드로이드') || lower.includes('ios') || lower.includes('mobile')) p = 'Mobile';
+            else p = 'Console';
+         }
+         return { ...game, platform: p };
+      });
+      if (modified) {
+         setPlayHistoryData(migrated);
+      }
+      window.hasMigratedPlayHistory = true;
+    }
+  }, [playHistoryData, setPlayHistoryData]);
 
   useEffect(() => {
     if (currentTab !== 'about') return;
@@ -2129,47 +2182,166 @@ export default function App() {
     const mobileGames = playHistoryData.filter((g: any) => g.platform === 'Mobile').length;
     const consoleGames = playHistoryData.filter((g: any) => g.platform === 'Console').length;
 
+    const CORE_GENRES = ['RPG', '액션', '시뮬레이션', '퍼즐', '어드벤처', '캐주얼', '오픈월드'];
+    const genreCounts = CORE_GENRES.map(genre => ({
+      name: genre,
+      count: playHistoryData.filter((g: any) => (g.genre || '').toLowerCase().includes(genre.toLowerCase())).length
+    })).sort((a, b) => b.count - a.count);
+
     return (
       <div className={`pt-24 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'} bg-[#FAFAFA] min-h-screen`}>
         <div className="max-w-6xl mx-auto px-6 mb-32">
           <div className="mb-12 mt-8 text-center md:text-left">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4 flex items-center justify-center md:justify-start gap-3">
-               <Gamepad2 size={36} className="text-blue-500"/> Gamer's Archive
-            </h1>
-            <p className="text-gray-500 text-lg">기획자의 시선으로 분석하며 플레이한 게임들의 상세한 인사이트 기록입니다.</p>
+            <div className="flex flex-col md:flex-row justify-between items-center w-full mb-4">
+                 <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight flex items-center justify-center md:justify-start gap-3">
+                    <Gamepad2 size={36} className="text-blue-500"/> Gamer's Archive
+                 </h1>
+                 {isAdmin && hasUnsavedOrder && (
+                    <button onClick={() => { setPlayHistoryData(playHistoryData); setHasUnsavedOrder(false); }} className="mt-4 md:mt-0 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 animate-bounce">
+                       💾 순서 저장 (일괄 업데이트)
+                    </button>
+                 )}
+              </div>
+            <p className="text-gray-500 text-lg">다양한 플랫폼과 장르를 넘나들며 쌓아온 폭넓은 플레이 이력입니다.</p>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-             <div className="bg-gray-900 text-white p-6 rounded-3xl shadow-md">
-                <span className="text-sm font-bold text-gray-400 uppercase tracking-wider block mb-2">Total Games</span>
-                <div className="text-4xl font-black">{totalGames}<span className="text-lg font-medium ml-1">개</span></div>
+          {/* Phase 3: Interactive Data Visualization Dashboard */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+             {/* Radar Chart (Genres) */}
+             <div className="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <h3 className="text-xl font-extrabold text-gray-900 mb-6 flex items-center gap-3">
+                   <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500">
+                      <Gamepad2 size={24} />
+                   </div>
+                   장르 선호도 (Radar)
+                </h3>
+                <div className="h-[320px] w-full">
+                   <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart cx="50%" cy="50%" outerRadius="75%" data={genreCounts}>
+                         <PolarGrid stroke="#f3f4f6" strokeWidth={1.5} />
+                         <PolarAngleAxis dataKey="name" tick={{ fill: '#6b7280', fontSize: 13, fontWeight: 700 }} />
+                         <PolarRadiusAxis angle={30} domain={[0, Math.max(...genreCounts.map(g => g.count), 5)]} tick={false} axisLine={false} />
+                         <Radar name="플레이 수" dataKey="count" stroke="#10b981" strokeWidth={3} fill="#34d399" fillOpacity={0.4} animationDuration={1500} activeDot={{ onClick: (e, payload) => { if(payload?.payload?.name) setHistoryGenreFilter(payload.payload.name); }, cursor: 'pointer', r: 6 }} />
+                         <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)', fontWeight: 'bold' }} />
+                      </RadarChart>
+                   </ResponsiveContainer>
+                </div>
              </div>
-             <div className="bg-white border border-gray-200 p-6 rounded-3xl shadow-sm">
-                <span className="text-sm font-bold text-gray-500 uppercase tracking-wider block mb-2">PC</span>
-                <div className="text-3xl font-extrabold text-blue-600">{pcGames}<span className="text-lg font-bold text-gray-400 ml-1">개</span></div>
-             </div>
-             <div className="bg-white border border-gray-200 p-6 rounded-3xl shadow-sm">
-                <span className="text-sm font-bold text-gray-500 uppercase tracking-wider block mb-2">Mobile</span>
-                <div className="text-3xl font-extrabold text-emerald-600">{mobileGames}<span className="text-lg font-bold text-gray-400 ml-1">개</span></div>
-             </div>
-             <div className="bg-white border border-gray-200 p-6 rounded-3xl shadow-sm">
-                <span className="text-sm font-bold text-gray-500 uppercase tracking-wider block mb-2">Console</span>
-                <div className="text-3xl font-extrabold text-purple-600">{consoleGames}<span className="text-lg font-bold text-gray-400 ml-1">개</span></div>
+
+             {/* Doughnut Chart & Quick Filters (Platforms) */}
+             <div className="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col">
+                <h3 className="text-xl font-extrabold text-gray-900 mb-6 flex items-center gap-3">
+                   <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
+                      <Monitor size={24} />
+                   </div>
+                   플랫폼 퀵 필터 (Doughnut)
+                </h3>
+                <div className="flex flex-col md:flex-row items-center gap-8 flex-grow">
+                   <div className="h-[260px] w-full md:w-1/2 flex items-center justify-center relative">
+                      <ResponsiveContainer width="100%" height="100%">
+                         <PieChart>
+                            <defs>
+                               <linearGradient id="colorPC" x1="0" y1="0" x2="1" y2="1">
+                                  <stop offset="0%" stopColor="#7DD3FC" stopOpacity={1}/>
+                                  <stop offset="100%" stopColor="#0284C7" stopOpacity={0.8}/>
+                               </linearGradient>
+                               <linearGradient id="colorMobile" x1="0" y1="0" x2="1" y2="1">
+                                  <stop offset="0%" stopColor="#6EE7B7" stopOpacity={1}/>
+                                  <stop offset="100%" stopColor="#059669" stopOpacity={0.8}/>
+                               </linearGradient>
+                               <linearGradient id="colorConsole" x1="0" y1="0" x2="1" y2="1">
+                                  <stop offset="0%" stopColor="#D8B4FE" stopOpacity={1}/>
+                                  <stop offset="100%" stopColor="#7C3AED" stopOpacity={0.8}/>
+                               </linearGradient>
+                            </defs>
+                            <Pie
+                              data={[
+                                { name: 'PC', value: pcGames, color: 'url(#colorPC)' },
+                                { name: 'Mobile', value: mobileGames, color: 'url(#colorMobile)' },
+                                { name: 'Console', value: consoleGames, color: 'url(#colorConsole)' }
+                              ].filter(d => d.value > 0)}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius="72%"
+                              outerRadius="85%"
+                              paddingAngle={2}
+                              dataKey="value"
+                              stroke="#ffffff"
+                              strokeWidth={2}
+                              animationDuration={1500}
+                            >
+                              { [ { name: 'PC', value: pcGames, color: 'url(#colorPC)' }, { name: 'Mobile', value: mobileGames, color: 'url(#colorMobile)' }, { name: 'Console', value: consoleGames, color: 'url(#colorConsole)' } ].filter(d => d.value > 0).map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} onClick={() => setHistoryPlatformFilter(entry.name)} className="cursor-pointer hover:opacity-80 transition-all drop-shadow-sm" style={{ outline: 'none' }} />
+                              )) }
+                            </Pie>
+                            <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontWeight: 'bold' }} itemStyle={{ color: '#1f2937' }} />
+                         </PieChart>
+                      </ResponsiveContainer>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                         <span className="text-3xl font-semibold text-gray-700">{totalGames}</span>
+                         <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Total</span>
+                      </div>
+                   </div>
+                   <div className="w-full md:w-1/2 flex flex-col gap-3">
+                      <button onClick={() => setHistoryPlatformFilter('All')} className={`flex items-center justify-between p-4 rounded-xl border transition-all ${historyPlatformFilter === 'All' ? 'border-transparent bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl scale-[1.02]' : 'border-gray-200 bg-white hover:border-indigo-300 text-gray-800 hover:shadow-sm hover:bg-gray-50'}`}>
+                         <span className="font-extrabold text-base tracking-wide">Total</span>
+                         <span className={`text-base font-black px-3 py-1 rounded-lg ${historyPlatformFilter === 'All' ? 'bg-white/25 text-white shadow-inner' : 'bg-gray-100 text-gray-700 shadow-inner border border-gray-200'}`}>{totalGames}</span>
+                      </button>
+                      <button onClick={() => setHistoryPlatformFilter('PC')} className={`flex items-center justify-between p-4 rounded-xl border transition-all ${historyPlatformFilter === 'PC' ? 'border-sky-400 bg-sky-50 text-sky-700 shadow-md scale-[1.02]' : 'border-gray-100 bg-gray-50/50 hover:border-sky-300 text-gray-600 hover:bg-sky-50/30'}`}>
+                         <span className="font-bold text-base">PC</span>
+                         <span className={`text-base font-black px-3 py-1 rounded-lg ${historyPlatformFilter === 'PC' ? 'bg-sky-400 text-white shadow-sm' : 'bg-white text-gray-500 shadow-sm border border-gray-100'}`}>{pcGames}</span>
+                      </button>
+                      <button onClick={() => setHistoryPlatformFilter('Mobile')} className={`flex items-center justify-between p-4 rounded-xl border transition-all ${historyPlatformFilter === 'Mobile' ? 'border-emerald-400 bg-emerald-50 text-emerald-700 shadow-md scale-[1.02]' : 'border-gray-100 bg-gray-50/50 hover:border-emerald-300 text-gray-600 hover:bg-emerald-50/30'}`}>
+                         <span className="font-bold text-base">Mobile</span>
+                         <span className={`text-base font-black px-3 py-1 rounded-lg ${historyPlatformFilter === 'Mobile' ? 'bg-emerald-400 text-white shadow-sm' : 'bg-white text-gray-500 shadow-sm border border-gray-100'}`}>{mobileGames}</span>
+                      </button>
+                      <button onClick={() => setHistoryPlatformFilter('Console')} className={`flex items-center justify-between p-4 rounded-xl border transition-all ${historyPlatformFilter === 'Console' ? 'border-violet-400 bg-violet-50 text-violet-700 shadow-md scale-[1.02]' : 'border-gray-100 bg-gray-50/50 hover:border-violet-300 text-gray-600 hover:bg-violet-50/30'}`}>
+                         <span className="font-bold text-base">Console</span>
+                         <span className={`text-base font-black px-3 py-1 rounded-lg ${historyPlatformFilter === 'Console' ? 'bg-violet-400 text-white shadow-sm' : 'bg-white text-gray-500 shadow-sm border border-gray-100'}`}>{consoleGames}</span>
+                      </button>
+                   </div>
+                </div>
              </div>
           </div>
-
+          
           <div className="flex flex-wrap items-center justify-between gap-4 mb-8 border-b border-gray-200 pb-8">
-             <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-               {['All', 'PC', 'Mobile', 'Console'].map(platform => (
-                  <button 
-                    key={platform}
-                    onClick={() => setHistoryPageFilter(platform)}
-                    className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-sm ${historyPageFilter === platform ? 'bg-blue-500 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-400 hover:bg-gray-50'}`}
-                  >
-                    {platform}
-                  </button>
-               ))}
-             </div>
+             <div className="flex flex-wrap gap-4 items-center justify-center md:justify-start">
+                  <div className="flex flex-col gap-1.5">
+                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider pl-1">Platform</label>
+                     <div className="relative">
+                        <select 
+                           value={historyPlatformFilter} 
+                           onChange={e => setHistoryPlatformFilter(e.target.value)}
+                           className="appearance-none bg-white border border-gray-200 text-gray-700 font-bold py-2.5 pl-4 pr-10 rounded-xl shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer min-w-[140px]"
+                        >
+                           <option value="All">All Platforms</option>
+                           <option value="PC">PC</option>
+                           <option value="Mobile">Mobile</option>
+                           <option value="Console">Console</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                           <ChevronDown size={16} />
+                        </div>
+                     </div>
+                  </div>
+                  
+                  <div className="flex flex-col gap-1.5">
+                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider pl-1">Genre</label>
+                     <div className="relative">
+                        <select 
+                           value={historyGenreFilter} 
+                           onChange={e => setHistoryGenreFilter(e.target.value)}
+                           className="appearance-none bg-white border border-gray-200 text-gray-700 font-bold py-2.5 pl-4 pr-10 rounded-xl shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer min-w-[140px]"
+                        >
+                           <option value="All">All Genres</option>
+                           {CORE_GENRES.map(g => <option key={g} value={g}>{g}</option>)}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                           <ChevronDown size={16} />
+                        </div>
+                     </div>
+                  </div>
+               </div>
              {isAdmin && (
                 <button 
                   onClick={handleOptimizeIcons}
@@ -2186,11 +2358,15 @@ export default function App() {
              )}
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={playHistoryData.map((g:any)=>g.id)} strategy={rectSortingStrategy}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {playHistoryData
-              .filter((game: any) => historyPageFilter === 'All' || game.platform === historyPageFilter)
+              .filter((game: any) => historyPlatformFilter === 'All' || game.platform === historyPlatformFilter)
+                .filter((game: any) => historyGenreFilter === 'All' || (game.genre || '').toLowerCase().includes(historyGenreFilter.toLowerCase()))
               .map((game: any, index: number) => (
-              <div key={game.id} className="p-5 md:p-6 rounded-[1.5rem] bg-white border border-gray-200 hover:shadow-lg transition-shadow flex flex-col group relative overflow-hidden h-full">
+              <SortableWrapper key={game.id} id={game.id} isAdmin={isAdmin}>
+              <div className="p-5 md:p-6 rounded-[1.5rem] bg-white border border-gray-200 hover:shadow-lg transition-shadow flex flex-col group relative overflow-hidden h-full">
                  {isAdmin && <button onClick={() => { const oIdx = playHistoryData.findIndex((p:any)=>p.id===game.id); const n = [...playHistoryData]; n.splice(oIdx, 1); setPlayHistoryData(n); }} className="absolute top-2 right-2 w-7 h-7 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-40 opacity-0 group-hover:opacity-100">✕</button>}
                  {game.image ? (
                      <div className="w-full h-36 mb-5 bg-gray-100 rounded-xl overflow-hidden relative group/img shrink-0">
@@ -2227,7 +2403,11 @@ export default function App() {
                  {isAdmin ? (
                     <div className="w-full space-y-2 mt-auto flex-1 flex flex-col justify-end">
                        <EditableText isAdmin={isAdmin} value={game.title} onChange={(v: string) => { const oIdx = playHistoryData.findIndex((p:any)=>p.id===game.id); const n = [...playHistoryData]; n[oIdx].title = v; setPlayHistoryData(n); }} className="font-bold text-center block w-full" placeholder="게임명" />
-                       <EditableText isAdmin={isAdmin} value={game.platform} onChange={(v: string) => { const oIdx = playHistoryData.findIndex((p:any)=>p.id===game.id); const n = [...playHistoryData]; n[oIdx].platform = v; setPlayHistoryData(n); }} className="text-xs text-center block w-full" placeholder="PC/Mobile/Console" />
+                       <select value={game.platform} onChange={(e) => { const oIdx = playHistoryData.findIndex((p:any)=>p.id===game.id); const n = [...playHistoryData]; n[oIdx].platform = e.target.value; setPlayHistoryData(n); }} className="text-xs text-center block w-full bg-gray-50 border border-gray-200 rounded p-1 mb-1 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                           <option value="PC">PC</option>
+                           <option value="Mobile">Mobile</option>
+                           <option value="Console">Console</option>
+                       </select>
                        <EditableText isAdmin={isAdmin} value={game.genre} onChange={(v: string) => { const oIdx = playHistoryData.findIndex((p:any)=>p.id===game.id); const n = [...playHistoryData]; n[oIdx].genre = v; setPlayHistoryData(n); }} className="text-xs text-center block w-full" placeholder="장르" />
                        <EditableText isAdmin={isAdmin} value={game.hours} onChange={(v: string) => { const oIdx = playHistoryData.findIndex((p:any)=>p.id===game.id); const n = [...playHistoryData]; n[oIdx].hours = v; setPlayHistoryData(n); }} className="text-xs text-center block w-full" placeholder="플레이타임" />
                     </div>
@@ -2235,9 +2415,16 @@ export default function App() {
                     <div className="flex flex-col items-center justify-between flex-1">
                        <h3 className="text-lg font-extrabold text-gray-900 leading-tight mb-3 text-center">{game.title}</h3>
                        <div className="flex flex-col items-center w-full gap-3 mt-auto">
-                           <div className="flex flex-wrap justify-center items-center gap-1.5">
-                              <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded tracking-wide uppercase">{game.platform}</span>
-                              <span className="text-[10px] font-bold text-gray-500 border border-gray-200 px-2.5 py-1 rounded bg-white shadow-sm">{game.genre}</span>
+                           <div className="flex flex-wrap justify-center items-center gap-2">
+                              <span className={`text-[10px] font-black px-3 py-1 rounded-full shadow-sm tracking-wide uppercase 
+                                 ${game.platform === 'PC' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 
+                                   game.platform === 'Mobile' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 
+                                   'bg-purple-100 text-purple-700 border border-purple-200'}`}>
+                                 {game.platform}
+                              </span>
+                              <span className="text-[10px] font-bold text-gray-700 bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm hover:bg-gray-50 transition-colors">
+                                 {game.genre}
+                              </span>
                            </div>
                            <span className="flex items-center justify-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 w-full shadow-sm">
                              <Clock size={12}/> {game.hours}
@@ -2246,6 +2433,7 @@ export default function App() {
                     </div>
                  )}
               </div>
+              </SortableWrapper>
             ))}
 
             {isAdmin && (
@@ -2255,6 +2443,8 @@ export default function App() {
                </div>
             )}
           </div>
+            </SortableContext>
+          </DndContext>
         </div>
         <GlobalFooterCTA />
       </div>

@@ -187,5 +187,8 @@ export function useContent<T>(key: string, initial: T, companyId: string = 'defa
     });
   };
 
-  return [data, update];
+    const localOnlyUpdate = (newData: T | ((prev: T) => T)) => {
+    setData((prev) => typeof newData === 'function' ? (newData as Function)(prev) : newData);
+  };
+  return [data, update, localOnlyUpdate] as any;
 }
