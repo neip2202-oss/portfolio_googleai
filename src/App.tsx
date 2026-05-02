@@ -2213,7 +2213,7 @@ export default function App() {
                    <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500">
                       <Gamepad2 size={24} />
                    </div>
-                   장르 선호도 (Radar)
+                   장르 선호도
                 </h3>
                 <div className="h-[320px] w-full">
                    <ResponsiveContainer width="100%" height="100%">
@@ -2234,7 +2234,7 @@ export default function App() {
                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
                       <Monitor size={24} />
                    </div>
-                   플랫폼 퀵 필터 (Doughnut)
+                   플랫폼 분포도
                 </h3>
                 <div className="flex flex-col md:flex-row items-center gap-8 flex-grow">
                    <div className="h-[260px] w-full md:w-1/2 flex items-center justify-center relative">
