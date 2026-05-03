@@ -388,8 +388,16 @@ export default function App() {
 
   const handleAdminToggle = () => {
     if (isAdmin) {
+      if (hasUnsavedOrder) {
+        setPlayHistoryData((prev: any) => [...prev]);
+        setHasUnsavedOrder(false);
+      }
+      if (hasUnsavedCoverLetterOrder) {
+        setCoverLetterData((prev: any) => [...prev]);
+        setHasUnsavedCoverLetterOrder(false);
+      }
       setIsAdminMode(false); 
-      showToast('관리자 환경이 종료되었으며, 변경사항은 이미 저장되었습니다.', 'success');
+      showToast('관리자 모드가 종료되고, 변경사항이 서버에 동기화되었습니다.', 'success');
     } else {
       setIsAuthModalOpen(true);
     }
@@ -464,7 +472,7 @@ export default function App() {
   ], selectedCompany);
 
   
-  const [coverLetterData, setCoverLetterData] = useContent<any[]>('coverLetterData', [
+  const [coverLetterData, setCoverLetterData, setLocalCoverLetterData] = useContent<any[]>('coverLetterData', [
     { id: 1, title: '지원 동기 및 기획자로서의 목표', content: '**"선택에 이유를 묻는 단단한 근거가 서비스 성패를 좌우한다."**\n\n단순히 재밌어 보이는 아이디어를 넘어, 논리적 구조로 엮어내고 실제 지표로 증명하는 기획자가 되고자 합니다.' }
   ], selectedCompany);
 
@@ -472,6 +480,19 @@ export default function App() {
   const [activeAboutSection, setActiveAboutSection] = useState('hero');
   const [activeResumeSection, setActiveResumeSection] = useState('');
   const [hasUnsavedOrder, setHasUnsavedOrder] = useState(false);
+  const [hasUnsavedCoverLetterOrder, setHasUnsavedCoverLetterOrder] = useState(false);
+
+  const handleCoverLetterDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (active && over && active.id !== over.id) {
+        setLocalCoverLetterData((items: any) => {
+            const oldIndex = items.findIndex((i: any) => i.id === active.id);
+            const newIndex = items.findIndex((i: any) => i.id === over.id);
+            setHasUnsavedCoverLetterOrder(true);
+            return arrayMove(items, oldIndex, newIndex);
+        });
+    }
+  };
   
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
@@ -1372,8 +1393,11 @@ export default function App() {
 
             {/* Anchor Navigation Moved to right floating panel */}
 
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleCoverLetterDragEnd}>
+              <SortableContext items={coverLetterData.map((g:any)=>g.id)} strategy={verticalListSortingStrategy}>
             {coverLetterData.map((letter: any, index: number) => (
-               <div id={`cover-letter-${letter.id}`} key={letter.id} className="break-inside-avoid print:break-inside-avoid">
+               <SortableWrapper key={letter.id} id={letter.id} isAdmin={isAdmin}>
+               <div id={`cover-letter-${letter.id}`} className="break-inside-avoid print:break-inside-avoid">
                   <div className="print:border-t-[30px] print:border-[#FAFAFA] print:-mt-[30px] print:bg-clip-padding">
                      <div className="p-8 md:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm relative group/cover scroll-mt-32">
                      {isAdmin && <button onClick={() => { const n=[...coverLetterData]; n.splice(index, 1); setCoverLetterData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-30 opacity-0 group-hover/cover:opacity-100">✕</button>}
@@ -1405,7 +1429,10 @@ export default function App() {
                      </div>
                   </div>
                </div>
+               </SortableWrapper>
             ))}
+            </SortableContext>
+            </DndContext>
           </div>
         )}
 
