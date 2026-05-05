@@ -876,9 +876,15 @@ export default function App() {
                .slice(0, 3)
                .map((game: any) => (
                <div key={game.id} className="p-5 md:p-6 rounded-2xl bg-[#FAFAFA] border border-gray-100 hover:border-blue-300 transition-colors flex flex-col justify-center items-center text-center">
-                 <div className="w-12 h-12 rounded-xl bg-white border border-gray-200 shadow-sm flex items-center justify-center text-blue-500 mb-4">
-                   {game.platform === 'PC' ? <Monitor size={24}/> : game.platform === 'Mobile' ? <Smartphone size={24}/> : <Gamepad2 size={24}/>}
-                 </div>
+                 {game.image ? (
+                    <div className="w-full h-28 md:h-32 mb-4 bg-gray-200 rounded-xl overflow-hidden shrink-0 shadow-sm relative group/img">
+                       <img src={game.image} alt={game.title} className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110" />
+                    </div>
+                 ) : (
+                    <div className="w-12 h-12 rounded-xl bg-white border border-gray-200 shadow-sm flex items-center justify-center text-blue-500 mb-4 shrink-0">
+                      {game.platform === 'PC' ? <Monitor size={24}/> : game.platform === 'Mobile' ? <Smartphone size={24}/> : <Gamepad2 size={24}/>}
+                    </div>
+                 )}
                  <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">{game.title}</h3>
                  <span className="text-xs text-gray-500 font-medium mb-3">{game.genre}</span>
                  <span className="flex items-center gap-1 text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
@@ -1683,7 +1689,6 @@ export default function App() {
 
     return (
       <div className={`pt-24 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'} bg-[#FAFAFA] min-h-screen`}>
-        <SyncButton tabName="플레이 기록" />
         <div className="max-w-4xl mx-auto px-6 mb-32">
           <div className="flex justify-between items-center mb-8 mt-6">
               <button onClick={() => handleNavClick('portfolio')} className="flex items-center gap-2 text-gray-500 hover:text-gray-900 font-bold transition-colors">
@@ -2217,6 +2222,7 @@ export default function App() {
 
     return (
       <div className={`pt-24 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'} bg-[#FAFAFA] min-h-screen`}>
+        <SyncButton tabName="플레이 기록" />
         <div className="max-w-6xl mx-auto px-6 mb-32">
           <div className="mb-12 mt-8 text-center md:text-left">
             <div className="flex flex-col md:flex-row justify-between items-center w-full mb-4">
