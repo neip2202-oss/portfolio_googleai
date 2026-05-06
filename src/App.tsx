@@ -2214,7 +2214,7 @@ export default function App() {
     const mobileGames = playHistoryData.filter((g: any) => g.platform === 'Mobile').length;
     const consoleGames = playHistoryData.filter((g: any) => g.platform === 'Console').length;
 
-    const CORE_GENRES = ['RPG', '액션', '시뮬레이션', '퍼즐', '어드벤처', '캐주얼', '오픈월드'];
+    const CORE_GENRES = ['RPG', '액션', '시뮬레이션', '퍼즐', '어드벤처', '오픈월드'];
     const genreCounts = CORE_GENRES.map(genre => ({
       name: genre,
       count: playHistoryData.filter((g: any) => (g.genre || '').toLowerCase().includes(genre.toLowerCase())).length
