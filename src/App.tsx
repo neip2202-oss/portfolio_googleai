@@ -220,7 +220,7 @@ const SortableWrapper = ({ id, isAdmin, children }: any) => {
     position: 'relative'
   };
   return (
-    <div ref={setNodeRef} style={style} className="h-full">
+    <div ref={setNodeRef} style={style} className="h-full flex flex-col">
       {isAdmin && (
          <div {...attributes} {...listeners} className="absolute top-4 left-4 z-[100] cursor-grab active:cursor-grabbing bg-emerald-500 text-white p-2 rounded-xl shadow-xl border-2 border-white transition-all hover:scale-110 flex items-center justify-center">
             <GripVertical size={20} />
@@ -1530,7 +1530,7 @@ export default function App() {
               <SortableContext items={projectsData.map((g:any)=>g.id)} strategy={rectSortingStrategy}>
              {projectsData.map((project: any) => (
                 <SortableWrapper key={project.id} id={project.id} isAdmin={isAdmin}>
-                <div key={project.id} onClick={() => handleProjectClick(project)} className="cursor-pointer group flex flex-col bg-white border border-gray-200 hover:border-emerald-300 transition-all hover:shadow-xl overflow-hidden rounded-3xl">
+                <div key={project.id} onClick={() => handleProjectClick(project)} className="h-full cursor-pointer group flex flex-col bg-white border border-gray-200 hover:border-emerald-300 transition-all hover:shadow-xl overflow-hidden rounded-3xl">
                  <div className={`aspect-[4/3] ${project.imgColor} relative overflow-hidden`}>
                     {project.media?.thumbnail ? (
                        <img src={project.media.thumbnail} alt={project.title} className="w-full h-full object-cover" />
@@ -1668,7 +1668,7 @@ export default function App() {
                  const IconComp = iconsMapping[work.iconName] || FileText;
                  return (
                  <SortableWrapper key={work.id} id={work.id} isAdmin={isAdmin}>
-                 <div key={work.id} onClick={() => handleOtherWorkClick(work)} className="p-8 rounded-3xl bg-[#FAFAFA] border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all group flex flex-col cursor-pointer">
+                 <div key={work.id} onClick={() => handleOtherWorkClick(work)} className="h-full p-8 rounded-3xl bg-[#FAFAFA] border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all group flex flex-col cursor-pointer">
                     <div className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center text-blue-500 mb-6 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
                        <IconComp size={26} />
                     </div>
@@ -1707,7 +1707,7 @@ export default function App() {
                  const IconComp = iconsMapping[work.iconName] || FileText;
                  return (
                  <SortableWrapper key={work.id} id={work.id} isAdmin={isAdmin}>
-                 <div key={work.id} onClick={() => handleOtherWorkClick(work)} className="p-8 rounded-3xl bg-[#FAFAFA] border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all group flex flex-col cursor-pointer">
+                 <div key={work.id} onClick={() => handleOtherWorkClick(work)} className="h-full p-8 rounded-3xl bg-[#FAFAFA] border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all group flex flex-col cursor-pointer">
                     <div className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center text-blue-500 mb-6 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
                        <IconComp size={26} />
                     </div>
