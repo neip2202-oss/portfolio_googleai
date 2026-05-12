@@ -213,12 +213,17 @@ const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (bas
 
 const SortableWrapper = ({ id, isAdmin, children }: any) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-  const style = { transform: CSS.Transform.toString(transform), transition };
+  const style = { 
+    transform: CSS.Transform.toString(transform), 
+    transition,
+    zIndex: transform ? 999 : 'auto',
+    position: 'relative'
+  };
   return (
-    <div ref={setNodeRef} style={style} className="relative h-full">
+    <div ref={setNodeRef} style={style} className="h-full">
       {isAdmin && (
-         <div {...attributes} {...listeners} className="absolute top-4 left-4 z-50 cursor-grab active:cursor-grabbing bg-white/80 backdrop-blur-sm p-1.5 rounded-lg shadow-sm border border-gray-200 text-gray-400 hover:text-blue-500 hover:bg-white transition-colors">
-            <GripVertical size={18} />
+         <div {...attributes} {...listeners} className="absolute top-4 left-4 z-[100] cursor-grab active:cursor-grabbing bg-emerald-500 text-white p-2 rounded-xl shadow-xl border-2 border-white transition-all hover:scale-110 flex items-center justify-center">
+            <GripVertical size={20} />
          </div>
       )}
       {children}
@@ -396,6 +401,18 @@ export default function App() {
         setCoverLetterData((prev: any) => [...prev]);
         setHasUnsavedCoverLetterOrder(false);
       }
+      if (hasUnsavedProjectsOrder) {
+        setProjectsData([...projectsData]);
+        setHasUnsavedProjectsOrder(false);
+      }
+      if (hasUnsavedOtherWorksOrder) {
+        setOtherWorksData([...otherWorksData]);
+        setHasUnsavedOtherWorksOrder(false);
+      }
+      if (hasUnsavedPlanOrder) {
+        setPlanData([...planData]);
+        setHasUnsavedPlanOrder(false);
+      }
       setIsAdminMode(false); 
       showToast('관리자 모드가 종료되고, 변경사항이 서버에 동기화되었습니다.', 'success');
     } else {
@@ -438,18 +455,18 @@ export default function App() {
 
   const defaultMarkdown = `### 1. 문제 인식 및 목표\n해당 기획/작업을 진행하게 된 배경, 문제점 또는 목표를 기입합니다.\n\n### 2. 접근 방식 및 해결 구조\n어떤 논리적 구조를 통해 문제를 해결했는지 보여줍니다.\n\n### 3. 최종 성과\n- 성공적인 시스템 도입\n- 정량적 수치 기입`;
 
-  const [projectsData, setProjectsData] = useContent<any>('projectsData', [
+  const [projectsData, setProjectsData, setLocalProjectsData] = useContent<any>('projectsData', [
     { id: 1, genre: '캐주얼 액션 레이싱', title: 'Super Bumpers', role: ['PD', 'PM', '차량(성장) 기획', '인게임 규칙', 'UI/UX', 'QA'], desc: '속도=공격이라는 단순한 규칙 위에, 차량과 성장을 더해 계속 플레이하게 만드는 구조를 고민했습니다. 구글 스토어와 스팀 출시의 전 과정을 경험했습니다.', outcome: '난이도 밸런싱 최적화로 초기 이탈률 15% 방어', isFeatured: true, imgColor: 'bg-blue-200', links: ['Google Play', 'Steam'], markdown: defaultMarkdown, media: { thumbnail: '', video: '', slides: ['', '', '', '', ''] } },
     { id: 2, genre: '로그라이크 타워 디펜스', title: 'R.T.D (Random Tile Defense)', role: ['PM', '퀘스트 기획', '아이템 기획', '사운드 기획', '맵 제작'], desc: '메이플스토리 월드에서 제작한 로그라이크 타워 디펜스 게임. 랜덤 타일 배치와 전략적 유닛 운용을 기획했습니다.', outcome: '팀 내 리드 역할 수행 및 스팀 런칭 달성', isFeatured: true, imgColor: 'bg-stone-200', links: ['MapleStory World'], markdown: defaultMarkdown, media: { thumbnail: '', video: '', slides: ['', '', '', '', ''] } },
     { id: 3, genre: '턴제 RPG', title: 'Project Zero', role: ['시스템 기획'], desc: 'FGT 참여 및 피드백 기반 전투 시스템 개선', isFeatured: false, imgColor: 'bg-gray-100', links: [], markdown: defaultMarkdown, media: { thumbnail: '', video: '', slides: ['', '', '', '', ''] } },
   ], selectedCompany);
 
-  const [otherWorksData, setOtherWorksData] = useContent<any>('otherWorksData', [
+  const [otherWorksData, setOtherWorksData, setLocalOtherWorksData] = useContent<any>('otherWorksData', [
     { id: 101, category: 'AI & Tool', title: 'Excel 밸런싱 시뮬레이터', desc: 'VBA를 활용하여 기획자가 수치만 입력하면 예상 데미지 기댓값을 자동으로 산출해주는 시뮬레이터 제작.', iconName: 'Database', markdown: defaultMarkdown, media: { thumbnail: '', video: '', slides: ['', '', '', '', ''] } },
     { id: 102, category: '역기획서', title: '원신 전투 시스템 역기획', desc: '원소 반응 시스템의 데미지 공식을 역산하고 구조화한 상세 역기획 문서 및 개선 방향 제안.', iconName: 'Search', markdown: defaultMarkdown, media: { thumbnail: '', video: '', slides: ['', '', '', '', ''] } },
   ], selectedCompany);
 
-  const [planData, setPlanData] = useContent<any>('planData', [], selectedCompany);
+  const [planData, setPlanData, setLocalPlanData] = useContent<any>('planData', [], selectedCompany);
 
   const [playHistoryData, setPlayHistoryData, setLocalPlayHistoryData] = useContent<any>('playHistoryData', [
     { id: 1, platform: 'PC', title: '발더스 게이트 3', genre: 'CRPG', hours: '300+' },
@@ -489,6 +506,45 @@ export default function App() {
             const oldIndex = items.findIndex((i: any) => i.id === active.id);
             const newIndex = items.findIndex((i: any) => i.id === over.id);
             setHasUnsavedCoverLetterOrder(true);
+            return arrayMove(items, oldIndex, newIndex);
+        });
+    }
+  };
+  const [hasUnsavedProjectsOrder, setHasUnsavedProjectsOrder] = useState(false);
+  const [hasUnsavedOtherWorksOrder, setHasUnsavedOtherWorksOrder] = useState(false);
+  const [hasUnsavedPlanOrder, setHasUnsavedPlanOrder] = useState(false);
+
+  const handleProjectsDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (active && over && active.id !== over.id) {
+        setLocalProjectsData((items: any) => {
+            const oldIndex = items.findIndex((i: any) => i.id === active.id);
+            const newIndex = items.findIndex((i: any) => i.id === over.id);
+            setHasUnsavedProjectsOrder(true);
+            return arrayMove(items, oldIndex, newIndex);
+        });
+    }
+  };
+
+  const handleOtherWorksDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (active && over && active.id !== over.id) {
+        setLocalOtherWorksData((items: any) => {
+            const oldIndex = items.findIndex((i: any) => i.id === active.id);
+            const newIndex = items.findIndex((i: any) => i.id === over.id);
+            setHasUnsavedOtherWorksOrder(true);
+            return arrayMove(items, oldIndex, newIndex);
+        });
+    }
+  };
+
+  const handlePlanDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (active && over && active.id !== over.id) {
+        setLocalPlanData((items: any) => {
+            const oldIndex = items.findIndex((i: any) => i.id === active.id);
+            const newIndex = items.findIndex((i: any) => i.id === over.id);
+            setHasUnsavedPlanOrder(true);
             return arrayMove(items, oldIndex, newIndex);
         });
     }
@@ -1470,7 +1526,10 @@ export default function App() {
         
         {portfolioTab === 'main' && (
            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
+           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleProjectsDragEnd}>
+              <SortableContext items={projectsData.map((g:any)=>g.id)} strategy={rectSortingStrategy}>
              {projectsData.map((project: any) => (
+                <SortableWrapper key={project.id} id={project.id} isAdmin={isAdmin}>
                 <div key={project.id} onClick={() => handleProjectClick(project)} className="cursor-pointer group flex flex-col bg-white border border-gray-200 hover:border-emerald-300 transition-all hover:shadow-xl overflow-hidden rounded-3xl">
                  <div className={`aspect-[4/3] ${project.imgColor} relative overflow-hidden`}>
                     {project.media?.thumbnail ? (
@@ -1580,7 +1639,10 @@ export default function App() {
                      )}
                   </div>
                </div>
+                </SortableWrapper>
              ))}
+             </SortableContext>
+             </DndContext>
 
              {isAdmin && (
                 <div onClick={() => {
@@ -1600,9 +1662,12 @@ export default function App() {
 
         {portfolioTab === 'other' && (
            <div className="grid md:grid-cols-3 gap-6 animate-in fade-in duration-300">
+           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleOtherWorksDragEnd}>
+              <SortableContext items={otherWorksData.map((g:any)=>g.id)} strategy={rectSortingStrategy}>
               {otherWorksData.map((work: any) => {
                  const IconComp = iconsMapping[work.iconName] || FileText;
                  return (
+                 <SortableWrapper key={work.id} id={work.id} isAdmin={isAdmin}>
                  <div key={work.id} onClick={() => handleOtherWorkClick(work)} className="p-8 rounded-3xl bg-[#FAFAFA] border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all group flex flex-col cursor-pointer">
                     <div className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center text-blue-500 mb-6 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
                        <IconComp size={26} />
@@ -1614,7 +1679,10 @@ export default function App() {
                        상세 보기 <ArrowRight size={14} />
                     </div>
                  </div>
+                 </SortableWrapper>
               )})}
+              </SortableContext>
+              </DndContext>
 
               {isAdmin && (
                 <div onClick={() => {
@@ -1633,9 +1701,12 @@ export default function App() {
 
         {portfolioTab === 'plan' && (
            <div className="grid md:grid-cols-3 gap-6 animate-in fade-in duration-300">
+           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handlePlanDragEnd}>
+              <SortableContext items={planData.map((g:any)=>g.id)} strategy={rectSortingStrategy}>
               {planData.map((work: any) => {
                  const IconComp = iconsMapping[work.iconName] || FileText;
                  return (
+                 <SortableWrapper key={work.id} id={work.id} isAdmin={isAdmin}>
                  <div key={work.id} onClick={() => handleOtherWorkClick(work)} className="p-8 rounded-3xl bg-[#FAFAFA] border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all group flex flex-col cursor-pointer">
                     <div className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center text-blue-500 mb-6 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
                        <IconComp size={26} />
@@ -1647,7 +1718,10 @@ export default function App() {
                        상세 보기 <ArrowRight size={14} />
                     </div>
                  </div>
+                 </SortableWrapper>
               )})}
+              </SortableContext>
+              </DndContext>
 
               {isAdmin && (
                 <div onClick={() => {
