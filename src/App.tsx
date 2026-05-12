@@ -1669,9 +1669,15 @@ export default function App() {
                  return (
                  <SortableWrapper key={work.id} id={work.id} isAdmin={isAdmin}>
                  <div key={work.id} onClick={() => handleOtherWorkClick(work)} className="h-full p-8 rounded-3xl bg-[#FAFAFA] border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all group flex flex-col cursor-pointer">
-                    <div className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center text-blue-500 mb-6 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                       <IconComp size={26} />
-                    </div>
+                    {work.media?.thumbnail ? (
+                       <div className="w-full aspect-video rounded-2xl overflow-hidden mb-6 border border-gray-100 shadow-sm group-hover:shadow-md transition-shadow bg-gray-50 flex items-center justify-center">
+                          <img src={work.media.thumbnail} alt={work.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                       </div>
+                    ) : (
+                       <div className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center text-blue-500 mb-6 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                          <IconComp size={26} />
+                       </div>
+                    )}
                     <span className="text-xs font-bold text-blue-600 mb-2">{work.category}</span>
                     <h3 className="text-xl font-extrabold text-gray-900 mb-3">{work.title}</h3>
                     <p className="text-gray-600 text-sm leading-relaxed mb-6 flex-1 line-clamp-3">{work.desc}</p>
@@ -1708,9 +1714,15 @@ export default function App() {
                  return (
                  <SortableWrapper key={work.id} id={work.id} isAdmin={isAdmin}>
                  <div key={work.id} onClick={() => handleOtherWorkClick(work)} className="h-full p-8 rounded-3xl bg-[#FAFAFA] border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all group flex flex-col cursor-pointer">
-                    <div className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center text-blue-500 mb-6 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                       <IconComp size={26} />
-                    </div>
+                    {work.media?.thumbnail ? (
+                       <div className="w-full aspect-video rounded-2xl overflow-hidden mb-6 border border-gray-100 shadow-sm group-hover:shadow-md transition-shadow bg-gray-50 flex items-center justify-center">
+                          <img src={work.media.thumbnail} alt={work.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                       </div>
+                    ) : (
+                       <div className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center text-blue-500 mb-6 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                          <IconComp size={26} />
+                       </div>
+                    )}
                     <span className="text-xs font-bold text-blue-600 mb-2">{work.category}</span>
                     <h3 className="text-xl font-extrabold text-gray-900 mb-3">{work.title}</h3>
                     <p className="text-gray-600 text-sm leading-relaxed mb-6 flex-1 line-clamp-3">{work.desc}</p>
@@ -2522,21 +2534,27 @@ export default function App() {
                     <div className="flex flex-col items-center justify-between flex-1">
                        <h3 className="text-lg font-extrabold text-gray-900 leading-tight mb-3 text-center">{game.title}</h3>
                        <div className="flex flex-col items-center w-full gap-3 mt-auto">
-                           <div className="flex flex-wrap justify-center items-center gap-2">
-                              <span className={`text-[10px] font-black px-3 py-1 rounded-full shadow-sm tracking-wide uppercase 
-                                 ${game.platform === 'PC' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 
-                                   game.platform === 'Mobile' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 
-                                   'bg-purple-100 text-purple-700 border border-purple-200'}`}>
-                                 {game.platform}
-                              </span>
-                              <span className="text-[10px] font-bold text-gray-700 bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm hover:bg-gray-50 transition-colors">
-                                 {game.genre}
-                              </span>
+                           <div className="flex flex-col items-center w-full gap-2">
+                              {(isAdmin || game.platform) && (
+                                 <span className={`text-[10px] font-black px-3 py-1 rounded-full shadow-sm tracking-wide uppercase 
+                                    ${game.platform === 'PC' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 
+                                      game.platform === 'Mobile' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 
+                                      'bg-purple-100 text-purple-700 border border-purple-200'}`}>
+                                    {game.platform}
+                                 </span>
+                              )}
+                              {(isAdmin || (game.genre && game.genre !== '장르' && game.genre !== '')) && (
+                                 <span className="text-[10px] font-bold text-gray-700 bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm hover:bg-gray-50 transition-colors">
+                                    {game.genre}
+                                 </span>
+                              )}
                            </div>
-                           <span className="flex items-center justify-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 w-full shadow-sm">
-                             <Clock size={12}/> {game.hours}
-                           </span>
-                       </div>
+                           {(isAdmin || (game.hours && game.hours !== '0' && game.hours !== '플레이타임' && game.hours !== '')) && (
+                              <span className="flex items-center justify-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 w-full shadow-sm mt-1">
+                                <Clock size={12}/> {game.hours}
+                              </span>
+                           )}
+                        </div>
                     </div>
                  )}
               </div>
