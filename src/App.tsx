@@ -211,7 +211,7 @@ const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (bas
   }
 };
 
-const SortableWrapper = ({ id, isAdmin, children }: any) => {
+const SortableWrapper = ({ id, isAdmin, children, className }: any) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = { 
     transform: CSS.Transform.toString(transform), 
@@ -220,7 +220,7 @@ const SortableWrapper = ({ id, isAdmin, children }: any) => {
     position: 'relative'
   };
   return (
-    <div ref={setNodeRef} style={style} className="h-full flex flex-col">
+    <div ref={setNodeRef} style={style} className={className || "h-full flex flex-col print:block"}>
       {isAdmin && (
          <div {...attributes} {...listeners} className="absolute top-4 left-4 z-[100] cursor-grab active:cursor-grabbing bg-emerald-500 text-white p-2 rounded-xl shadow-xl border-2 border-white transition-all hover:scale-110 flex items-center justify-center">
             <GripVertical size={20} />
@@ -1458,9 +1458,8 @@ export default function App() {
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleCoverLetterDragEnd}>
               <SortableContext items={coverLetterData.map((g:any)=>g.id)} strategy={verticalListSortingStrategy}>
             {coverLetterData.map((letter: any, index: number) => (
-               <SortableWrapper key={letter.id} id={letter.id} isAdmin={isAdmin}>
-               <div id={`cover-letter-${letter.id}`} className="break-inside-avoid print:break-inside-avoid">
-                  <div className="print:border-t-[30px] print:border-[#FAFAFA] print:-mt-[30px] print:bg-clip-padding">
+               <SortableWrapper key={letter.id} id={letter.id} isAdmin={isAdmin} className="break-inside-avoid print:break-inside-avoid print:border-t-[30px] print:border-[#FAFAFA] print:-mt-[30px] print:bg-clip-padding">
+               <div id={`cover-letter-${letter.id}`}>
                      <div className="p-8 md:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm relative group/cover scroll-mt-32">
                      {isAdmin && <button onClick={() => { const n=[...coverLetterData]; n.splice(index, 1); setCoverLetterData(n); }} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center font-bold text-sm shadow transition-colors z-30 opacity-0 group-hover/cover:opacity-100">✕</button>}
                      {isAdmin ? (
@@ -1489,7 +1488,6 @@ export default function App() {
                         </div>
                      )}
                      </div>
-                  </div>
                </div>
                </SortableWrapper>
             ))}
