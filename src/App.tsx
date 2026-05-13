@@ -1511,17 +1511,34 @@ export default function App() {
     <div className={`pt-24 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'} bg-white min-h-screen`}>
       <SyncButton tabName="포트폴리오" />
       <div className="max-w-6xl mx-auto px-6 mb-32">
-        <div className="mb-10 mt-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div className="mb-20 mt-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
-            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight mb-4">포트폴리오</h1>
-            <p className="text-gray-500">게임 기획부터 런칭까지의 메인 프로젝트와 기획서, AI 툴링 작업물 아카이브입니다.</p>
+            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight mb-0">포트폴리오</h1>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-10 border-b border-gray-200 pb-6">
-           <button onClick={() => setPortfolioTab('main')} className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm whitespace-nowrap ${portfolioTab === 'main' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-700'}`}>메인 프로젝트</button>
-           <button onClick={() => setPortfolioTab('plan')} className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm whitespace-nowrap ${portfolioTab === 'plan' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-700'}`}>기획서</button>
-           <button onClick={() => setPortfolioTab('other')} className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm whitespace-nowrap ${portfolioTab === 'other' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-700'}`}>AI & 툴링</button>
+        <div className="flex flex-wrap items-end gap-3 mb-10 border-b border-gray-200 pb-8">
+           <button onClick={() => setPortfolioTab('main')} className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm whitespace-nowrap flex items-center gap-2 ${portfolioTab === 'main' ? 'bg-gray-900 text-white' : 'border-2 border-emerald-100 text-emerald-700 animate-sync-glow'}`}>
+              메인 프로젝트 <span className={`text-[11px] font-extrabold px-1.5 py-0.5 rounded-md ${portfolioTab === 'main' ? 'bg-gray-800 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>{projectsData.length}</span>
+           </button>
+
+           <div className="relative group">
+              {portfolioTab !== 'plan' && (
+                 <div className="absolute -top-14 left-1/2 -translate-x-1/2 animate-bounce z-20">
+                    <div className="bg-emerald-600 text-white text-[12px] font-black px-4 py-2 rounded-2xl whitespace-nowrap shadow-xl border border-emerald-400 relative tracking-tighter">
+                       작업물 더보기
+                       <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-emerald-600 rotate-45 border-r border-b border-emerald-400"></div>
+                    </div>
+                 </div>
+              )}
+              <button onClick={() => setPortfolioTab('plan')} className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm whitespace-nowrap flex items-center gap-2 ${portfolioTab === 'plan' ? 'bg-gray-900 text-white' : 'border-2 border-emerald-100 text-emerald-700 animate-sync-glow'}`}>
+                 기획서 <span className={`text-[11px] font-extrabold px-1.5 py-0.5 rounded-md ${portfolioTab === 'plan' ? 'bg-gray-800 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>{planData.length}</span>
+              </button>
+           </div>
+
+           <button onClick={() => setPortfolioTab('other')} className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm whitespace-nowrap flex items-center gap-2 ${portfolioTab === 'other' ? 'bg-gray-900 text-white' : 'border-2 border-emerald-100 text-emerald-700 animate-sync-glow'}`}>
+              AI & 툴링 <span className={`text-[11px] font-extrabold px-1.5 py-0.5 rounded-md ${portfolioTab === 'other' ? 'bg-gray-800 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>{otherWorksData.length}</span>
+           </button>
         </div>
         
         {portfolioTab === 'main' && (
