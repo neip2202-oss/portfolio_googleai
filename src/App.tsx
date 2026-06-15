@@ -245,7 +245,16 @@ export default function App() {
   });
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [resumeSubTab, setResumeSubTab] = useState('cv'); 
-  const [portfolioTab, setPortfolioTab] = useState('main'); 
+  const [portfolioTab, setPortfolioTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const filter = params.get('filter');
+      if (filter && ['main', 'plan', 'other'].includes(filter)) {
+        return filter;
+      }
+    }
+    return 'main';
+  });
   const [activeMedia, setActiveMedia] = useState('thumbnail'); 
   const [docSlideIndex, setDocSlideIndex] = useState(0);
   const [currentDocIndex, setCurrentDocIndex] = useState(0);
