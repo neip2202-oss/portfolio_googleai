@@ -318,6 +318,7 @@ export default function App() {
 
   // 생성된 기업 리스트 관리
   const [companyList, setCompanyList] = useContent<string[]>('companyList', ['default']);
+  const [isPublic, setIsPublic] = useContent<boolean>('siteVisibility', true, selectedCompany);
 
   // 기업 전환 함수 (새로고침 없이 URL 및 상태 동기화)
   const handleSwitchCompany = (companyId: string) => {
@@ -2653,15 +2654,57 @@ export default function App() {
                {isAdmin ? <Unlock size={18} /> : <Settings size={18} />}
                {isAdmin && <span className="text-xs font-bold mr-1">Edit Mode</span>}
             </button>
+            {isAdmin && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-white shadow-sm ml-2">
+                <button 
+                  onClick={() => setIsPublic(!isPublic)} 
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${isPublic ? 'bg-emerald-500' : 'bg-gray-300'}`}
+                  title="사이트 공개/비공개 전환"
+                >
+                  <span className={`${isPublic ? 'translate-x-4' : 'translate-x-1'} inline-block h-3 w-3 transform rounded-full bg-white transition-transform shadow-sm`} />
+                </button>
+                <span className={`text-xs font-bold ${isPublic ? 'text-emerald-600' : 'text-gray-400'}`}>{isPublic ? 'Public' : 'Private'}</span>
+              </div>
+            )}
           </div>
         </div>
       </nav>
 
+      {!isPublic && !isAdmin ? (
+        <div className="pt-32 pb-20 px-6 max-w-4xl mx-auto min-h-screen flex flex-col items-center justify-center text-center animate-in fade-in duration-500">
+           <div className="bg-white p-10 md:p-16 rounded-[2rem] shadow-xl border border-gray-100 flex flex-col items-center">
+              <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-8 border border-gray-200 shadow-sm">
+                 <span className="text-3xl">🔒</span>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-6 tracking-tight">현재 비공개 상태입니다</h2>
+              <p className="text-gray-500 text-sm md:text-base leading-relaxed max-w-md mx-auto mb-10 font-medium break-keep">
+                 새로운 여정을 시작하게 되어 포트폴리오 공개를 잠시 전환하였습니다.<br/>사이트 열람 권한이나 협업 관련 문의는 아래 메일로 연락해 주시기 바랍니다.
+              </p>
+              <div className="flex flex-col items-center gap-3 w-full max-w-[260px]">
+                <a href="mailto:neip2202@gmail.com" className="w-full bg-gray-900 text-white px-8 py-3.5 rounded-full font-bold shadow-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2 hover:scale-105 active:scale-95">
+                   <Mail size={18} /> 메일 보내기
+                </a>
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText('neip2202@gmail.com');
+                    showToast('이메일 주소가 복사되었습니다.', 'success');
+                  }}
+                  className="text-gray-400 hover:text-gray-900 text-[13px] font-medium transition-colors flex items-center justify-center gap-1.5 px-4 py-2 rounded-full hover:bg-gray-50 w-full"
+                >
+                  <Copy size={14} /> 주소 복사 (neip2202@gmail.com)
+                </button>
+              </div>
+           </div>
+        </div>
+      ) : (
+        <>
       {currentTab === 'about' && renderAbout()}
       {currentTab === 'resume' && renderResume()}
       {currentTab === 'portfolio' && renderPortfolio()}
       {currentTab === 'project-detail' && renderProjectDetail()}
       {currentTab === 'play-history' && renderPlayHistory()}
+        </>
+      )}
 
       {isAuthModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
