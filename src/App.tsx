@@ -431,7 +431,7 @@ export default function App() {
   };
 
   const handleAdminAuth = () => {
-    if (adminPwd === '0630') {
+    if (adminPwd === '900630') {
       setIsAdminMode(true);
       setIsAuthModalOpen(false);
       setAdminPwd('');
@@ -2723,7 +2723,7 @@ export default function App() {
                   onChange={e => setAdminPwd(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleAdminAuth()}
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono text-center tracking-widest text-lg"
-                  placeholder="••••"
+                  placeholder="••••••"
                   autoFocus
                />
                <button onClick={handleAdminAuth} className="w-full py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-emerald-600 transition-colors">접속하기</button>
