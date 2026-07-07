@@ -40,6 +40,7 @@ export const safeSerialize = (data: any): any => {
 };
 
 export const hasContent = (value: any): boolean => {
+  if (value === false) return true; // boolean false는 빈 값이 아닌 유효한 데이터로 인정
   if (!value) return false;
   if (Array.isArray(value)) return value.length > 0;
   if (typeof value === 'object') return Object.keys(value).length > 0;
