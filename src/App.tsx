@@ -2676,9 +2676,9 @@ export default function App() {
               <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-8 border border-gray-200 shadow-sm">
                  <span className="text-3xl">🔒</span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-6 tracking-tight">현재 비공개 상태입니다</h2>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-6 tracking-tight">비공개 상태</h2>
               <p className="text-gray-500 text-sm md:text-base leading-relaxed max-w-md mx-auto mb-10 font-medium break-keep">
-                 새로운 여정을 시작하게 되어 포트폴리오 공개를 잠시 전환하였습니다.<br/>사이트 열람 권한이나 협업 관련 문의는 아래 메일로 연락해 주시기 바랍니다.
+                 새로운 여정을 시작하게 되어<br/>포트폴리오 공개를 전환하였습니다.<br/><br/>사이트 열람 권한이나 협업 관련 문의는<br/>아래 메일로 연락해 주시기 바랍니다.
               </p>
               <div className="flex flex-col items-center gap-3 w-full max-w-[260px]">
                 <a href="mailto:neip2202@gmail.com" className="w-full bg-gray-900 text-white px-8 py-3.5 rounded-full font-bold shadow-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2 hover:scale-105 active:scale-95">
