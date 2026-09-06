@@ -815,7 +815,7 @@ export default function App() {
           </button>
         </div>
         <div className="text-center mt-12 text-sm text-gray-400 font-medium">
-          © {new Date().getFullYear()} 이솔잎 (Lee Solip). All rights reserved.
+          © {new Date().getFullYear()} Portfolio. All rights reserved.
           <div className="flex items-center justify-center gap-2 mt-2 text-xs opacity-70">
             <span>v1.0.1</span>
             <span>•</span>
@@ -2800,8 +2800,8 @@ export default function App() {
               언제든 편하게 연락해 주세요.
             </p>
             <div className="space-y-3">
-              <a href="mailto:neip2202@gmail.com" className="w-full flex items-center justify-center gap-3 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-emerald-600 transition-colors shadow-lg">
-                <Mail className="w-5 h-5" /> neip2202@gmail.com
+              <a href={`mailto:${profileData?.email ?? 'neip2202@gmail.com'}`} className="w-full flex items-center justify-center gap-3 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-emerald-600 transition-colors shadow-lg">
+                <Mail className="w-5 h-5" /> {profileData?.email ?? 'neip2202@gmail.com'}
               </a>
             </div>
           </div>
