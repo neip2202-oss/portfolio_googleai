@@ -348,8 +348,8 @@ export default function App() {
     let setters: any[] = [];
 
     if (tabName === '메인') {
-      keysToSync = ['aboutData', 'workProcessData', 'timelineLeftData', 'activitiesLeftData', 'activitiesRightData'];
-      setters = [setAboutData, setWorkProcessData, setTimelineLeftData, setActivitiesLeftData, setActivitiesRightData];
+      keysToSync = ['profileData', 'aboutData', 'workProcessData', 'timelineLeftData', 'activitiesLeftData', 'activitiesRightData'];
+      setters = [setProfileData, setAboutData, setWorkProcessData, setTimelineLeftData, setActivitiesLeftData, setActivitiesRightData];
     } else if (tabName === '포트폴리오' || tabName === '기획서') {
       keysToSync = ['projectsData', 'otherWorksData', 'planData'];
       setters = [setProjectsData, setOtherWorksData, setPlanData];
@@ -444,6 +444,15 @@ export default function App() {
   // -------------------------------------------------------------
   // 사이트 데이터 (CMS State connected via API)
   // -------------------------------------------------------------
+  const [profileData, setProfileData] = useContent<any>('profileData', {
+    nameKo: '이솔잎',
+    nameEn: 'LEE SOLIP',
+    birthdate: '1996.10.01',
+    address: '인천시 부평구',
+    phone: '010-2725-1490',
+    email: 'neip2202@gmail.com'
+  }, selectedCompany);
+
   const [aboutData, setAboutData] = useContent<any>('aboutData', {
     title1: '의도를 구조로 만들고,',
     title2: '구조를 명확히 완성하는 기획자',
@@ -1105,20 +1114,41 @@ export default function App() {
                {aboutData.profileImage ? (
                   <img src={aboutData.profileImage} className="w-full h-full object-cover" style={{ imageRendering: '-webkit-optimize-contrast', transform: 'translateZ(0)', backfaceVisibility: 'hidden' }} alt="Profile" />
                ) : (
-                  <span className="text-gray-400 font-bold text-sm tracking-widest font-accent uppercase">Photo</span>
+                  <div className="text-gray-300 flex flex-col items-center justify-center mt-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  </div>
                )}
                {isAdmin && (
-                  <label className="absolute inset-0 bg-black/50 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10 w-full h-full">
-                     <ImageIcon size={24} className="mb-2" />
-                     <span className="font-bold text-xs">사진 업로드</span>
-                     <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (b64) => setAboutData({...aboutData, profileImage: b64}))} />
-                  </label>
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity z-10 w-full h-full flex flex-col items-center justify-center gap-4">
+                     <label className="text-white flex flex-col items-center justify-center cursor-pointer hover:text-emerald-300 transition-colors">
+                       <ImageIcon size={22} className="mb-1.5" />
+                       <span className="font-bold text-[11px] bg-black/40 px-2 py-0.5 rounded-full">업로드</span>
+                       <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (b64) => setAboutData({...aboutData, profileImage: b64}))} />
+                     </label>
+                     {aboutData.profileImage && (
+                       <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setAboutData({...aboutData, profileImage: null}); }} className="text-white flex flex-col items-center justify-center cursor-pointer hover:text-red-400 transition-colors">
+                         <Trash2 size={20} className="mb-1.5" />
+                         <span className="font-bold text-[11px] bg-black/40 px-2 py-0.5 rounded-full">삭제하기</span>
+                       </button>
+                     )}
+                  </div>
                )}
              </div>
           </div>
           
           <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left justify-center w-full">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-3 tracking-tight">이솔잎 <span className="text-2xl text-gray-300 font-bold ml-2 font-accent">LEE SOLIP</span></h1>
+            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-3 tracking-tight flex items-baseline justify-center md:justify-start gap-2 flex-wrap">
+              {isAdmin ? (
+                <>
+                  <EditableText isAdmin={isAdmin} value={profileData?.nameKo ?? '이솔잎'} onChange={(v: string) => setProfileData({...profileData, nameKo: v})} className="inline-block" placeholder="이름" />
+                  <EditableText isAdmin={isAdmin} value={profileData?.nameEn ?? 'LEE SOLIP'} onChange={(v: string) => setProfileData({...profileData, nameEn: v})} className="text-2xl text-gray-300 font-bold font-accent inline-block" placeholder="영문 이름" />
+                </>
+              ) : (
+                <>
+                  {profileData?.nameKo ?? '이솔잎'} <span className="text-2xl text-gray-300 font-bold font-accent">{profileData?.nameEn ?? 'LEE SOLIP'}</span>
+                </>
+              )}
+            </h1>
             {isAdmin ? (
                <EditableText isAdmin={isAdmin} value={aboutData.logline || "'의도를 구조로' 만들고 '구조를 결과로' 완성하는 기획자"} onChange={(v: string) => setAboutData({...aboutData, logline: v})} className="text-emerald-600 font-extrabold mb-6 text-lg md:text-xl tracking-tight block w-full" placeholder="한 줄 소개글 (로그라인)" />
             ) : (
@@ -1130,13 +1160,37 @@ export default function App() {
             )}
             
             <div className="flex flex-wrap justify-center md:justify-start items-center gap-2.5">
-              <span className="flex items-center gap-1.5 text-sm text-gray-500 font-bold px-3 py-2 bg-gray-50 rounded-lg border border-gray-100 font-accent"><Calendar size={16} className="text-emerald-500"/> 1996.10.01</span>
-              <span className="flex items-center gap-1.5 text-sm text-gray-500 font-bold px-3 py-2 bg-gray-50 rounded-lg border border-gray-100"><MapPin size={16} className="text-emerald-500"/> 인천시 부평구</span>
+              <span className="flex items-center gap-1.5 text-sm text-gray-500 font-bold px-3 py-2 bg-gray-50 rounded-lg border border-gray-100 font-accent">
+                <Calendar size={16} className="text-emerald-500"/>
+                {isAdmin ? <EditableText isAdmin={isAdmin} value={profileData?.birthdate ?? '1996.10.01'} onChange={(v: string) => setProfileData({...profileData, birthdate: v})} className="inline-block" placeholder="생년월일" /> : (profileData?.birthdate ?? '1996.10.01')}
+              </span>
+              <span className="flex items-center gap-1.5 text-sm text-gray-500 font-bold px-3 py-2 bg-gray-50 rounded-lg border border-gray-100">
+                <MapPin size={16} className="text-emerald-500"/>
+                {isAdmin ? <EditableText isAdmin={isAdmin} value={profileData?.address ?? '인천시 부평구'} onChange={(v: string) => setProfileData({...profileData, address: v})} className="inline-block" placeholder="주소" /> : (profileData?.address ?? '인천시 부평구')}
+              </span>
               <div className="hidden md:block w-px h-5 bg-gray-200 mx-2"></div>
               {isAdminMode && (
-                <a href="tel:010-2725-1490" className="flex items-center gap-2 text-sm text-gray-800 font-bold px-5 py-2.5 bg-white border-2 border-gray-200 hover:border-emerald-500 hover:text-emerald-600 transition-all rounded-xl shadow-sm hover:shadow-md"><Phone size={14}/> 010-2725-1490</a>
+                isAdmin ? (
+                  <span className="flex items-center gap-2 text-sm text-gray-800 font-bold px-5 py-2.5 bg-white border border-dashed border-emerald-400 rounded-xl shadow-sm">
+                    <Phone size={14}/>
+                    <EditableText isAdmin={isAdmin} value={profileData?.phone ?? '010-2725-1490'} onChange={(v: string) => setProfileData({...profileData, phone: v})} className="inline-block" placeholder="전화번호" />
+                  </span>
+                ) : (
+                  <a href={`tel:${profileData?.phone ?? '010-2725-1490'}`} className="flex items-center gap-2 text-sm text-gray-800 font-bold px-5 py-2.5 bg-white border-2 border-gray-200 hover:border-emerald-500 hover:text-emerald-600 transition-all rounded-xl shadow-sm hover:shadow-md">
+                    <Phone size={14}/> {profileData?.phone ?? '010-2725-1490'}
+                  </a>
+                )
               )}
-              <a href="mailto:neip2202@gmail.com" className="flex items-center gap-2 text-sm text-white font-bold px-5 py-2.5 bg-gray-900 hover:bg-emerald-600 transition-all rounded-xl shadow-md font-accent"><Mail size={14}/> neip2202@gmail.com</a>
+              {isAdmin ? (
+                <span className="flex items-center gap-2 text-sm text-white font-bold px-5 py-2.5 bg-gray-800 border border-dashed border-gray-400 rounded-xl shadow-md font-accent">
+                  <Mail size={14}/>
+                  <EditableText isAdmin={isAdmin} value={profileData?.email ?? 'neip2202@gmail.com'} onChange={(v: string) => setProfileData({...profileData, email: v})} className="inline-block" placeholder="이메일" />
+                </span>
+              ) : (
+                <a href={`mailto:${profileData?.email ?? 'neip2202@gmail.com'}`} className="flex items-center gap-2 text-sm text-white font-bold px-5 py-2.5 bg-gray-900 hover:bg-emerald-600 transition-all rounded-xl shadow-md font-accent">
+                  <Mail size={14}/> {profileData?.email ?? 'neip2202@gmail.com'}
+                </a>
+              )}
             </div>
 
           </div>
